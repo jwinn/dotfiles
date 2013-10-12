@@ -71,9 +71,6 @@ map <leader>es :sp %%
 map <leader>ev :vsp %%
 map <leader>et :tabe %%
 
-" adjust viewports to the same size
-map <leader>= <C-w>=
-
 " maps Alt-[h,j,k,l] to resizing split window
 nnoremap <M-h> <C-w><
 nnoremap <M-j> <C-w>-
@@ -99,6 +96,11 @@ if has("gui_running")
     nnoremap Ò :set columns+=5<cr>
   endif
 endif
+
+" map ctrl+s for saving
+noremap <silent> <C-s> :update<cr>
+vnoremap <silent> <C-s> <C-c>:update<cr>
+inoremap <silent> <C-s> <C-o>:update<cr>
 
 " adjust viewports to the same size
 map <leader>= <C-w>=
