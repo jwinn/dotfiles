@@ -183,6 +183,7 @@
     " Lisp {
       if count(g:vundle_groups, "lisp")
         Bundle 'tpope/vim-fireplace'
+        Bundle 'tpope/vim-classpath'
         Bundle 'guns/vim-clojure-static'
         Bundle 'vim-scripts/slimv.vim'
       endif

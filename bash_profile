@@ -72,10 +72,6 @@ fi
 # Aliases
 alias ls="ls -G"
 alias ll="ls -la"
-if [[ ${os} == "darwin" && -d /Applications/MacVim.app ]]; then
-  alias vim="/Applications/MacVim.app/Contents/MacOS/Vim"
-  alias vi=vim
-fi
 if [[ ! $(is_set llg) ]]; then
   function llg () {
     ls -al "${1}" | grep ${@:2}
@@ -163,5 +159,16 @@ if [[ -n ${has_node} ]]; then
 
   [[ -z ${path_has_local_npm} ]] && export PATH=./node_modules/.bin:$PATH
 fi
+
+# IRC Config
+export IRCNICK=leviticus
+export IRCALTNICK=lev
+export IRCUSER=jon
+#export IRCHOST=devnull.org
+export IRCNAME="* I'm still too lame to read BitchX.doc *"
+export IRCSERVER="us.undernet.org eu.undernet.org"
+#export IRCPORT=6667
+#export IRCUMODE="+iw"
+export IRCFINGER="That tickles"
 
 PS1="\[${BOLD}${MAGENTA}\]\u \[$WHITE\]at \[$ORANGE\]\h \[$WHITE\]in \[$GREEN\]\w\[$WHITE\]\$([[ -n \$(__git_ps1) ]] && echo \" on \")\[$PURPLE\]\$(parse_git_branch)\[$WHITE\]\n\$ \[$RESET\]"
