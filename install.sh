@@ -4,13 +4,13 @@ endpath=$HOME/.dotfiles
 today=`date +%Y%m%d`
 
 echo "Cloning from github into ${endpath}"
-if [ -d $endpath/.git ]; then
+if [ -d "${endpath}/.git" ]; then
 	cd ${endpath} && git pull
 else
 	git clone https://github.com/jwinn/dotfiles.git $endpath
 fi
 
-if [[ -d $HOME/.vim || -f $HOME/.vimrc ]]; then
+if [[ -d "${HOME}/.vim" || -f "${HOME}/.vimrc" ]]; then
 	echo "Vim settings already exist"
 	read -p "Do you want to back them up? [Y/n]" yn
 	case $yn in
