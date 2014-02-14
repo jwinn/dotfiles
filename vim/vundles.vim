@@ -37,7 +37,7 @@
   "Bundles {
     " set the default vundle sets to install
     if !exists("g:vundle_groups")
-      let g:vundle_groups = [ "general", "programming", "neocomplcache", "codeformat", "javascript", "html", "node", "java", "ruby", "php", "python", "lisp", "go", "haskell", "twig", "misc" ]
+      let g:vundle_groups = [ "general", "programming", "neocomplete", "codeformat", "javascript", "html", "node", "java", "ruby", "php", "python", "lisp", "go", "haskell", "twig", "misc" ]
     endif
 
     " allow override of all vundles
@@ -108,10 +108,14 @@
         if filereadable(expand("~/.vim/bundle/vim-snippets/snippets/support_functions.vim"))
           source ~/.vim/bundle/vim-snippets/snippets/support_functions.vim
         endif
-      elseif count(g:vundle_groups, "neocomplcache")
-        Bundle 'Shougo/neocomplcache'
+      elseif count(g:vundle_groups, "neocomplete")
+        if has("lua")
+          Bundle 'Shougo/neocomplete'
+        else
+          Bundle 'Shougo/neocomplcache'
+        endif
         Bundle 'Shougo/neosnippet'
-        Bundle 'honza/vim-snippets'
+        Bundle 'Shougo/neosnippet-snippets'
       endif
     " }
 
