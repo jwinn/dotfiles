@@ -160,6 +160,16 @@ if [[ -n ${has_node} ]]; then
   [[ -z ${path_has_local_npm} ]] && export PATH=./node_modules/.bin:$PATH
 fi
 
+has_vi=$(command -v vi)
+has_vim=$(command -v vim)
+if [[ -n ${has_vi} && -n ${has_vim} ]]; then
+  vi_prefix=$(command -v vi | sed 's#^\(.*\)/bin/vi$#\1#')
+  vim_prefix=$(command -v vim | sed 's#^\(.*\)/bin/vim$#\1#')
+  if [[ ! -e '${vim_prefix}/vi' ]]; then
+    ln -sf ${has_vim} ${vim_prefix}/bin/vi
+  fi
+fi
+
 # IRC Config
 export IRCNICK=leviticus
 export IRCALTNICK=lev
