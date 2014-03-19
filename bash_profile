@@ -170,6 +170,18 @@ if [[ -n ${has_vi} && -n ${has_vim} ]]; then
   fi
 fi
 
+# JAVA
+has_java_home=$(command -v /usr/libexec/java_home)
+if [[ -n ${has_java_home} ]]; then
+  if [[ ! -n $JAVA_HOME ]]; then
+    export JAVA_HOME=$(//usr/libexec/java_home)
+  fi
+  alias resetjdk='export JAVA_HOME=$(/usr/libexec/java_home)'
+  alias setjdk16='export JAVA_HOME=$(/usr/libexec/java_home -v 1.6)'
+  alias setjdk17='export JAVA_HOME=$(/usr/libexec/java_home -v 1.7)'
+  alias setjdk18='export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)'
+fi
+
 # IRC Config
 export IRCNICK=leviticus
 export IRCALTNICK=lev
