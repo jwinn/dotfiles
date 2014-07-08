@@ -1,0 +1,53 @@
+" vim: set sw=2 ts=2 sts=2 et tw=78 foldmarker={,} spell:
+
+"let g:make = 'gmake'
+"if system('uname -o') =~ '^GNU/'
+"  let g:make = 'make'
+"endif
+"NeoBundle 'Shougo/vimproc.vim', {'build': {'unix': g:make}}
+NeoBundle 'Shougo/vimproc', {
+\  'build' : {
+\    'windows' : 'make -f make_mingw32.mak',
+\    'cygwin' : 'make -f make_cygwin.mak',
+\    'mac' : 'make -f make_mac.mak',
+\    'unix' : 'make -f make_unix.mak',
+\  }
+\}
+
+NeoBundle 'Zenburn'                              " low-light contrast scheme
+NeoBundle 'altercation/vim-colors-solarized'     " solarized scheme
+NeoBundle 'godlygeek/csapprox'                   " CSApprox
+NeoBundle 'chriskempson/base16-vim'              " base16 theme
+
+NeoBundle 'Shougo/unite.vim'                     " fuzzy search
+NeoBundle 'bling/vim-airline'                    " statusline improvements
+NeoBundle 'tpope/vim-surround'                   " surround things
+NeoBundle 'terryma/vim-multiple-cursors'         " multiple cursors
+NeoBundle 'scrooloose/nerdtree'                  " filesystem interaction
+
+NeoBundle 'tlib'                                 " ultipsnips' dependency
+NeoBundle 'MarcWeber/ultisnips'                  " snip Management
+NeoBundle 'honza/vim-snippets'                   " default snippets
+
+if executable('ctags')
+  NeoBundle 'majutsushi/tagbar'                  " tag sidebar
+endif
+
+if executable('ack')                             " code search
+  NeoBundle 'mileszs/ack.vim'
+elseif executable('ackgrep')
+  let g:ackprg="ack-grep -H --nocolor --nogroup --column"
+  NeoBundle 'mileszs/ack.vim'
+elseif executable('ag')
+  NeoBundle 'mileszs/ack.vim'
+  let g:ackprg = 'ag --nogroup --nocolor --column --smart-case'
+endif
+
+NeoBundle 'tpope/vim-fugitive'                   " git
+NeoBundle 'SuperTab'                             " code complete
+NeoBundle 'scrooloose/syntastic'                 " syntax check
+NeoBundle 'tComment'                             " comment helper
+NeoBundle 'tpope/vim-markdown'                   " markdown syntax
+NeoBundle 'hail2u/vim-css3-syntax'               " CSS / SCSS
+NeoBundle 'pangloss/vim-javascript'              " javascript syntax
+NeoBundle 'mattn/emmet-vim'                      " emmet support
