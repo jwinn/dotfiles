@@ -510,7 +510,7 @@ set nocompatible
 " }
 
 " colors {
-  if empty($ITERM_PROFILE)
+  if IsGui() || empty($ITERM_PROFILE)
     set background=dark
     if filereadable(expand('~/.vim/bundle/vim-colors-solarized/colors/solarized.vim'))
       let g:solarized_termcolors=256
