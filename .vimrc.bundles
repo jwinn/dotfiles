@@ -23,7 +23,7 @@ NeoBundle 'Shougo/unite.vim'                     " fuzzy search
 NeoBundle 'bling/vim-airline'                    " statusline improvements
 NeoBundle 'tpope/vim-surround'                   " surround things
 NeoBundle 'terryma/vim-multiple-cursors'         " multiple cursors
-NeoBundle 'scrooloose/nerdtree'                  " filesystem interaction
+"NeoBundle 'scrooloose/nerdtree'                  " filesystem interaction
 
 NeoBundle 'tlib'                                 " ultipsnips' dependency
 NeoBundle 'MarcWeber/ultisnips'                  " snip Management
@@ -44,6 +44,8 @@ elseif executable('ag')
 endif
 
 NeoBundle 'tpope/vim-fugitive'                   " git
+NeoBundle 'airblade/vim-gitgutter'               " git changes in gutter
+NeoBundle 'Xuyuanp/git-nerdtree'                 " git status in NERDTree
 NeoBundle 'SuperTab'                             " code complete
 NeoBundle 'scrooloose/syntastic'                 " syntax check
 NeoBundle 'tComment'                             " comment helper
