@@ -450,7 +450,7 @@ set nocompatible
 " }
 
 " various {
-  set virtualedit=onemore         " allow for cursor beyond last char
+  set virtualedit=insert          " allow for cursor beyond last char
   " better unix/win compatibility
   set viewoptions=folds,options,cursor,unix,slash
   if !exists('g:no_views')
@@ -653,16 +653,50 @@ set nocompatible
 " }
 
 " plugins {
+  " ctrlp {
+    if isdirectory(expand('~/.vim/bundle/ctrlp.vim'))
+      let g:ctrlp_working_path_mode = 'ra'
+      nnoremap <silent> <D-t> :CtrlP<CR>
+      nnoremap <silent> <D-r> :CtrlPMRU<CR>
+      let g:ctrlp_custom_ignore = {
+          \ 'dir':  '\.git$\|\.hg$\|\.svn$',
+          \ 'file': '\.exe$\|\.so$\|\.dll$\|\.pyc$' }
+
+      " On Windows use 'dir' as fallback command.
+      if IsWin()
+          let s:ctrlp_fallback = 'dir %s /-n /b /s /a-d'
+      elseif executable('ag')
+          let s:ctrlp_fallback = 'ag %s --nocolor -l -g ""'
+      elseif executable('ack-grep')
+          let s:ctrlp_fallback = 'ack-grep %s --nocolor -f'
+      elseif executable('ack')
+          let s:ctrlp_fallback = 'ack %s --nocolor -f'
+      else
+          let s:ctrlp_fallback = 'find %s -type f'
+      endif
+
+      let g:ctrlp_user_command = {
+          \ 'types': {
+              \ 1: ['.git', 'cd %s && git ls-files . --cached --exclude-standard --others'],
+              \ 2: ['.hg', 'hg --cwd %s locate -I .'],
+          \ },
+          \ 'fallback': s:ctrlp_fallback
+      \ }
+    endif
+  " }
+
   " emmet {
-    let g:user_emmet_mode='i'             " only enable in insert mode
-    let g:user_emmet_leader_key='<C-y>'   " default, change, if necessary
-    " only enable for html,css,scss
-    let g:user_emmet_install_global = 0
-    autocmd FileType html,css,scss EmmetInstall
+    if isdirectory(expand('~/.vim/bundle/emmet.vim))
+      let g:user_emmet_mode='i'           " only enable in insert mode
+      let g:user_emmet_leader_key='<C-y>' " default, change, if necessary
+      " only enable for html,css,scss
+      let g:user_emmet_install_global = 0
+      autocmd FileType html,css,scss EmmetInstall
+    endif
   " }
 
   " fugitive {
-    if isdirectory(expand("~/.vim/bundle/vim-fugitive/"))
+    if isdirectory(expand('~/.vim/bundle/vim-fugitive/'))
       nnoremap <silent> <leader>gs :Gstatus<CR>
       nnoremap <silent> <leader>gd :Gdiff<CR>
       nnoremap <silent> <leader>gc :Gcommit<CR>
@@ -679,8 +713,8 @@ set nocompatible
   " }
 
   " nerdtree {
-    if isdirectory(expand("~/.vim/bundle/nerdtree"))
-      map <C-e> <plug>NERDTreeTabsToggle<CR>
+    if isdirectory(expand('~/.vim/bundle/nerdtree')) || isdirectory(expand('~/.vim/bundle/git-nerdtree'))
+      map <C-e> <plug>NERDTreeToggle<CR>
       map <leader>e :NERDTreeFind<CR>
       nmap <leader>nt :NERDTreeFind<CR>
 
@@ -693,7 +727,6 @@ set nocompatible
       let NERDTreeMouseMode=2
       let NERDTreeShowHidden=1
       let NERDTreeKeepTreeInNewTab=1
-      let g:nerdtree_tabs_open_on_gui_startup=0
     endif
   " }
 
@@ -723,31 +756,79 @@ set nocompatible
   " }
 
   " unite {
+    if isdirectory(expand('~/.vim/bundle/unite.vim'))
+      call unite#filters#matcher_default#use(['matcher_fuzzy'])
+      call unite#filters#sorter_default#use(['sorter_rank'])
+      "call unite#custom#source('file_rec/async','sorters','sorter_rank', )
+      " ctrl+p
+      let g:unite_data_directory='~/.vim/.cache/unite'
+      let g:unite_enable_start_insert=1
+      let g:unite_source_history_yank_enable=1
+      let g:unite_prompt='» '
+      let g:unite_split_rule = 'botright'
+      if executable('ag')
+        let g:unite_source_grep_command='ag'
+        let g:unite_source_grep_default_opts='--nocolor --nogroup -S -C4'
+        let g:unite_source_grep_recursive_opt=''
+      endif
+      nnoremap <silent> <c-p> :Unite -auto-resize file file_mru file_rec<cr>
+
+      " ack.vim/ag.vim
+      nnoremap <Space>/ :Unite grep:.<CR>
+
+      " yankring/yankstack
+      nnoremap <Space>y :Unite history/yank<cr>
+
+      " LustyJuggler
+      nnoremap <Space>s :Unite -quick-match buffer<CR>
+    endif
   " }
 
   " ultisnips {
-    let g:UltiSnipsSnippetsDir = "~/.vim/bundle/vim-snippets/UltiSnips"
+    if isdirectory(expand('~/.vim/bundle/vim-snippets/UltiSnips'))
+      let g:UltiSnipsSnippetsDir = '~/.vim/bundle/vim-snippets/UltiSnips'
+    endif
   " }
 
   " vim-airline {
-    let g:airline_theme = 'powerlineish'
-    if IsGui()
-      if IsOsx()
-        set guifont=Inconsolata\ for\ Powerline:h14
+    if isdirectory(expand('~/.vim/bundle/vim-airline'))
+      let g:airline_theme = 'powerlineish'
+      if IsGui()
+        if IsOsx()
+          set guifont=Inconsolata\ for\ Powerline:h14
+        else
+          set guifont=Inconsolata\ for\ Powerline\ 12
+        endif
+        let g:airline_powerline_fonts = 1
       else
-        set guifont=Inconsolata\ for\ Powerline\ 12
+        let g:airline_powerline_fonts = 0
+        let g:airline_left_sep='›'  " Slightly fancier than '>'
+        let g:airline_right_sep='‹' " Slightly fancier than '<'
       endif
-      let g:airline_powerline_fonts = 1
-    else
-      let g:airline_powerline_fonts = 0
-      let g:airline_left_sep='›'  " Slightly fancier than '>'
-      let g:airline_right_sep='‹' " Slightly fancier than '<'
     endif
   " }
 
   " vim-css3-syntax {
-    highlight VendorPrefix guifg=#00ffff gui=bold
-    match VendorPrefix /-\(moz\|webkit\|o\|ms\)-[a-zA-Z-]\+/
+    if isdirectory(expand('~/.vim/bundle/vim-css3-syntax'))
+      highlight VendorPrefix guifg=#00ffff gui=bold
+      match VendorPrefix /-\(moz\|webkit\|o\|ms\)-[a-zA-Z-]\+/
+    endif
+  " }
+
+  " vim-multiple-cursors {
+    if isdirectory(expand('~/.vim/bundle/vim-multiple-cursors'))
+      let g:multi_cursor_start_key='<C-n>'
+      let g:multi_cursor_next_key='<C-n>'
+      let g:multi_cursor_prev_key='<C-p>'
+      let g:multi_cursor_skip_key='<C-x>'
+      let g:multi_cursor_quit_key='<Esc>'
+
+      let g:multi_cursor_exit_from_visual_mode = 1
+      let g:multi_cursor_exit_from_insert_mode = 1
+
+      highlight multiple_cursors_cursor term=reverse cterm=reverse gui=reverse
+      highlight link multiple_cursors_visual Visual
+    endif
   " }
 " }
 
