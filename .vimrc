@@ -686,7 +686,7 @@ set nocompatible
   " }
 
   " emmet {
-    if isdirectory(expand('~/.vim/bundle/emmet.vim))
+    if isdirectory(expand('~/.vim/bundle/emmet.vim'))
       let g:user_emmet_mode='i'           " only enable in insert mode
       let g:user_emmet_leader_key='<C-y>' " default, change, if necessary
       " only enable for html,css,scss
