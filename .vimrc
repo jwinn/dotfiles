@@ -15,6 +15,32 @@ set nocompatible
     endif
   endfunction
 
+  function! CopyFile(src, dest)
+    let ret = writefile(readfile(a:src, 'b'), a:dest, 'b')
+    if ret == -1
+      return 0
+    endif
+    return 1
+  endfunction
+
+  function! MakeFontsDir()
+    if empty(glob('~/.fonts'))
+      silent call mkdir($HOME.'/.fonts', 'p')
+    endif
+  endfunction
+
+  function! CopyFontFile(dir, file)
+    let src_dir = expand('~/.vim/bundle/powerline-fonts')
+    let src_font_dir = expand(src_dir.'/'.a:dir)
+    let src_font_file = expand(src_font_dir.'/'.a:file)
+    let font_dir = expand('~/.fonts')
+    let font_file = expand(font_dir.'/'.a:file)
+    if filereadable(src_font_file) && !filereadable(font_file)
+      call MakeFontsDir()
+      call CopyFile(src_font_file, font_file)
+    endif
+  endfunction
+
   function! StripTrailingWhitespace()
     if !exists('g:keep_trailing_whitespace')
       " prep: save last search, and cursor position.
@@ -324,7 +350,9 @@ set nocompatible
       set guifont="Consolas:h13"
     endif
 
-    set transparency=5            " transparency of text bg as %
+    if exists('transparency')
+      set transparency=5           " transparency of text bg as %
+    endif
     "set fullscreen                " run in fullscreen mode
 
     " setting these in GVim/MacVim because terminals cannot distinguish between
@@ -795,9 +823,11 @@ set nocompatible
       let g:airline_theme = 'powerlineish'
       if IsGui()
         if IsOsx()
-          set guifont=Inconsolata\ for\ Powerline:h14
+          call CopyFontFile('SourceCodePro', 'Sauce Code Powerline Regular.otf')
+          set guifont="Sauce Code Powerline Regular:h14"
         else
-          set guifont=Inconsolata\ for\ Powerline\ 12
+          call CopyFontFile('DejaVuSansMono', 'DejaVu Sans Mono for Powerline.ttf')
+          set guifont="DejaVu Sans Mono for Powerline:h12"
         endif
         let g:airline_powerline_fonts = 1
       else

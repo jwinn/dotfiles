@@ -23,6 +23,7 @@ NeoBundle 'chriskempson/base16-vim'              " base16 theme
 " NeoBundle 'Shougo/unite.vim'                     " fuzzy search
 NeoBundle 'kien/ctrlp.vim'                       " fuzzy search                       
 NeoBundle 'bling/vim-airline'                    " statusline improvements
+NeoBundle 'Lokaltog/powerline-fonts'             " powerline fonts
 NeoBundle 'tpope/vim-surround'                   " surround things
 NeoBundle 'terryma/vim-multiple-cursors'         " multiple cursors
 " NeoBundle 'scrooloose/nerdtree'                  " filesystem interaction
