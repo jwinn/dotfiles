@@ -403,8 +403,8 @@ set nocompatible
 " }
 
 " tabs and indenting {
-  set tabstop=4                   " # spaces <Tab> equals
-  set shiftwidth=4                " # spaces used for each (auto)indent
+  set tabstop=2                   " # spaces <Tab> equals
+  set shiftwidth=2                " # spaces used for each (auto)indent
   set smarttab                    " <Tab> in indent inserts 'shiftwidth' spaces
   set shiftround                  " round to 'shiftwidth' for "<<" and ">>"
 " }
