@@ -1,7 +1,0 @@
-#!/bin/sh
-
-now=$(date "+%Y%m%d %T")
-echo "${now}: Going to sleep..." >> /mnt/sshfs_mounts.sh.log
-/mnt/sshfs_mounts.sh umount
-#diskutil umount /mnt/backup 2>&1 ~/mnt/sshfs_mounts.log
-#diskutil umount /mnt/data 2>&1 ~/mnt/sshfs_mounts.log

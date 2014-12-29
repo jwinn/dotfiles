@@ -8,7 +8,7 @@ root = true
 ;vim:path=~/.vim/bundle/js-beautify/js/lib/beautify.js
 ; Javascript interpreter to be invoked by default 'node'
 bin=node
-indent_style = tab
+indent_style = space
 indent_size = 2
 max_line_length = 78
 break-chained-methods = true
@@ -17,7 +17,7 @@ wrap-line-length = 78
 
 [**.css]
 ;vim:path=~/.vim/bundle/js-beautify/js/lib/beautify-css.js
-indent_style = tab
+indent_style = space
 indent_size = 2
 max_line_length = 78
 wrap-line-length = 78
@@ -28,7 +28,7 @@ wrap-line-length = 78
 ; So it's best to avoid them
 ;vim:path=~/.vim/bundle/js-beautify/js/lib/beautify-html.js
 ;vim:max_line_length=78:brace_style=collapse
-indent_style = tab
+indent_style = space
 indent_size = 2
 max_line_length = 78
 wrap-line-length = 78

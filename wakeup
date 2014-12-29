@@ -1,8 +1,0 @@
-#!/bin/sh
-
-now=$(date "+%Y%m%d %T")
-echo "${now}: Waking up..." >> /mnt/sshfs_mounts.sh.log
-sleep 9
-/mnt/sshfs_mounts.sh mount
-#cd /mnt/backup
-#cd /mnt/data
