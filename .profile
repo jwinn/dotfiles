@@ -191,7 +191,7 @@ if [ "$has_node" ]; then
   [ -z "$path_has_local_npm" ] && export PATH=./node_modules/.bin:$PATH
 fi
 
-export NVM_DIR="/home/jowinn/.nvm"
+export NVM_DIR="${HOME}/.nvm"
 [ -s "${NVM_DIR}/nvm.sh" ] && . "${NVM_DIR}/nvm.sh"  # This loads nvm
 
 has_vi=$(command -v vi)
