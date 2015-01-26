@@ -191,8 +191,17 @@ if [ "$has_node" ]; then
   [ -z "$path_has_local_npm" ] && export PATH=./node_modules/.bin:$PATH
 fi
 
-export NVM_DIR="${HOME}/.nvm"
-[ -s "${NVM_DIR}/nvm.sh" ] && . "${NVM_DIR}/nvm.sh"  # This loads nvm
+# nvm
+if [ -x /usr/local/bin/brew ] && [ -d $(brew --prefix nvm) ]; then
+	export NVM_DIR=$(brew --prefix)/var/nvm
+	source $(brew --prefix nvm)/nvm.sh
+elif [ -d ${HOME}/.nvm ]; then
+	export NVM_DIR="${HOME}/.nvm"
+	[ -s "${NVM_DIR}/nvm.sh" ] && . "${NVM_DIR}/nvm.sh"  # This loads nvm
+fi
+if [ $(command -v nvm) ] && [ $has_bash ]; then
+	[ -r ${NVM_DIR}/bash_completion ] && . ${NVM_DIR}/bash_completion
+fi
 
 has_vi=$(command -v vi)
 has_vim=$(command -v vim)
