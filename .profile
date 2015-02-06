@@ -1,5 +1,13 @@
 os=${OSTYPE%%[0-9]*}
 has_bash=$(echo $SHELL | grep bash)
+has_brew=$(command -v brew)
+has_git=$(command -v git)
+has_java_home=$(command -v /usr/libexec/java_home)
+has_node=$(command -v node)
+has_nvm=$(command -v nvm)
+has_nvm_brew=$(brew --prefix nvm)
+has_vi=$(command -v vi)
+has_vim=$(command -v vim)
 
 # Functions
 is_var () {
@@ -122,7 +130,6 @@ parse_git_branch () {
 }
 
 # git prompt/completion
-has_git=$(command -v git)
 if [ $has_git ]; then
 	git_version=$(git --version | sed -e "s/git version \([0-9]*\.[0-9]*\.[0-9]*\).*/\1/")
 
@@ -141,7 +148,7 @@ if [ $has_git ]; then
 		fi
 	fi
 
-	if [ "$os" = "darwin" ] && [ -x /usr/local/bin/brew ]; then
+	if [ "$os" = "darwin" ] && [ $has_brew ]; then
 		if [ -d $(brew --prefix)/etc/bash_completion.d ]; then
 			. $(brew --prefix)/etc/bash_completion.d/git-prompt.sh
 		fi
@@ -154,7 +161,7 @@ if [ $has_git ]; then
 	fi
 fi
 
-if [ "$os" = "darwin" ] && [ -d /usr/local/Cellar ]; then
+if [ "$os" = "darwin" ] && [ $has_brew ]; then
   path_has_local_bin=$(echo $PATH | grep -o '/usr/local/bin')
   if [ $path_has_local_bin ]; then
     # strip out other occurrences and add to first check
@@ -178,7 +185,6 @@ fi
 
 [ -d "${HOME}/.sm" ] && export PATH="${PATH}:${HOME}/.sm/bin:${HOME}/.sm/pkg/active/bin:${HOME}/.sm/pkg/active/sbin"
 
-has_node=$(command -v node)
 if [ "$has_node" ]; then
   node_prefix=$(command -v node | sed 's#^\(.*\)/bin/node$#\1#')
   path_has_npm=$(echo $PATH | grep -o '/npm/bin')
@@ -192,19 +198,17 @@ if [ "$has_node" ]; then
 fi
 
 # nvm
-if [ -x /usr/local/bin/brew ] && [ -d $(brew --prefix nvm) ]; then
-	export NVM_DIR=$(brew --prefix)/var/nvm
-	source $(brew --prefix nvm)/nvm.sh
+if [ $has_brew ] && [ $has_nvm_brew ]; then
+	export NVM_DIR=$has_nvm_brew
+	source ${has_nvm_brew}/nvm.sh
 elif [ -d ${HOME}/.nvm ]; then
 	export NVM_DIR="${HOME}/.nvm"
 	[ -s "${NVM_DIR}/nvm.sh" ] && . "${NVM_DIR}/nvm.sh"  # This loads nvm
 fi
-if [ $(command -v nvm) ] && [ $has_bash ]; then
+if [ $has_nvm ] && [ $has_bash ]; then
 	[ -r ${NVM_DIR}/bash_completion ] && . ${NVM_DIR}/bash_completion
 fi
 
-has_vi=$(command -v vi)
-has_vim=$(command -v vim)
 if [ $has_vi ] && [ $has_vim ]; then
   vi_prefix=$(command -v vi | sed 's#^\(.*\)/vi$#\1#')
   vim_prefix=$(command -v vim | sed 's#^\(.*\)/vim$#\1#')
@@ -212,7 +216,6 @@ if [ $has_vi ] && [ $has_vim ]; then
 fi
 
 # JAVA
-has_java_home=$(command -v /usr/libexec/java_home)
 if [ $has_java_home ]; then
   if [ ! $JAVA_HOME ] && [ -x /usr/libexec/java_home ]; then
 	export JAVA_HOME=$(/usr/libexec/java_home)
