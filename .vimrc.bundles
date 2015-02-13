@@ -47,6 +47,10 @@ elseif executable('ag')
   let g:ackprg = 'ag --nogroup --nocolor --column --smart-case'
 endif
 
+if g:sysvars.osx
+	NeoBundle 'rizzatti/dash.vim'                  " dash doc integration (osx)
+endif
+
 NeoBundle 'tpope/vim-fugitive'                   " git
 NeoBundle 'airblade/vim-gitgutter'               " git changes in gutter
 NeoBundle 'SuperTab'                             " code complete
@@ -55,4 +59,8 @@ NeoBundle 'tComment'                             " comment helper
 NeoBundle 'tpope/vim-markdown'                   " markdown syntax
 NeoBundle 'hail2u/vim-css3-syntax'               " CSS / SCSS
 NeoBundle 'pangloss/vim-javascript'              " javascript syntax
+NeoBundle 'othree/yajs.vim'                      " another js syntax
+NeoBundle 'othree/javascript-libraries-syntax.vim' " js lib syntax
+NeoBundle 'mxw/vim-jsx'                          " jsx support
+NeoBundle 'moll/vim-node'                        " node.js support
 NeoBundle 'mattn/emmet-vim'                      " emmet support

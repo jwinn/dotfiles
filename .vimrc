@@ -171,23 +171,29 @@ set nocompatible
     else
       return "\<C-p>"
   endfunction
-
-  silent function! IsOsx()
-    return has('macunix')
-  endfunction
-
-  silent function! IsUnix()
-    return has('unix') && !has('macunix') && !has('win32unix')
-  endfunction
-
-  silent function! IsWin()
-    return has('win16') || has('win32') || has('win64')
-  endfunction
-
-  silent function! IsGui()
-    return has('gui_running')
-  endfunction
 " }
+
+" variables {
+	" get the uname for determinate
+	let s:uname = system("echo -n \"$(uname -s)\"")
+	let s:tmp_ignorecase = &ignorecase
+
+	" temp set ignorecase
+	let &ignorecase = 1
+
+  let g:sysvars = {}
+  let g:sysvars['uname'] = system('echo -n "$(uname -s)"')
+  let g:sysvars['osx']   = (g:sysvars.uname =~ 'darwin') || has('macunix')
+  let g:sysvars['linux'] = (g:sysvars.uname =~ 'linux') && has('unix') && !g:sysvars.osx
+  let g:sysvars['win']   = has('win16') || has('win32') || has('win64')
+  let g:sysvars['unix']  = has('unix') && !g:sysvars.osx && !g:sysvars.win
+  let g:sysvars['gui']   = has('gui_running')
+
+	" reset changes and clean up
+	let &ignorecase = s:tmp_ignorecase
+	unlet s:tmp_ignorecase
+" }
+
 
 " important {
   " allow for user customization before vimrc sourced
@@ -197,7 +203,7 @@ set nocompatible
 
   set pastetoggle=<F2> " pastetoggle (sane indentation on paste)
 
-  if IsWin()
+  if g:sysvars.win
     " use '.vim' instead of 'vimfiles';
     " this makes synchronization across (heterogeneous) systems easier
     set runtimepath=$HOME/.vim,$VIM/vimfiles,$VIMRUNTIME,$VIM/vimfiles/after,$HOME/.vim/after
@@ -326,7 +332,7 @@ set nocompatible
 " }
 
 " GUI (here instead of .gvimrc) {
-  if IsGui()
+  if g:sysvars.gui
     set lines=40 columns=117
 
     set guioptions-=m             " remove the menu
@@ -335,7 +341,7 @@ set nocompatible
     set guioptions+=a             " visual mode is global
     set guioptions+=c             " use :ex prompt instead of modal dialogs
 
-    if IsOsx()
+    if g:sysvars.osx
       " make Mac 'Option' key behave as 'Alt'
       set mmta
 
@@ -344,9 +350,9 @@ set nocompatible
 
       " MacVIM shift+arrow-keys behavior (required in .vimrc)
       let macvim_hig_shift_movement = 1
-    elseif IsUnix()
+    elseif g:sysvars.unix
       set guifont="DejaVu Sans Mono 12"
-    elseif IsWin()
+    elseif g:sysvars.win
       set guifont="Consolas:h13"
     endif
 
@@ -462,7 +468,7 @@ set nocompatible
 " }
 
 " executing external commands {
-  if !IsWin()
+  if !g:sysvars.win
     set shell=$SHELL              " shell to use for ext cmds
   endif
 " }
@@ -538,7 +544,7 @@ set nocompatible
 " }
 
 " colors {
-  if IsGui() || empty($ITERM_PROFILE)
+  if g:sysvars.gui || empty($ITERM_PROFILE)
     set background=dark
     if filereadable(expand('~/.vim/bundle/vim-colors-solarized/colors/solarized.vim'))
       let g:solarized_termcolors=256
@@ -638,7 +644,7 @@ set nocompatible
   nnoremap <M-j> <C-w>-
   nnoremap <M-k> <C-w>+
   nnoremap <M-l> <C-w>>
-  if IsOsx()
+  if g:sysvars.osx
     nnoremap ˙ <C-w><
     nnoremap ∆ <C-w>-
     nnoremap ˚ <C-w>+
@@ -646,12 +652,12 @@ set nocompatible
   endif
 
   " Shift-Alt-[h,j,k,l] will resize window
-  if IsGui()
+  if g:sysvars.gui
     nnoremap <S-M-h> :set columns+=5<cr>
     nnoremap <S-M-j> :set lines-=1<cr>
     nnoremap <S-M-k> :set lines+=1<cr>
     nnoremap <S-M-l> :set columns-=5<cr>
-    if IsOsx()
+    if g:sysvars.osx
       nnoremap Ó :set columns-=5<cr>
       nnoremap Ô :set lines-=1<cr>
       nnoremap  :set lines+=1<cr>
@@ -691,7 +697,7 @@ set nocompatible
           \ 'file': '\.exe$\|\.so$\|\.dll$\|\.pyc$' }
 
       " On Windows use 'dir' as fallback command.
-      if IsWin()
+      if g:sysvars.win
           let s:ctrlp_fallback = 'dir %s /-n /b /s /a-d'
       elseif executable('ag')
           let s:ctrlp_fallback = 'ag %s --nocolor -l -g ""'
@@ -821,8 +827,8 @@ set nocompatible
   " vim-airline {
     if isdirectory(expand('~/.vim/bundle/vim-airline'))
       let g:airline_theme = 'powerlineish'
-      if IsGui()
-        if IsOsx()
+      if g:sysvars.gui
+        if g:sysvars.osx
           call CopyFontFile('SourceCodePro', 'Sauce Code Powerline Regular.otf')
           set guifont="Sauce Code Powerline Regular:h14"
         else
@@ -844,6 +850,12 @@ set nocompatible
       match VendorPrefix /-\(moz\|webkit\|o\|ms\)-[a-zA-Z-]\+/
     endif
   " }
+
+	" vim-jsx {
+		if isdirectory(expand('~/.vim/bundle/vim-jsx'))
+			let g:jsx_ext_required = 0 " allows for jsx syntax in .js files
+		endif
+	" }
 
   " vim-multiple-cursors {
     if isdirectory(expand('~/.vim/bundle/vim-multiple-cursors'))
