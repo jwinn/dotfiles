@@ -2,13 +2,14 @@ os=${OSTYPE%%[0-9]*}
 
 has_bash=$(echo $SHELL | grep bash)
 has_brew=$(command -v brew)
-[ $has_brew ] && has_brew_nvm=$(brew --prefix nvm)
+if [ $has_brew ]; then
+  [ -n "$(brew ls --versions nvm)" ] && has_brew_nvm=$(brew --prefix nvm)
+fi
 has_git=$(command -v git)
 hass_google_chrome=$(command -v google-chrome)
 has_java_home=$(command -v /usr/libexec/java_home)
 has_less=$(command -v less)
 has_node=$(command -v node)
-has_nvm=$(command -v nvm)
 has_sshfs=$(command -v sshfs)
 has_tput=$(command -v tput)
 has_vi=$(command -v vi)
@@ -208,14 +209,10 @@ if [ $has_node ]; then
 fi
 
 # nvm
-if [ $has_nvm ] || [ $has_brew_nvm ]; then
-  if [ -z "$NVM_DIR" ]; then
-    export NVM_DIR="${HOME}/.nvm"
-    [ $has_brew_nvm ] && export NVM_DIR=$has_brew_nvm
-  fi
-  [ -s "${NVM_DIR}/nvm.sh" ] && . ${NVM_DIR}/nvm.sh  # This loads nvm
-  [ $has_bash ] && [ -r ${NVM_DIR}/bash_completion ] && . ${NVM_DIR}/bash_completion
-fi
+export NVM_DIR=${NVM_DIR:-${HOME}/.nvm}
+[ -s "${has_brew_nvm}/nvm.sh" ] && . ${has_brew_nvm}/nvm.sh
+[ -s "${NVM_DIR}/nvm.sh" ] && . ${NVM_DIR}/nvm.sh  # This loads nvm
+[ $has_bash ] && [ -r ${NVM_DIR}/bash_completion ] && . ${NVM_DIR}/bash_completion
 
 if [ $has_vi ] && [ $has_vim ]; then
   vi_prefix=$(command -v vi | sed 's#^\(.*\)/vi$#\1#')
