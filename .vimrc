@@ -412,7 +412,11 @@ set nocompatible
   set tabstop=2                   " # spaces <Tab> equals
   set shiftwidth=2                " # spaces used for each (auto)indent
   set smarttab                    " <Tab> in indent inserts 'shiftwidth' spaces
+	set softtabstop=2               " # spaces to insert for tab (<ctrl-v><TAB>)
   set shiftround                  " round to 'shiftwidth' for "<<" and ">>"
+  set expandtab                   " expand <TAB> to spaces in Insert mode
+  set autoindent                  " automatically set indent of a new line
+	set smartindent                 " do clever autoindenting
 " }
 
 " folding {
@@ -787,6 +791,15 @@ set nocompatible
     " automatically open and close the popup menu / preview window
     au CursorMovedI,InsertLeave * if pumvisible() == 0|silent! pclose|endif
     set completeopt=menu,preview,longest
+  " }
+
+  " syntastic {
+    if isdirectory(expand('~/.vim/bundle/syntastic'))
+      let g:syntastic_always_populate_loc_list = 1
+      let g:syntastic_auto_loc_list = 1
+      let g:syntastic_check_on_open = 1
+      let g:syntastic_check_on_wq = 0
+    endif
   " }
 
   " unite {
