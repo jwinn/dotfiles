@@ -39,9 +39,9 @@ current_git_status() {
     gitdf=$(git status -s | wc -l | tr -d '[:blank:]' 2>/dev/null)
     gitb=$(__git_ps1 "%s")
     if [ $gitdf -eq 0 ]; then
-      printf "%s|%s%s%s|" "${clr_rst}" "${clr_ok}" "${gitb}" "${clr_rst}"
+      printf "%s%s%s%s " "${clr_rst}" "${clr_ok}" "${gitb}" "${clr_rst}"
     else
-      printf "%s|%s%s [%s]%s|" \
+      printf "%s%s%s-%s%s " \
         "${clr_rst}" "${clr_err}" "$gitb" "$gitdf" "${clr_rst}"
     fi
   fi
@@ -280,13 +280,13 @@ if [ $has_tput ]; then
   clr_ule=$(tput rmul)
 
   if [ $term_colors -ge 256 ]; then
-    clr_time=$(tput setaf 240)
-    clr_user=$(tput setaf 93)
-    clr_host=$(tput setaf 39)
-    clr_pwd=$(tput setaf 25)
-    clr_ok=$(tput setaf 34)
-    clr_err=$(tput setaf 124)
-    clr_uk=$(tput setaf 11)
+    clr_time=$(tput setaf 243)
+    clr_user=$(tput setaf 172)
+    clr_host=$(tput setaf 202)
+    clr_pwd=$(tput setaf 216)
+    clr_ok=$(tput setaf 40)
+    clr_err=$(tput setaf 160)
+    clr_uk=$(tput setaf 226)
   else
     clr_time=$(tput bold; tput setaf 0)
     clr_user=$(tput setaf 5)
@@ -299,7 +299,7 @@ if [ $has_tput ]; then
 fi
 
 PS1="\[${clr_time}\]\t\[${clr_rst}\] "
+[ $has_git_prompt ] && PS1="$PS1\$(current_git_status)"
 PS1="${PS1}\[${clr_user}\]\u\[${clr_rst}\]@\[${clr_host}\]\h"
 PS1="${PS1}\[${clr_rst}\]:\[${clr_pwd}\]\w"
-[ $has_git_prompt ] && PS1="$PS1 \$(current_git_status)"
 export PS1="${PS1}\[${clr_rst}\]\n\$ "
