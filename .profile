@@ -3,10 +3,12 @@ os=${OSTYPE%%[0-9]*}
 has_bash=$(echo $SHELL | grep bash)
 has_brew=$(command -v brew)
 if [ $has_brew ]; then
-  [ -n "$(brew ls --versions nvm)" ] && has_brew_nvm=$(brew --prefix nvm)
+  [ -n "$(brew ls --versions nvm 2>/dev/null)" ] && \
+    has_brew_nvm=$(brew --prefix nvm)
 fi
 has_git=$(command -v git)
 hass_google_chrome=$(command -v google-chrome)
+has_java=$(command -v java)
 has_java_home=$(command -v /usr/libexec/java_home)
 has_less=$(command -v less)
 has_node=$(command -v node)
@@ -107,11 +109,11 @@ if [ $has_sshfs ]; then
     if [ "$1" = "-a" ]]; then
       ls -1 ~/_mounts/g/|while read dir
     do
-      [ $(mount|grep "_mounts/g/$dir") ] && umount ~/_mounts/g/$dir
+      [ $(mount | grep "_mounts/g/$dir") ] && umount ~/_mounts/g/$dir
       [ $(ls ~/_mounts/g/$dir) ] || rm -rf ~/_mounts/g/$dir
     done
   else
-    [ $(mount|grep "_mounts/g/$1") ] && umount ~/_mounts/g/$1
+    [ $(mount | grep "_mounts/g/$1") ] && umount ~/_mounts/g/$1
     [ $(ls ~/_mounts/g/$1) ] || rm -rf ~/_mounts/g/$1
   fi
 }
@@ -221,13 +223,14 @@ if [ $has_vi ] && [ $has_vim ]; then
 fi
 
 # JAVA
-if [ $has_java_home ]; then
-  if [ ! $JAVA_HOME ] && [ -x /usr/libexec/java_home ]; then
-    export JAVA_HOME=$(/usr/libexec/java_home)
-    alias resetjdk='export JAVA_HOME=$(/usr/libexec/java_home)'
-    alias setjdk16='export JAVA_HOME=$(/usr/libexec/java_home -v 1.6)'
-    alias setjdk17='export JAVA_HOME=$(/usr/libexec/java_home -v 1.7)'
-    alias setjdk18='export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)'
+if [ $has_java_home ] && [ -x $has_java_home ]; then
+  should_install_java=$($has_java_home 2>&1 | grep -i 'no java runtime')
+  if [ ! $JAVA_HOME ] && [ -z "${should_install_java}" ]; then
+    export JAVA_HOME=$has_java_home
+    alias resetjdk='export JAVA_HOME=$($has_java_home)'
+    alias setjdk16='export JAVA_HOME=$($has_java_home -v 1.6)'
+    alias setjdk17='export JAVA_HOME=$($has_java_home -v 1.7)'
+    alias setjdk18='export JAVA_HOME=$($has_java_home -v 1.8)'
   fi
 fi
 
