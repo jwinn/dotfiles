@@ -24,20 +24,27 @@ set nocompatible
   endfunction
 
   function! MakeFontsDir()
-    if empty(glob('~/.fonts'))
-      silent call mkdir($HOME.'/.fonts', 'p')
+    if empty(g:sysvars.fonts)
+      silent call mkdir(g:sysvars.fonts, 'p')
     endif
   endfunction
 
-  function! CopyFontFile(dir, file)
-    let src_dir = expand('~/.vim/bundle/powerline-fonts')
-    let src_font_dir = expand(src_dir.'/'.a:dir)
-    let src_font_file = expand(src_font_dir.'/'.a:file)
-    let font_dir = expand('~/.fonts')
-    let font_file = expand(font_dir.'/'.a:file)
-    if filereadable(src_font_file) && !filereadable(font_file)
+  function! InstallFonts()
+    let src_dir = expand('~/.vim/bundle/fonts')
+    if isdirectory(src_dir)
       call MakeFontsDir()
-      call CopyFile(src_font_file, font_file)
+      if len(split(globpath(g:sysvars.fonts, '*Powerline*.[ot]tf'))) == 0
+        echo 'Installing Powerline Fonts...'
+        let src_font_files = split(globpath(src_dir, '**/*.[ot]tf'), '\n')
+        for src_font_file in src_font_files
+          let dest_font_file = g:sysvars.fonts.'/'.fnamemodify(src_font_file, ':t')
+          call CopyFile(src_font_file, dest_font_file)
+        endfor
+        if executable('fc-cache')
+          echo 'Updating font cache'
+          system('fc-cache -f '.g:sysvars.fonts)
+        endif
+      endif
     endif
   endfunction
 
@@ -174,20 +181,24 @@ set nocompatible
 " }
 
 " variables {
-	" get the uname for determinate
-	let s:uname = system("echo -n \"$(uname -s)\"")
 	let s:tmp_ignorecase = &ignorecase
 
 	" temp set ignorecase
 	let &ignorecase = 1
 
   let g:sysvars = {}
-  let g:sysvars['uname'] = system('echo -n "$(uname -s)"')
-  let g:sysvars['osx']   = (g:sysvars.uname =~ 'darwin') || has('macunix')
-  let g:sysvars['linux'] = (g:sysvars.uname =~ 'linux') && has('unix') && !g:sysvars.osx
-  let g:sysvars['win']   = has('win16') || has('win32') || has('win64')
-  let g:sysvars['unix']  = has('unix') && !g:sysvars.osx && !g:sysvars.win
-  let g:sysvars['gui']   = has('gui_running')
+  let g:sysvars['uname']  = system('echo -n "$(uname -s)"')
+  let g:sysvars['osx']    = (g:sysvars.uname =~ 'darwin') || has('macunix')
+  let g:sysvars['linux']  = (g:sysvars.uname =~ 'linux') && has('unix') && !g:sysvars.osx
+  let g:sysvars['win']    = has('win16') || has('win32') || has('win64')
+  let g:sysvars['unix']   = has('unix') && !g:sysvars.osx && !g:sysvars.win
+  let g:sysvars['gui']    = has('gui_running')
+  let g:sysvars['macvim'] = has('gui_macvim')
+  if g:sysvars.osx
+    let g:sysvars['fonts'] = expand('~/Library/Fonts')
+  else
+    let g:sysvars['fonts'] = expand('~/.fonts')
+  endif
 
 	" reset changes and clean up
 	let &ignorecase = s:tmp_ignorecase
@@ -333,7 +344,7 @@ set nocompatible
 
 " GUI (here instead of .gvimrc) {
   if g:sysvars.gui
-    set lines=40 columns=117
+    set lines=40
 
     set guioptions-=m             " remove the menu
     set guioptions-=T             " remove the toolbar
@@ -345,21 +356,24 @@ set nocompatible
       " make Mac 'Option' key behave as 'Alt'
       set mmta
 
-      set guifont="Source Code Pro 16, Menlo Regular 14"
       set linespace=2             " # pixel lines between characters
+      set guifont=Inconsolata:h14,Monaco:h14,Consolas:h14,Courier\ New:h14,Courier:h14
 
       " MacVIM shift+arrow-keys behavior (required in .vimrc)
       let macvim_hig_shift_movement = 1
-    elseif g:sysvars.unix
-      set guifont="DejaVu Sans Mono 12"
-    elseif g:sysvars.win
-      set guifont="Consolas:h13"
+    else
+      set guifont=Inconsolata:h12,Monaco:h12,Consolas:h12,Courier\ New:h12,Courier:h12
     endif
 
     if exists('transparency')
       set transparency=5           " transparency of text bg as %
     endif
-    "set fullscreen                " run in fullscreen mode
+
+    " open macvim in fullscreen
+    if g:sysvars.macvim
+      set fuoptions=maxvert,maxhorz
+      "au GUIEnter * set fullscreen
+    endif
 
     " setting these in GVim/MacVim because terminals cannot distinguish between
     " <space> and <S-space> because curses sees them the same
@@ -839,20 +853,39 @@ set nocompatible
 
   " vim-airline {
     if isdirectory(expand('~/.vim/bundle/vim-airline'))
-      let g:airline_theme = 'powerlineish'
-      if g:sysvars.gui
-        if g:sysvars.osx
-          call CopyFontFile('SourceCodePro', 'Sauce Code Powerline Regular.otf')
-          set guifont="Sauce Code Powerline Regular:h14"
-        else
-          call CopyFontFile('DejaVuSansMono', 'DejaVu Sans Mono for Powerline.ttf')
-          set guifont="DejaVu Sans Mono for Powerline:h12"
+      let g:airline_theme = 'base16'
+
+      if isdirectory(expand('~/.vim/bundle/fonts'))
+        call InstallFonts()
+        if g:sysvars.gui
+          set guifont=Sauce\ Code\ Powerline:h14
         endif
         let g:airline_powerline_fonts = 1
       else
-        let g:airline_powerline_fonts = 0
-        let g:airline_left_sep='›'  " Slightly fancier than '>'
-        let g:airline_right_sep='‹' " Slightly fancier than '<'
+        if !exists('g:airline_symbols')
+          let g:airline_symbols = {}
+        endif
+
+        " unicode symbols
+        let g:airline_left_sep = '»'
+        let g:airline_left_sep = '▶'
+        let g:airline_right_sep = '«'
+        let g:airline_right_sep = '◀'
+        let g:airline_symbols.linenr = '␊'
+        let g:airline_symbols.linenr = '␤'
+        let g:airline_symbols.linenr = '¶'
+        let g:airline_symbols.branch = '⎇'
+        let g:airline_symbols.paste = 'ρ'
+        let g:airline_symbols.paste = 'Þ'
+        let g:airline_symbols.paste = '∥'
+        let g:airline_symbols.whitespace = 'Ξ'
+        " let g:airline_left_sep = "\ue0b0"
+        " let g:airline_left_alt_sep = "\ue0b1"
+        " let g:airline_right_sep = "\ue0b2"
+        " let g:airline_right_alt_sep = "\ue0b3"
+        " let g:airline_symbols.branch = "\ue0a0"
+        " let g:airline_symbols.readonly = "\ue0a2"
+        " let g:airline_symbols.linenr = "\ue0a1"
       endif
     endif
   " }
