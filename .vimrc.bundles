@@ -1,43 +1,10 @@
 " vim: set sw=2 ts=2 sts=2 et tw=78 foldmarker={,} spell:
 
-" let g:make = 'gmake'
-" if system('uname -o') =~ '^GNU/'
-"  let g:make = 'make'
-" endif
-" NeoBundle 'Shougo/vimproc.vim', {'build': {'unix': g:make}}
-" NeoBundle 'Shougo/vimproc', {
-" \  'build' : {
-" \    'windows' : 'make -f make_mingw32.mak',
-" \    'cygwin' : 'make -f make_cygwin.mak',
-" \    'mac' : 'make -f make_mac.mak',
-" \    'unix' : 'make -f make_unix.mak',
-" \  }
-" \}
-
-NeoBundle 'Zenburn'                              " low-light contrast scheme
-NeoBundle 'altercation/vim-colors-solarized'     " solarized scheme
-NeoBundle 'godlygeek/csapprox'                   " CSApprox
-NeoBundle 'chriskempson/base16-vim'              " base16 theme
-
-" NeoBundle 'Shougo/neomru.vim'                    " MRU features
-" NeoBundle 'Shougo/unite.vim'                     " fuzzy search
-NeoBundle 'kien/ctrlp.vim'                       " fuzzy search                       
-NeoBundle 'bling/vim-airline'                    " statusline improvements
-NeoBundle 'powerline/fonts'                      " powerline patched fonts
-NeoBundle 'tpope/vim-surround'                   " surround things
-NeoBundle 'terryma/vim-multiple-cursors'         " multiple cursors
-" NeoBundle 'scrooloose/nerdtree'                  " filesystem interaction
-NeoBundle 'Xuyuanp/git-nerdtree'                 " git status in NERDTree
-
-NeoBundle 'tlib'                                 " ultipsnips' dependency
-NeoBundle 'MarcWeber/ultisnips'                  " snip Management
-NeoBundle 'honza/vim-snippets'                   " default snippets
-
 if executable('ctags')
-  NeoBundle 'majutsushi/tagbar'                  " tag sidebar
+  NeoBundle 'majutsushi/tagbar' " tag sidebar
 endif
 
-if executable('ack')                             " code search
+if executable('ack') " code search
   NeoBundle 'mileszs/ack.vim'
 elseif executable('ackgrep')
   let g:ackprg="ack-grep -H --nocolor --nogroup --column"
@@ -47,20 +14,113 @@ elseif executable('ag')
   let g:ackprg = 'ag --nogroup --nocolor --column --smart-case'
 endif
 
-if g:sysvars.osx
-	NeoBundle 'rizzatti/dash.vim'                  " dash doc integration (osx)
+if g:sysvars.osx && isdirectory('/Applications/Dash.app')
+  NeoBundle 'rizzatti/dash.vim' " dash doc integration (osx)
 endif
 
-NeoBundle 'tpope/vim-fugitive'                   " git
-NeoBundle 'airblade/vim-gitgutter'               " git changes in gutter
-NeoBundle 'SuperTab'                             " code complete
-NeoBundle 'scrooloose/syntastic'                 " syntax check
-NeoBundle 'tComment'                             " comment helper
-NeoBundle 'tpope/vim-markdown'                   " markdown syntax
-NeoBundle 'hail2u/vim-css3-syntax'               " CSS / SCSS
-NeoBundle 'pangloss/vim-javascript'              " javascript syntax
-NeoBundle 'othree/yajs.vim'                      " another js syntax
-NeoBundle 'othree/javascript-libraries-syntax.vim' " js lib syntax
-NeoBundle 'mxw/vim-jsx'                          " jsx support
-NeoBundle 'moll/vim-node'                        " node.js support
-NeoBundle 'mattn/emmet-vim'                      " emmet support
+" let g:make = 'gmake'
+" if system('uname -o') =~ '^GNU/'
+"   let g:make = 'make'
+" endif
+" NeoBundle 'Shougo/vimproc.vim', {'build': {'unix': g:make}}
+" NeoBundle 'Shougo/vimproc', {
+"       \ 'build': {
+"       \   'windows': 'make -f make_mingw32.mak',
+"       \   'cygwin': 'make -f make_cygwin.mak',
+"       \   'mac': 'make -f make_mac.mak',
+"       \   'unix': 'make -f make_unix.mak'
+"       \ }
+
+if g:bundles.airline == 1
+  NeoBundle 'powerline/fonts' " powerline patched fonts
+  NeoBundle 'bling/vim-airline' " statusline improvements
+endif
+
+if g:bundles.autocomplete == 1
+  if has('lua')
+    NeoBundle 'Shougo/neocomplete.vim' " auto completion
+    NeoBundle 'Shougo/neosnippet.vim' " snippets
+    NeoBundle 'Shougo/neosnippet-snippets' " runtime snippets
+  else
+    NeoBundle 'AutoComplPop' " inline autocompletion
+    NeoBundle 'ervandew/supertab' " basic code complete
+    NeoBundle 'tlib' " ultipsnips dependency
+    NeoBundle 'MarcWeber/ultisnips' " snip Management
+  endif
+
+  NeoBundle 'honza/vim-snippets' " default snippets
+endif
+
+if g:bundles.colors == 1
+  NeoBundle 'chriskempson/base16-vim' " base16 theme
+  NeoBundle 'godlygeek/csapprox' " CSApprox
+  NeoBundle 'flazz/vim-colorschemes' " collection from vimcolors
+endif
+
+if g:bundles.common == 1
+  NeoBundle 'scrooloose/nerdtree' " filesystem interaction
+  NeoBundle 'scrooloose/syntastic' " syntax check
+  NeoBundle 'tComment' " comment helper
+  NeoBundle 'terryma/vim-multiple-cursors' " multiple cursors
+  NeoBundle 'jistr/vim-nerdtree-tabs' " NERDTree tab support
+  NeoBundle 'tpope/vim-surround' " surround things
+endif
+
+if g:bundles.css == 1
+  NeoBundle 'skammer/vim-css-color' " colors css color strings
+  NeoBundle 'hail2u/vim-css3-syntax' " CSS / SCSS
+endif
+
+if g:bundles.git == 1
+  NeoBundle 'Xuyuanp/nerdtree-git-plugin' " NERDTree git plugin
+  NeoBundle 'tpope/vim-fugitive' " git
+  NeoBundle 'airblade/vim-gitgutter' " git changes in gutter
+endif
+
+if g:bundles.go == 1
+  NeoBundle 'fatih/vim-go' " go lang support
+endif
+
+if g:bundles.html == 1
+  NeoBundle 'mattn/emmet-vim' " emmet support
+endif
+
+if g:bundles.icons == 1
+  NeoBundle 'ryanoasis/nerd-filetype-glyphs-fonts-patcher' " pre-patched fonts
+  NeoBundle 'ryanoasis/vim-webdevicons' " icons for file types
+endif
+
+if g:bundles.js == 1
+  NeoBundle 'othree/javascript-libraries-syntax.vim' " js lib syntax
+  NeoBundle 'pangloss/vim-javascript' " javascript syntax
+  NeoBundle 'heavenshell/vim-jsdoc' " generate jsdoc
+  NeoBundle 'elzr/vim-json' " json support
+  NeoBundle 'mxw/vim-jsx' " jsx support
+  NeoBundle 'moll/vim-node' " node.js support
+  NeoBundle 'othree/yajs.vim' " another js syntax
+endif
+
+if g:bundles.less == 1
+  NeoBundle 'groenewege/vim-less' " LESS support
+endif
+
+if g:bundles.md == 1
+  NeoBundle 'tpope/vim-markdown' " markdown syntax
+endif
+
+if g:bundles.rust == 1
+  NeoBundle 'rust-lang/rust.vim' " rust lang support
+endif
+
+if g:bundles.swift == 1
+  NeoBundle 'Keithbsmiley/swift.vim' " swift syntax support
+endif
+
+if g:bundles.unite == 1
+  NeoBundle 'Shougo/neomru.vim' " MRU features
+  NeoBundle 'Shougo/unite.vim' " fuzzy search
+else
+  NeoBundle 'kien/ctrlp.vim' " fuzzy search                       
+  NeoBundle 'techlivezheng/vim-plugin-minibufexpl' " buffer explorer
+endif
+
