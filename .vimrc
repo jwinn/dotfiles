@@ -227,6 +227,7 @@ function! s:InsertTabWrapper()
   let g:sysvars.unix =   has('unix') && !g:sysvars.osx && !g:sysvars.win
   let g:sysvars.gui =    has('gui_running')
   let g:sysvars.macvim = has('gui_macvim')
+  let g:sysvars.has256 = (&term =~ '256color') || g:sysvars.gui
 
   if g:sysvars.osx
     let g:sysvars.fonts = expand('~/Library/Fonts')
@@ -262,10 +263,10 @@ function! s:InsertTabWrapper()
         \ 'color_scheme': 'default'
         \ }
   if isdirectory(expand('~/.vim/bundle/vim-colorschemes'))
-    let g:options.color_scheme = 'jellybeans'
+    let g:options.color_scheme = 'hybrid'
   endif
   if isdirectory(expand('~/.vim/bundle/vim-airline'))
-    let g:options.airline_theme = 'jellybeans'
+    let g:options.airline_theme = 'hybrid'
   endif
   " }
 
@@ -360,16 +361,18 @@ function! s:InsertTabWrapper()
   set synmaxcol=2048              " no need to syntax color super long lines
   set hlsearch                    " highlights matched search pattern
   set cursorline                  " highlight screen line of cursor
+  set textwidth=80                " highlight 80 column
 
   if exists('&colorcolumn')
-    set colorcolumn=80            " highlight column at #
+    " highlight column at #
+    set colorcolumn=80
+    let &colorcolumn="80,".join(range(120,999),",")
   else
     au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%>80v.\+', -1)
   endif
 
   " toggle spelling mistakes
   map <F7> :setlocal spell! spell?<CR>
-  highlight SpellErrors guibg=red guifg=black ctermbg=red ctermfg=black
   " }
 
   " multiple windows {
@@ -447,7 +450,7 @@ function! s:InsertTabWrapper()
       " auto resize splits when window resizes
       "autocmd VimResized * wincdm =
     endif
-  elseif &term == 'xterm' || &term == 'screen'
+  elseif g:sysvars.has256
     set t_Co=256                  " enable 256 colors for CSApprox warning
   endif
   " }
@@ -745,6 +748,20 @@ function! s:InsertTabWrapper()
   " }
 
   " colors {
+  if exists('&colorcolumn')
+    if g:sysvars.has256
+      highlight ColorColumn guibg=#444444 ctermbg=238
+    else
+      highlight ColorColumn ctermbg=7 ctermfg=1
+    endif
+  endif
+
+  if g:sysvars.has256
+    highlight SpellErrors guibg=#8700af ctermbg=91
+  else
+    highlight SpellErrors ctermbg=5 ctermfg=0
+  endif
+
   if isdirectory(expand('~/.vim/bundle/vim-colorschemes/colors'))
     let g:solarized_termcolors = 256
     let g:solarized_termtrans = 1
@@ -1175,9 +1192,9 @@ function! s:InsertTabWrapper()
 
   if g:sysvars.gui
     if exists('g:bundles.icons')
-      set guifont=Sauce\ Code\ Powerline\ Plus\ Nerd\ File\ Types\ Mono:h14
+      set guifont=Sauce\ Code\ Powerline\ Plus\ Nerd\ File\ Types\ Mono:h12
     elseif exists('g:bundles.airline')
-      set guifont=Sauce\ Code\ Powerline:h14
+      set guifont=Sauce\ Code\ Powerline:h12
     endif
   endif
 
