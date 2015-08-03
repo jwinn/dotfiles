@@ -1163,6 +1163,19 @@ function! s:InsertTabWrapper()
     let g:multi_cursor_exit_from_visual_mode = 1
     let g:multi_cursor_exit_from_insert_mode = 1
 
+    " account for neocomplete to improve perf
+    function! Multiple_cursors_before()
+      if exists(':NeoCompleteLock')==2
+        execute 'NeoCompleteLock'
+      endif
+    endfunction
+
+    function! Multiple_cursors_after()
+      if exists(':NeoCompleteUnlock')==2
+        execute 'NeoCompleteUnlock'
+      endif
+    endfunction
+
     highlight multiple_cursors_cursor term=reverse cterm=reverse gui=reverse
     highlight link multiple_cursors_visual Visual
   endif
