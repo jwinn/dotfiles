@@ -817,7 +817,7 @@ function! s:InsertTabWrapper()
     nnoremap <silent> <D-t> :CtrlP<CR>
     nnoremap <silent> <D-r> :CtrlPMRU<CR>
     let g:ctrlp_custom_ignore = {
-          \ 'dir':  '\.git$\|\.hg$\|\.svn$',
+          \ 'dir':  '\.git$\|\.hg$\|\.svn|node_modules|bower_components$',
           \ 'file': '\.exe$\|\.so$\|\.dll$\|\.pyc$' }
 
     " On Windows use 'dir' as fallback command.
@@ -1129,6 +1129,9 @@ function! s:InsertTabWrapper()
     " turn on detecting underscore starting functions as private convention 
     let g:jsdoc_underscore_private = 1
     let g:jsdoc_allow_shorthand = 1 " allow ES6 shorthand syntax
+
+    " since v0.3 there is no longer a default mapping
+    nmap <silent> <C-j> <Plug>(jsdoc)
   endif
   " }
 
