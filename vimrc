@@ -13,7 +13,7 @@ function! InstallNeoBundle()
   if empty(glob('~/.vim/bundle/neobundle.vim'))
     echo "Installing NeoBundle..."
     echo ""
-    silent call mkdir(expand(~'/.vim/bundle'), 'p')
+    silent call mkdir(expand('~/.vim/bundle'), 'p')
     silent call system('git clone https://github.com/Shougo/neobundle.vim '.expand('~/.vim/bundle/neobundle.vim'))
   endif
 endfunction
@@ -27,7 +27,7 @@ function! CopyFile(src, dest)
 endfunction
 
 function! MakeFontsDir()
-  if empty(g:sysvars.fonts)
+  if exists(g:sysvars.fonts) = 0
     silent call mkdir(g:sysvars.fonts, 'p')
   endif
 endfunction
