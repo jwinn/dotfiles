@@ -35,18 +35,22 @@ endfunction
 function! InstallFonts(src, exists_glob)
   let src_dir = expand(a:src)
   let exists_path = globpath(g:sysvars.fonts, a:exists_glob)
-  if isdirectory(src_dir)
-    call MakeFontsDir()
-    if len(split(exists_path)) == 0
-      echo 'Installing fonts from: '.src_dir
-      let src_font_files = split(globpath(src_dir, '**/*.[ot]tf'), '\n')
-      for src_font_file in src_font_files
-        let dest_font_file = g:sysvars.fonts.'/'.fnamemodify(src_font_file, ':t')
-        call CopyFile(src_font_file, dest_font_file)
-      endfor
-      if executable('fc-cache')
-        echo 'Updating font cache'
-        system('fc-cache -f '.g:sysvars.fonts)
+  if g:sysvars.win
+    echo "Please manually install the fonts from: '.src_dir
+  else
+    if isdirectory(src_dir)
+      call MakeFontsDir()
+      if len(split(exists_path)) == 0
+        echo 'Installing fonts from: '.src_dir
+        let src_font_files = split(globpath(src_dir, '**/*.[ot]tf'), '\n')
+        for src_font_file in src_font_files
+          let dest_font_file = g:sysvars.fonts.'/'.fnamemodify(src_font_file, ':t')
+          call CopyFile(src_font_file, dest_font_file)
+        endfor
+        if executable('fc-cache')
+          echo 'Updating font cache'
+          system('fc-cache -f '.g:sysvars.fonts)
+        endif
       endif
     endif
   endif
