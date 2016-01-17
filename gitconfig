@@ -1,3 +1,7 @@
+
+[diff]
+  tool = vimdiff
+
 [user]
 	name = Jon Winn
 	email = me@jonwinn.com

@@ -1,17 +1,20 @@
 " modeline {
 " vim: set sw=2 ts=2 sts=2 et tw=78 foldmarker={,} spell:
 " }
-" be improved
-set nocompatible
+
+if has('vim_starting')
+  if &compatible
+    set nocompatible " be improved
+  endif
+endif
 
 " functions { 
 function! InstallNeoBundle()
   if empty(glob('~/.vim/bundle/neobundle.vim'))
     echo "Installing NeoBundle..."
     echo ""
-    silent call mkdir($HOME.'/.vim/bundle', 'p')
-    silent !git clone https://github.com/Shougo/neobundle.vim
-          \ ~/.vim/bundle/neobundle.vim > /dev/null 2>&1
+    silent call mkdir(expand(~'/.vim/bundle'), 'p')
+    silent call system('git clone https://github.com/Shougo/neobundle.vim '.expand('~/.vim/bundle/neobundle.vim'))
   endif
 endfunction
 
@@ -220,7 +223,7 @@ function! s:InsertTabWrapper()
   let &ignorecase = 1
 
   let g:sysvars = {}
-  let g:sysvars.uname =  system('echo -n "$(uname -s)"')
+  let g:sysvars.uname =  system('uname -s')
   let g:sysvars.osx =    (g:sysvars.uname =~ 'darwin') || has('macunix')
   let g:sysvars.linux =  (g:sysvars.uname =~ 'linux') && has('unix') && !g:sysvars.osx
   let g:sysvars.win =    has('win16') || has('win32') || has('win64')
@@ -328,7 +331,7 @@ function! s:InsertTabWrapper()
   set scrolloff=3                 " # of screen lines to show around cursor
   set nowrap                      " do not wrap long lines
   set linebreak                   " wrap long lines in 'breakat' (not a hard break)
-  set showbreak=↪\                " placed before wrapped screen lines
+  set showbreak="↪  "             " placed before wrapped screen lines
   if (&termencoding ==# "utf-8" || &encoding ==# "utf-8")
     let &showbreak = "\u21aa "
   endif
@@ -469,7 +472,7 @@ function! s:InsertTabWrapper()
   " }
 
   " selecting text {
-  if has('unamedplus')
+  if has('unnamedplus')
     set clipboard=unnamed,unnamedplus " use + register for copy/paste
   else
     set clipboard=unnamed         " use system clipboard

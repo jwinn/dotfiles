@@ -67,6 +67,9 @@ if g:bundles.common == 1
 endif
 
 if g:bundles.css == 1
+  if v:version < 704
+    NeoBundle 'JulesWang/css.vim' " media query highlighting
+  endif
   NeoBundle 'skammer/vim-css-color' " colors css color strings
   NeoBundle 'hail2u/vim-css3-syntax' " CSS / SCSS
 endif
@@ -83,6 +86,7 @@ endif
 
 if g:bundles.html == 1
   NeoBundle 'mattn/emmet-vim' " emmet support
+  NeoBundle 'Slava/vim-spacebars' " handle/spacebars support
 endif
 
 if g:bundles.icons == 1
