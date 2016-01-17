@@ -27,7 +27,7 @@ function! CopyFile(src, dest)
 endfunction
 
 function! MakeFontsDir()
-  if exists(g:sysvars.fonts) = 0
+  if !isdirectory(g:sysvars.fonts)
     silent call mkdir(g:sysvars.fonts, 'p')
   endif
 endfunction
