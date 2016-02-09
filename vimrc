@@ -1,23 +1,78 @@
 " modeline {
-" vim: set sw=2 ts=2 sts=2 et tw=78 foldmarker={,} spell:
+" vim:set ft=vim sw=2 ts=2 sts=2 et tw=78 foldmarker={,} spell:
 " }
 
-if has('vim_starting')
-  if &compatible
-    set nocompatible " be improved
-  endif
+" variables {
+
+" g:sys {
+let s:tmp_ignorecase = &ignorecase
+
+" temp set ignorecase
+let &ignorecase = 1
+
+let g:sys = {}
+let g:sys.uname =  system('uname -s')
+let g:sys.osx =    (g:sys.uname =~ 'darwin') || has('macunix')
+let g:sys.linux =  (g:sys.uname =~ 'linux') && has('unix') && !g:sys.osx
+let g:sys.win =    has('win16') || has('win32') || has('win64')
+let g:sys.unix =   has('unix') && !g:sys.osx && !g:sys.win
+let g:sys.gui =    has('gui_running')
+let g:sys.macvim = has('gui_macvim')
+let g:sys.nvim =   has('nvim')
+let g:sys.python = has('python')
+let g:sys.ruby =   has('ruby')
+let g:sys.has256 = (&term =~ '256color') || g:sys.gui
+
+" reset changes and clean up
+let &ignorecase = s:tmp_ignorecase
+unlet s:tmp_ignorecase
+" }
+
+" g:opts {
+let g:opts = {
+      \ 'airline_theme': 'hybrid',
+      \ 'color_dark': 1,
+      \ 'color_scheme': 'hybrid',
+      \ 'font_dir': expand('~/.fonts'),
+      \ 'leader': ',',
+      \ 'patched_font': 'Inconsolata for Powerline Nerd Font Complete.otf',
+      \ 'patched_font_rel_dir': 'Inconsolata/complete',
+      \ 'vim_home': expand('~/.vim')
+      \ }
+
+if g:sys.win
+  let g:opts.patched_font = 'Inconsolata for Powerline Nerd Font Complete Windows Compatible.otf'
+  let g:opts.vim_home = expand('~/vimfiles')
+elseif g:sys.nvim
+  let g:opts.vim_home = expand('~/.config/nvim')
 endif
 
-" functions { 
-function! InstallNeoBundle()
-  if empty(glob('~/.vim/bundle/neobundle.vim'))
-    echo "Installing NeoBundle..."
-    echo ""
-    silent call mkdir(expand('~/.vim/bundle'), 'p')
-    silent call system('git clone https://github.com/Shougo/neobundle.vim '.expand('~/.vim/bundle/neobundle.vim'))
-  endif
-endfunction
+let g:opts.backup_dir = expand(g:opts.vim_home . '/.backup')
+let g:opts.plugin_dir = expand(g:opts.vim_home . '/plugged')
+let g:opts.undo_dir = expand(g:opts.backup_dir . '/undo')
 
+if g:sys.osx
+  let g:opts.font_dir = expand('~/Library/Fonts')
+endif
+
+" }
+
+" }
+
+" important {
+set pastetoggle=<F2> " pastetoggle (sane indentation on paste)
+
+" change mapleader <leader> to g:opts.leader,
+" but retain default for local buffers
+" setting here causes this to be set for any <leader> references later
+" in the initialization sequence
+let mapleader = g:opts.leader
+let maplocalleader = "\\"
+" }
+
+" functions {
+
+" CopyFile {
 function! CopyFile(src, dest)
   let ret = writefile(readfile(a:src, 'b'), a:dest, 'b')
   if ret == -1
@@ -25,70 +80,118 @@ function! CopyFile(src, dest)
   endif
   return 1
 endfunction
+" }
 
-function! MakeFontsDir()
-  if !isdirectory(g:sysvars.fonts)
-    silent call mkdir(g:sysvars.fonts, 'p')
-  endif
-endfunction
+" InstallFont {
+function! InstallFont(src, dest)
+  let src_font_path = expand(a:src)
+  let src_font = fnamemodify(src_font_path, ':t')
+  let dest_dir = expand(a:dest)
+  let dest_font = expand(a:dest . '/' . src_font)
 
-function! InstallFonts(src, exists_glob)
-  let src_dir = expand(a:src)
-  let exists_path = globpath(g:sysvars.fonts, a:exists_glob)
-  if g:sysvars.win
-    echo "Please manually install the fonts from: '.src_dir
-  else
-    if isdirectory(src_dir)
-      call MakeFontsDir()
-      if len(split(exists_path)) == 0
-        echo 'Installing fonts from: '.src_dir
-        let src_font_files = split(globpath(src_dir, '**/*.[ot]tf'), '\n')
-        for src_font_file in src_font_files
-          let dest_font_file = g:sysvars.fonts.'/'.fnamemodify(src_font_file, ':t')
-          call CopyFile(src_font_file, dest_font_file)
-        endfor
-        if executable('fc-cache')
-          echo 'Updating font cache'
-          system('fc-cache -f '.g:sysvars.fonts)
+  if filereadable(src_font_path)
+    call MakeDir(dest_dir)
+
+    if !filereadable(dest_font)
+      echom "Copying font from: '" . src_font_path . "' to: '" . dest_font . "'"
+      call CopyFile(src_font_path, dest_font)
+
+      if g:sys.win
+        echom "Attempting to install font: " .  dest_font
+        let font_name = fnamemodify(dest_font, ':t')
+
+        call PowerShellCmd([
+              \ "(New-Object -ComObject Shell.Application).Namespace(0x14).CopyHere('" . dest_font . "', 0x10)"
+              \ ])
+
+        if filereadable(expand($windir . '/fonts/' . font_name))
+          echom "Successfully installed font: " . font_name
+        else
+          echoerr "Unable to install, please manually install the font: " . dest_font
         endif
+      endif
+
+      if executable('fc-cache')
+        echom 'Updating font cache'
+        system('fc-cache -f ' . g:sysvars.fonts)
       endif
     endif
   endif
 endfunction
+" }
 
-function! StripTrailingWhitespace()
-  if !exists('g:keep_trailing_whitespace')
-    " prep: save last search, and cursor position.
-    let _s=@/
-    let l = line(".")
-    let c = col(".")
-    " do the business:
-    %s/\s\+$//e
-    " clean up: restore previous search history, and cursor position
-    let @/=_s
-    call cursor(l, c)
+" InstallFonts {
+function! InstallFonts(src, dest)
+  let src_dir = expand(a:src)
+  let dest_dir = expand(a:dest)
+
+  if isdirectory(src_dir)
+    call MakeDir(dest_dir)
+
+    let src_fonts = split(globpath(src_dir, '**/*.[ot]tf'), '\n')
+    for src_font in src_fonts
+      call InstallFont(src_font, dest_dir)
+    endfor
   endif
 endfunction
+"}
 
-" return '[\s]' if trailing white space is detected
-" return '' otherwise
-function! StatuslineTrailingSpaceWarning()
-  if !exists('b:statusline_trailing_space_warning')
-    if !&modifiable
-      let b:statusline_trailing_space_warning = ''
-      return b:statusline_trailing_space_warning
-    endif
+" InstallPlug {
+function! InstallPlug(vhome)
+  if !filereadable(expand(a:vhome . '/autoload/plug.vim'))
+    let autoload_dir = expand(a:vhome . '/autoload')
+    let plug_file = expand(autoload_dir . '/plug.vim')
+    let plug_uri = 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 
-    if search('\s\+$', 'nw') != 0
-      let b:statusline_trailing_space_warning = '[\s]'
+    if g:sys.win
+      call MakeDir(autoload_dir)
+      call PowerShellCmd([
+            \ "(New-Object Net.WebClient).DownloadFile('" . plug_uri . "', $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath('" . plug_file . "'))"
+            \ ])
     else
-      let b:statusline_trailing_space_warning = ''
+      silent execute '!curl -fLo ' . plug_file . ' --create-dirs ' . plug_uri
     endif
+
+    autocmd VimEnter * PlugInstall | source $MYVIMRC
   endif
-
-  return b:statusline_trailing_space_warning
 endfunction
+" }
 
+" MakeDir {
+function! MakeDir(path)
+  if !isdirectory(expand(a:path))
+    silent call mkdir(expand(a:path), 'p')
+  endif
+endfunction
+" }
+
+" PowerShellCmd {
+function! PowerShellCmd(cmds)
+  let tmp = {
+        \ 'shell': &shell,
+        \ 'shellcmdflag': &shellcmdflag,
+        \ 'shellpipe': &shellpipe,
+        \ 'shellredir': &shellredir
+        \ }
+
+  let &shell = 'powershell.exe -ExecutionPolicy Unrestricted'
+  let &shellcmdflag = '-Command'
+  let &shellpipe = '>'
+  let &shellredir = '>'
+
+  for cmd in a:cmds
+    silent execute '!' . cmd
+  endfor
+
+  let &shell = tmp.shell
+  let &shellcmdflag = tmp.shellcmdflag
+  let &shellpipe = tmp.shellpipe
+  let &shellredir = tmp.shellredir
+  unlet tmp
+endfunction
+" }
+
+" StatuslineCurrentHighlight {
 " return the syntax highlight group under the cursor ''
 function! StatuslineCurrentHighlight()
   let name = synIDattr(synID(line('.'),col('.'),1),'name')
@@ -99,31 +202,28 @@ function! StatuslineCurrentHighlight()
     return '[' . name . ']'
   endif
 endfunction
+" }
 
-" return '[&et]' if &et is set wrong
-" return '[mixed-indenting]' if spaces and tabs are used to indent
-" return an empty string if everything is fine
-function! StatuslineTabWarning()
-  if !exists('b:statusline_tab_warning')
-    let b:statusline_tab_warning = ''
+" StatuslineLongLineWarning {
+" return a list containing the lengths of the long lines in this buffer
+function! s:LongLines()
+  let threshold = (&tw ? &tw : 80)
+  let spaces = repeat(" ", &ts)
+  let line_lens = map(getline(1,'$'), 'len(substitute(v:val, "\\t", spaces, "g"))')
+  return filter(line_lens, 'v:val > threshold')
+endfunction
 
-    if !&modifiable
-      return b:statusline_tab_warning
-    endif
+" find the median of the given array of numbers
+function! s:Median(nums)
+  let nums = sort(a:nums)
+  let l = len(nums)
 
-    let tabs = search('^\t', 'nw') != 0
-
-    " find spaces that arent used as alignment in the first indent column
-    let spaces = search('^ \{' . &ts . ',}[^\t]', 'nw') != 0
-
-    if (tabs && spaces)
-      let b:statusline_tab_warning = '[mixed-indenting]'
-    elseif (spaces && !&et) || (tabs && &et)
-      let b:statusline_tab_warning = '[&et]'
-    endif
+  if l % 2 == 1
+    let i = (l-1) / 2
+    return nums[i]
+  else
+    return (nums[l/2] + nums[(l/2)-1]) / 2
   endif
-
-  return b:statusline_tab_warning
 endfunction
 
 " return a warning for "long lines" where "long" is either &textwidth or 80
@@ -154,1076 +254,627 @@ function! StatuslineLongLineWarning()
 
   return b:statusline_long_line_warning
 endfunction
+" }
 
-" return a list containing the lengths of the long lines in this buffer
-function! s:LongLines()
-  let threshold = (&tw ? &tw : 80)
-  let spaces = repeat(" ", &ts)
-  let line_lens = map(getline(1,'$'), 'len(substitute(v:val, "\\t", spaces, "g"))')
-  return filter(line_lens, 'v:val > threshold')
+" StatuslineTabWarning {
+" return '[&et]' if &et is set wrong
+" return '[mixed-indenting]' if spaces and tabs are used to indent
+" return an empty string if everything is fine
+function! StatuslineTabWarning()
+  if !exists('b:statusline_tab_warning')
+    let b:statusline_tab_warning = ''
+
+    if !&modifiable
+      return b:statusline_tab_warning
+    endif
+
+    let tabs = search('^\t', 'nw') != 0
+
+    " find spaces that arent used as alignment in the first indent column
+    let spaces = search('^ \{' . &ts . ',}[^\t]', 'nw') != 0
+
+    if (tabs && spaces)
+      let b:statusline_tab_warning = '[mixed-indenting]'
+    elseif (spaces && !&et) || (tabs && &et)
+      let b:statusline_tab_warning = '[&et]'
+    endif
+  endif
+
+  return b:statusline_tab_warning
 endfunction
+" }
 
-" find the median of the given array of numbers
-function! s:Median(nums)
-  let nums = sort(a:nums)
-  let l = len(nums)
+" StatuslineTrailingSpaceWarning {
+" return '[\s]' if trailing white space is detected
+" return '' otherwise
+function! StatuslineTrailingSpaceWarning()
+  if !exists('b:statusline_trailing_space_warning')
+    if !&modifiable
+      let b:statusline_trailing_space_warning = ''
+      return b:statusline_trailing_space_warning
+    endif
 
-  if l % 2 == 1
-    let i = (l-1) / 2
-    return nums[i]
-  else
-    return (nums[l/2] + nums[(l/2)-1]) / 2
+    if search('\s\+$', 'nw') != 0
+      let b:statusline_trailing_space_warning = '[\s]'
+    else
+      let b:statusline_trailing_space_warning = ''
+    endif
+  endif
+
+  return b:statusline_trailing_space_warning
+endfunction
+" }
+
+" StripTrailingWhitespace {
+function! StripTrailingWhitespace()
+  if !exists('g:keep_trailing_whitespace')
+    " prep: save last search, and cursor position.
+    let _s=@/
+    let l = line(".")
+    let c = col(".")
+    " do the business:
+    %s/\s\+$//e
+    " clean up: restore previous search history, and cursor position
+    let @/=_s
+    call cursor(l, c)
   endif
 endfunction
+" }
 
-" determine how tab functions should be used for insert mode mappings
-inoremap <tab> <C-r>=s:InsertTabWrapper()<cr>
-" inoremap <S-tab> <C-n>
-function! s:InsertTabWrapper()
-  let col = col(".") - 1
-  if !col || getline(".")[col - 1] !~ "\k"
-    return "\<tab>"
-  else
-    return "\<C-n>"
-  endfunction
+" }
 
-  function! CleverCr()
-    if pumvisible()
-      if neosnippet#expandable()
-        let exp = "\<Plug>(neosnippet_expand)"
-        return exp . neocomplete#smart_close_popup()
-      else
-        return neocomplete#smart_close_popup()
-      endif
+" vim-plug {
+call InstallPlug(g:opts.vim_home)
+call plug#begin(g:opts.plugin_dir)
+
+" be sensible (default settings)
+Plug 'tpope/vim-sensible'
+
+" ctags sidebar
+if executable('ctags')
+  Plug 'majutsushi/tagbar'
+endif
+
+" code search
+if executable('ack')
+  Plug 'mileszs/ack.vim'
+elseif executable('ackgrep')
+  let g:ackprg="ack-grep -H --nocolor --nogroup --column"
+  Plug 'mileszs/ack.vim'
+elseif executable('ag')
+  Plug 'mileszs/ack.vim'
+  let g:ackprg = 'ag --nogroup --nocolor --column --smart-case'
+endif
+
+" Dash doc integration
+if g:sys.osx && isdirectory('/Applications/Dash.app')
+  Plug 'rizzatti/dash.vim'
+  :nmap <silent> <leader>d <Plug>DashSearch
+endif
+
+" airline
+Plug 'vim-airline/vim-airline' | Plug 'vim-airline/vim-airline-themes'
+
+" colorschemes
+Plug 'chriskempson/base16-vim' " base16 theme
+Plug 'godlygeek/csapprox' " CSApprox
+Plug 'junegunn/seoul256.vim' " nice dark/light color
+Plug 'altercation/vim-colors-solarized' " old classic
+Plug 'w0ng/vim-hybrid' " dark color scheme
+
+" common
+Plug 'scrooloose/syntastic' " syntax check
+Plug 'tComment' " comment helper
+Plug 'terryma/vim-multiple-cursors' " multiple cursors
+Plug 'tpope/vim-surround' " surround things
+
+" css
+Plug 'skammer/vim-css-color', { 'for': 'css' } " colors css color strings
+Plug 'hail2u/vim-css3-syntax', { 'for': 'css' } " CSS / SCSS
+
+" git
+Plug 'tpope/vim-fugitive' " git
+Plug 'airblade/vim-gitgutter' " git changes in gutter
+
+" go
+Plug 'fatih/vim-go', { 'for': 'go' } " go lang support
+
+" html
+Plug 'mattn/emmet-vim', { 'for': 'html' } " emmet support
+Plug 'othree/html5.vim', { 'for': 'html' } " html5 + svg support
+
+" js
+Plug 'othree/javascript-libraries-syntax.vim', { 'for': 'javascript' } " js lib syntax
+Plug 'heavenshell/vim-jsdoc', { 'for': 'javascript' } " generate jsdoc
+Plug 'elzr/vim-json', { 'for': ['javascript', 'json'] } " json support
+Plug 'mxw/vim-jsx', { 'for': 'javascript' } " jsx support
+Plug 'moll/vim-node', { 'for': 'javascript' } " node.js support
+Plug 'othree/yajs.vim', { 'for': 'javascript' } " js syntax
+
+" less
+Plug 'groenewege/vim-less', { 'for': 'less' } " LESS support
+
+" NERDTree
+Plug 'scrooloose/nerdtree' | Plug 'Xuyuanp/nerdtree-git-plugin' | Plug 'jistr/vim-nerdtree-tabs', { 'on': ['NERDTree', 'NERDTreeToggle'] }
+
+" markdown
+Plug 'tpope/vim-markdown', { 'for': 'markdown' } " markdown syntax
+
+" rust
+Plug 'rust-lang/rust.vim', { 'for': 'rust' } " rust lang support
+
+" swift
+Plug 'Keithbsmiley/swift.vim', { 'for': 'swift' } " swift syntax support
+
+" unite and MRU features
+Plug 'Shougo/neomru.vim' | Plug 'Shougo/unite.vim'
+
+" vim-devicons and pre-patched fonts
+" should be loaded after NEDTree, airline and unite
+Plug 'ryanoasis/nerd-fonts' | Plug 'ryanoasis/vim-devicons'
+
+call plug#end()
+" }
+
+" plugin config {
+" emmet-vim {
+if isdirectory(expand(g:opts.plugin_dir . '/emmet-vim'))
+  let g:user_emmet_mode = 'i' " only enable in insert mode
+  let g:user_emmet_leader_key = '<C-y>' " default, change, if necessary
+  " only enable for html,css,scss
+  let g:user_emmet_install_global = 0
+  autocmd FileType html,css,scss EmmetInstall
+endif
+" }
+
+" fugitive {
+if isdirectory(expand(g:opts.plugin_dir . '/vim-fugitive'))
+  nnoremap <silent> <leader>gs :Gstatus<CR>
+  nnoremap <silent> <leader>gd :Gdiff<CR>
+  nnoremap <silent> <leader>gc :Gcommit<CR>
+  nnoremap <silent> <leader>gb :Gblame<CR>
+  nnoremap <silent> <leader>gl :Glog<CR>
+  nnoremap <silent> <leader>gp :Git push<CR>
+  nnoremap <silent> <leader>gr :Gread<CR>
+  nnoremap <silent> <leader>gw :Gwrite<CR>
+  nnoremap <silent> <leader>ge :Gedit<CR>
+  " Mnemonic _i_nteractive
+  nnoremap <silent> <leader>gi :Git add -p %<CR>
+  nnoremap <silent> <leader>gg :SignifyToggle<CR>
+endif
+" }
+
+" javascript-libraries-syntax.vim {
+if isdirectory(expand(g:opts.plugin_dir . '/javascript-libraries-syntax.vim'))
+  " jquery,underscore,backbone,prelude,angularjs,angualrui,angularuirouter,react,flux,requirejs,sugar,jasmine,chai,handlebars
+  let g:used_javascript_libs = 'jquery,underscore,angularjs,angularui,angularuirouter,react,flux,jamine,chai'
+endif
+" }
+
+" nerd-fonts {
+if isdirectory(expand(g:opts.plugin_dir . '/nerd-fonts'))
+  let nerdfont_dir = expand(g:opts.plugin_dir . '/nerd-fonts/patched-fonts')
+  let patched_font_dir = expand(nerdfont_dir . '/' . g:opts.patched_font_rel_dir)
+  let patched_font = expand(patched_font_dir . '/' . g:opts.patched_font)
+  let font_name = substitute(fnamemodify(patched_font, ':t:r'), ' ', '_', 'g')
+
+  call InstallFont(patched_font, g:opts.font_dir)
+
+  if g:sys.gui
+    if g:sys.linux
+      execute 'set guifont=' . font_name . '\ 12'
+    elseif g:sys.win
+      execute 'set guifont=' . font_name . ':h12:cANSI'
     else
-      return "\<CR>"
+      execute 'set guifont=' . font_name . ':h12'
     endif
-  endfunction
-
-  function! CleverTab()
-    if pumvisible()
-      return "\<C-n>"
-    endif
-    let substr = strpart(getline('.'), 0, col('.') - 1)
-    let substr = matchstr(substr, '[^ \t]*$')
-    if strlen(substr) == 0
-      " nothing to match on empty string
-      return "\<Tab>"
-    else
-      " existing text matching
-      if neosnippet#expandable_or_jumpable()
-        return "\<Plug>(neosnippet_expand_or_jump)"
-      else
-        return neocomplete#start_manual_complete()
-      endif
-    endif
-  endfunction
-  " }
-
-  " variables {
-  let s:tmp_ignorecase = &ignorecase
-
-  " temp set ignorecase
-  let &ignorecase = 1
-
-  let g:sysvars = {}
-  let g:sysvars.uname =  system('uname -s')
-  let g:sysvars.osx =    (g:sysvars.uname =~ 'darwin') || has('macunix')
-  let g:sysvars.linux =  (g:sysvars.uname =~ 'linux') && has('unix') && !g:sysvars.osx
-  let g:sysvars.win =    has('win16') || has('win32') || has('win64')
-  let g:sysvars.unix =   has('unix') && !g:sysvars.osx && !g:sysvars.win
-  let g:sysvars.gui =    has('gui_running')
-  let g:sysvars.macvim = has('gui_macvim')
-  let g:sysvars.has256 = (&term =~ '256color') || g:sysvars.gui
-
-  if g:sysvars.osx
-    let g:sysvars.fonts = expand('~/Library/Fonts')
-  else
-    let g:sysvars.fonts = expand('~/.fonts')
   endif
+endif
+" }
 
-  " reset changes and clean up
-  let &ignorecase = s:tmp_ignorecase
-  unlet s:tmp_ignorecase
+" nerdtree {
+if isdirectory(expand(g:opts.plugin_dir . '/nerdtree'))
+  map <C-e> <plug>NERDTreeTabsToggle<CR>
+  map <leader>e :NERDTreeFind<CR>
+  nmap <leader>nt :NERDTreeFind<CR>
 
-  let g:bundles = {
-        \ 'airline': 1,
-        \ 'autocomplete': 1,
-        \ 'colors': 1,
-        \ 'common': 1,
-        \ 'css': 1,
-        \ 'git': 1,
-        \ 'go': 1,
-        \ 'html': 1,
-        \ 'icons': 1,
-        \ 'js': 1,
-        \ 'less': 1,
-        \ 'md': 1,
-        \ 'rust': 1,
-        \ 'swift': 1,
-        \ 'unite': 1
+  let g:NERDShutUp = 1
+
+  let NERDTreeShowBookmarks = 1
+  let NERDTreeIgnore = ['\.pyc','\~$','\.swo$','\.swp$','\.git',
+        \ '\.hg','\.svn','\.bzr','\.DS_Store']
+  let NERDTreeChDirMode = 0
+  let NERDTreeQuitOnOpen = 1
+  let NERDTreeMouseMode = 2
+  let NERDTreeShowHidden = 1
+  let NERDTreeKeepTreeInNewTab = 1
+
+  if isdirectory(expand('~/.vim/bundle/vim-nerdtree-tabs'))
+    let g:nerdtree_tabs_open_on_gui_startup = 0 " do not show on gui start
+    let g:nerdtree_tabs_focus_on_files = 1 " switch to file not nerdtree
+  endif
+endif
+" }
+
+" nerdtree-git-plugin {
+if isdirectory(expand(g:opts.plugin_dir . '/nerdtree-git-plugin'))
+  let g:NERDTreeIndicatorMapCustom = {
+        \ "Modified"  : "✹",
+        \ "Staged"    : "✚",
+        \ "Untracked" : "✭",
+        \ "Renamed"   : "➜",
+        \ "Unmerged"  : "═",
+        \ "Deleted"   : "✖",
+        \ "Dirty"     : "✗",
+        \ "Clean"     : "✔︎",
+        \ "Unknown"   : "?"
         \ }
+endif
+" }
 
-  let g:options = {
-        \ 'airline_theme': '',
-        \ 'color_dark': 1,
-        \ 'color_scheme': 'default'
-        \ }
-  if isdirectory(expand('~/.vim/bundle/vim-colorschemes'))
-    let g:options.color_scheme = 'hybrid'
+" syntastic {
+if isdirectory(expand(g:opts.plugin_dir . '/syntastic'))
+  set statusline+=%#warningmsg#
+  set statusline+=%{SyntasticStatuslineFlag()}
+  set statusline+=%*
+
+  let g:syntastic_always_populate_loc_list = 1
+  let g:syntastic_auto_loc_list = 1
+  let g:syntastic_check_on_open = 1
+  let g:syntastic_check_on_wq = 0
+endif
+" }
+
+" unite {
+if isdirectory(expand(g:opts.plugin_dir . '/unite.vim'))
+  call unite#filters#matcher_default#use(['matcher_fuzzy'])
+  call unite#filters#sorter_default#use(['sorter_rank'])
+  "call unite#custom#source('file_rec/async','sorters','sorter_rank', )
+  " ctrl+p
+  let g:unite_data_directory='~/.vim/.cache/unite'
+  let g:unite_enable_start_insert = 1
+  let g:unite_source_history_yank_enable = 1
+  let g:unite_prompt = '» '
+  let g:unite_split_rule = 'botright'
+  if executable('ag')
+    let g:unite_source_grep_command = 'ag'
+    let g:unite_source_grep_default_opts = '--nocolor --nogroup -S -C4'
+    let g:unite_source_grep_recursive_opt = ''
   endif
-  if isdirectory(expand('~/.vim/bundle/vim-airline'))
-    let g:options.airline_theme = 'hybrid'
-  endif
-  " }
+  nnoremap <silent> <c-p> :Unite -auto-resize file file_mru file_rec<cr>
 
-  " important {
-  " allow for user customization before vimrc sourced
-  if filereadable(expand('~/.vimrc.before'))
-    source ~/.vimrc.before
-  endif
+  " ack.vim/ag.vim
+  nnoremap <Space>/ :Unite grep:.<CR>
 
-  set pastetoggle=<F2> " pastetoggle (sane indentation on paste)
+  " yankring/yankstack
+  nnoremap <Space>y :Unite history/yank<cr>
 
-  if g:sysvars.win
-    " use '.vim' instead of 'vimfiles';
-    " this makes synchronization across (heterogeneous) systems easier
-    set runtimepath=$HOME/.vim,$VIM/vimfiles,$VIMRUNTIME,$VIM/vimfiles/after,$HOME/.vim/after
-  endif
+  " LustyJuggler
+  nnoremap <Space>s :Unite -quick-match buffer<CR>
+endif
+" }
 
-  " change mapleader <leader> to comma, but retain default for local buffers
-  " setting here causes this to be set for any <leader> references later
-  " in the initialization sequence
-  if !exists('g:no_leader_change')
-    let mapleader = ','
-    let maplocalleader = "\\"
-  endif
-
-  " neobundle {
-  silent call InstallNeoBundle()
-  if has('vim_starting')
-    set runtimepath+=~/.vim/bundle/neobundle.vim/
-  endif
-  call neobundle#begin(expand('~/.vim/bundle/'))
-
-  " let neobundle manage NeoBundle
-  NeoBundleFetch 'Shougo/neobundle.vim'
-
-  " bundles here
-  if filereadable(expand('~/.vimrc.bundles'))
-    source ~/.vimrc.bundles
-  endif
-
-  call neobundle#end()
-
-  NeoBundleCheck
-  " }
-  " }
-
-  " moving around, searching and patterns {
-  set whichwrap=b,s,h,l,<,>,[,]   " which cmnds wrap to another line
-  set incsearch                   " incremental search
-  set ignorecase                  " case insensitive search matching
-  set smartcase                   " no ignore if pattern has upper-case characters
-  " }
-
-  " tags {
-  " }
-
-  " displaying text {
-  set scrolljump=5                " lines to scroll when cursor leaves screen
-  set scrolloff=3                 " # of screen lines to show around cursor
-  set nowrap                      " do not wrap long lines
-  set linebreak                   " wrap long lines in 'breakat' (not a hard break)
-  set showbreak="↪  "             " placed before wrapped screen lines
-  if (&termencoding ==# "utf-8" || &encoding ==# "utf-8")
-    let &showbreak = "\u21aa "
-  endif
-  set sidescrolloff=2             " min # cols to keep left/right of cursor
-  set display+=lastline           " show last line, even if it doesn't fit
-  set cmdheight=1                 " # of lined for the cli
-  set lazyredraw                  " don't redraw while executing macros
-  if (&listchars ==# "eol:$")     " strings used for list mode
-    set listchars=tab:→\ ,trail:▸
-    if (&termencoding ==# "utf-8" || &encoding ==# "utf-8")
-      let &showbreak = "\u21aa "
-      let &listchars = "tab:\u2192 ,trail:\u25b8"
-    endif
-  endif
-  set number                      " show line #
-  set norelativenumber            " do not show relative line #
-  set numberwidth=1               " # cols for line #
-  " }
-
-  " syntax, highlighting and spelling {
-  if has('autocmd')
-    " turn on ft detection, plugins and indent
-    filetype plugin indent on
+" vim-airline {
+if isdirectory(expand(g:opts.plugin_dir . '/vim-airline'))
+  if !empty('g:opts.airline_theme')
+    let g:airline_theme = g:opts.airline_theme
   endif
 
-  if has('syntax') && !exists('g:syntax_on')
-    syntax enable                 " turn on syntax highlighting
-  endif
-
-  set synmaxcol=2048              " no need to syntax color super long lines
-  set hlsearch                    " highlights matched search pattern
-  set cursorline                  " highlight screen line of cursor
-  set textwidth=80                " highlight 80 column
-
-  if exists('&colorcolumn')
-    " highlight column at #
-    set colorcolumn=80
-    let &colorcolumn="80,".join(range(120,999),",")
+  if isdirectory(expand(g:opts.plugin_dir . '/nerd-fonts'))
+    let g:airline_powerline_fonts = 1
   else
-    au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%>80v.\+', -1)
-  endif
-
-  " toggle spelling mistakes
-  map <F7> :setlocal spell! spell?<CR>
-  " }
-
-  " multiple windows {
-  set laststatus=2                " show status line even if only 1 window
-
-  " statusline setup
-  set statusline=%<%f\                       " filename
-  set statusline+=%w%h%m%r                   " options
-  if exists('*fugitive#statusline')
-    set statusline+=%{fugitive#statusline()} " git
-  endif
-  set statusline+=\ [%{&ff}/%Y]              " filetype
-  set statusline+=\ [%{getcwd()}]            " current dir
-  set statusline+=%=%-14.(%l,%c%V%)\ %p%%    " right aligned file nav info
-
-  "set helpheight=30               " initial height of help window
-  set hidden                      " keep buffer when no longer shown
-  " }
-
-  " multiple tab pages {
-  " }
-
-  " terminal {
-  set ttyfast                     " term connection is fast
-  " set up gui cursor to look nice
-  set guicursor=n-v-c:block-Cursor-blinkon0,ve:ver35-Cursor,o:hor50-Cursor,i-ci:ver25-Cursor,r-cr:hor20-Cursor,sm:block-Cursor-blinkwait175-blinkoff150-blinkon175
-  " }
-
-  " using the mouse {
-  if has('mouse')
-    set mouse=a                   " list of flags for using the mouse
-  endif
-  set mousehide                   " hide mouse on insert mode
-  " }
-
-  " GUI (here instead of .gvimrc) {
-  if g:sysvars.gui
-    set lines=40
-
-    set guioptions-=m             " remove the menu
-    set guioptions-=T             " remove the toolbar
-    set guioptions-=t             " remove tear-off menus
-    set guioptions+=a             " visual mode is global
-    set guioptions+=c             " use :ex prompt instead of modal dialogs
-
-    if g:sysvars.osx
-      " make Mac 'Option' key behave as 'Alt'
-      set mmta
-
-      set linespace=2             " # pixel lines between characters
-      set guifont=Inconsolata:h14,Monaco:h14,Consolas:h14,Courier\ New:h14,Courier:h14
-
-      " MacVIM shift+arrow-keys behavior (required in .vimrc)
-      let macvim_hig_shift_movement = 1
-    else
-      set guifont=Inconsolata:h12,Monaco:h12,Consolas:h12,Courier\ New:h12,Courier:h12
+    if !exists('g:airline_symbols')
+      let g:airline_symbols = {}
     endif
 
-    if exists('transparency')
-      set transparency=5           " transparency of text bg as %
+    " unicode symbols
+    let g:airline_left_sep = '»'
+    let g:airline_left_sep = '▶'
+    let g:airline_right_sep = '«'
+    let g:airline_right_sep = '◀'
+    let g:airline_symbols.linenr = '␊'
+    let g:airline_symbols.linenr = '␤'
+    let g:airline_symbols.linenr = '¶'
+    let g:airline_symbols.branch = '⎇'
+    let g:airline_symbols.paste = 'ρ'
+    let g:airline_symbols.paste = 'Þ'
+    let g:airline_symbols.paste = '∥'
+    let g:airline_symbols.whitespace = 'Ξ'
+    " let g:airline_left_sep = "\ue0b0"
+    " let g:airline_left_alt_sep = "\ue0b1"
+    " let g:airline_right_sep = "\ue0b2"
+    " let g:airline_right_alt_sep = "\ue0b3"
+    " let g:airline_symbols.branch = "\ue0a0"
+    " let g:airline_symbols.readonly = "\ue0a2"
+    " let g:airline_symbols.linenr = "\ue0a1"
+  endif
+endif
+" }
+
+" vim-css-color {
+if isdirectory(expand(g:opts.plugin_dir . '/vim-css-color'))
+  let g:cssColorVimDoNotMessMyUpdatetime = 1
+endif
+" }
+
+" vim-css3-syntax {
+if isdirectory(expand(g:opts.plugin_dir . '/vim-css3-syntax'))
+  highlight VendorPrefix guifg=#00ffff gui=bold
+  match VendorPrefix /-\(moz\|webkit\|o\|ms\)-[a-zA-Z-]\+/
+endif
+" }
+
+" vim-gitgutter {
+if isdirectory(expand(g:opts.plugin_dir . '/vim-gitgutter'))
+  let g:gitgutter_max_signs = 500  " default value
+endif
+" }
+
+" vim-jsdoc {
+if isdirectory(expand(g:opts.plugin_dir . '/vim-jsdoc'))
+  " turn on detecting underscore starting functions as private convention
+  let g:jsdoc_underscore_private = 1
+  let g:jsdoc_enable_es6 = 1 " allow ES6 shorthand syntax
+
+  " since v0.3 there is no longer a default mapping
+  nmap <silent> <C-j> <Plug>(jsdoc)
+endif
+" }
+
+" vim-json {
+if isdirectory(expand(g:opts.plugin_dir . '/vim-json'))
+  let g:vim_json_syntax_conceal = 0
+endif
+" }
+
+" vim-jsx {
+if isdirectory(expand(g:opts.plugin_dir . '/vim-jsx'))
+  let g:jsx_ext_required = 0 " allows for jsx syntax in .js files
+endif
+" }
+
+" vim-less {
+if isdirectory(expand(g:opts.plugin_dir . '/vim-less'))
+  if executable('lessc')
+    nnoremap <Leader>m :w <BAR> !lessc % > %:t:r.css<CR><space>
+  endif
+endif
+" }
+
+" vim-multiple-cursors {
+if isdirectory(expand(g:opts.plugin_dir . '/vim-multiple-cursors'))
+  let g:multi_cursor_start_key = '<C-d>'
+  let g:multi_cursor_start_word_key = 'g<C-d>'
+  let g:multi_cursor_next_key = '<C-d>'
+  let g:multi_cursor_prev_key = '<C-S-d>'
+  let g:multi_cursor_skip_key = '<C-x>'
+  let g:multi_cursor_quit_key = '<Esc>'
+
+  let g:multi_cursor_exit_from_visual_mode = 1
+  let g:multi_cursor_exit_from_insert_mode = 1
+
+  " account for neocomplete to improve perf
+  function! Multiple_cursors_before()
+    if exists(':NeoCompleteLock') == 2
+      execute 'NeoCompleteLock'
     endif
+  endfunction
 
-    " open macvim in fullscreen
-    if g:sysvars.macvim
-      set fuoptions=maxvert,maxhorz
-      "au GUIEnter * set fullscreen
+  function! Multiple_cursors_after()
+    if exists(':NeoCompleteUnlock') == 2
+      execute 'NeoCompleteUnlock'
     endif
+  endfunction
 
-    " setting these in GVim/MacVim because terminals cannot distinguish between
-    " <space> and <S-space> because curses sees them the same
-    nnoremap <space> <PageDown>
-    nnoremap <S-space> <PageUp>
+  highlight multiple_cursors_cursor term=reverse cterm=reverse gui=reverse
+  highlight link multiple_cursors_visual Visual
+endif
+" }
+" }
 
-    if has('autocmd')
-      " auto resize splits when window resizes
-      "autocmd VimResized * wincdm =
-    endif
-  elseif g:sysvars.has256
-    set t_Co=256                  " enable 256 colors for CSApprox warning
-  endif
-  " }
+" displaying text {
+set number
+" }
 
-  " printing {
-  set printoptions=header:0,duplex:long,paper:letter
-  " }
+" syntax, highlighting and spelling {
+set synmaxcol=2048 " no need to syntax color super long lines
+set hlsearch " highlights matched search pattern
+set cursorline " highlight screen line of cursor
+set textwidth=80 " highlight 80 column
 
-  " messages and info {
-  set shortmess+=filmnrxoOtT      " abbr. of messages (avoids "hit enter")
-  set showcmd                     " show partial cmd keys in status bar
-  set ruler                       " show cursor position below window
-  " ruler on steroids?
-  set rulerformat=%30(%=\:b%n%y%m%r%w\ %l,%c%V\ %P%)
-  set visualbell                  " use visual bell instead of beep
-  " }
+if exists('&colorcolumn')
+  " highlight column at #
+  set colorcolumn=80
+  let &colorcolumn="80,".join(range(120,999),",")
+else
+  au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%>80v.\+', -1)
+endif
+" }
 
-  " selecting text {
-  if has('unnamedplus')
-    set clipboard=unnamed,unnamedplus " use + register for copy/paste
-  else
-    set clipboard=unnamed         " use system clipboard
-  endif
-  " }
+" messages and info {
+set shortmess+=filmnrxoOtT " abbr. of messages (avoids "hit enter")
+set visualbell " use visual bell instead of beep
+" }
 
-  " editing text {
-  set backspace=indent,eol,start  " backspace over everything
-  if (v:version > 703)
-    " delete comment char on 2nd line when joining commented lines
-    set formatoptions+=j
-  endif
-  "set completeopt+=longest        " better omni-complete menu
-  set completeopt=menu,preview,longest
-  set showmatch                   " when inserting bracket, brief jump to match
-  set nojoinspaces                " do not add second space when joining lines
-  " }
+" selecting text {
+if has('unnamedplus')
+  set clipboard=unnamed,unnamedplus " use + register for copy/paste
+else
+  set clipboard=unnamed " use system clipboard
+endif
+" }
 
-  " tabs and indenting {
-  set tabstop=2                   " # spaces <Tab> equals
-  set shiftwidth=2                " # spaces used for each (auto)indent
-  set smarttab                    " <Tab> in indent inserts 'shiftwidth' spaces
-  set softtabstop=2               " # spaces to insert for tab (<ctrl-v><TAB>)
-  set shiftround                  " round to 'shiftwidth' for "<<" and ">>"
-  set expandtab                   " expand <TAB> to spaces in Insert mode
-  set autoindent                  " automatically set indent of a new line
-  set smartindent                 " do clever autoindenting
-  " }
+" editing text {
+set backspace=indent,eol,start " backspace over everything
+if (v:version > 703)
+  " delete comment char on 2nd line when joining commented lines
+  set formatoptions+=j
+endif
+set completeopt=menu,preview,longest
+set showmatch " when inserting bracket, brief jump to match
+set nojoinspaces " do not add second space when joining lines
+" }
 
-  " folding {
-  if has('folding')
-    set foldenable                " auto fold code
-    set foldmethod=marker         " folding type
-  endif
-  " }
+" folding {
+if has('folding')
+  set foldenable " auto fold code
+  set foldmethod=marker " folding type
+endif
+" }
 
-  " diff mode {
-  " }
+" reading and writing files {
+set nobackup " do not keep a backup ~ file
+" list of dirs for backup file
+execute 'set backupdir=' . g:opts.backup_dir . ',.'
+set autoread " auto read file modified outside of vim
+" create the backup dir if it doesn't exist
+if empty(glob(g:opts.backup_dir))
+  silent call mkdir(g:opts.backup_dir, 'p')
+endif
+" }
 
-  " mapping {
-  " }
+" the swap file {
+set noswapfile " do not use a swap file
+" list of dirs for swap files
+execute 'set directory=' . g:opts.backup_dir . ',~/tmp,.'
+" }
 
-  " reading and writing files {
-  set nobackup                    " do not keep a backup ~ file
-  set backupdir=~/.vim/.backup,.  " list of dirs for backup file
-  set autoread                    " auto read file modified outside of vim
+" command line editing {
+" persistent undo
+if has('persistent_undo')
+  set undofile
+  execute 'set undodir=' . g:opts.undo_dir . ',~/tmp,.'
   " create the backup dir if it doesn't exist
-  if empty(glob('~/.vim/.backup'))
-    silent call mkdir($HOME.'/.vim/.backup', 'p')
+  if empty(glob(g:opts.undo_dir))
+    silent call mkdir(g:opts.undo_dir, 'p')
   endif
-  " }
+endif
+" }
 
-  " the swap file {
-  set noswapfile                  " do not use a swap file
-  set directory=~/.vim/.backup,~/tmp,. " list of dirs for swap files
-  " }
+" executing external commands {
+if g:sys.win
+  " change to powershell
+  "set shell=powershell.exe\ -ExecutionPolicy\ Unrestricted
+  "set shellcmdflag=-Command
+  "set shellpipe=>
+  "set shellredir=>
+elseif exists($SHELL)
+  set shell=$SHELL " shell to use for ext cmds
+endif
+" }
 
-  " command line editing {
-  set history=500                 " save # cmds in history
-  set wildmode=list:longest,full  " how cmd line completion works
+" ctags {
+set tags=./tags;/,~/.vimtags
+" }
 
-  " file name completion ignores
-  set wildignore+=*.exe,*.swp,.DS_Store
+" autocmd {
+if has('autocmd')
+  " recalculate the trailing whitespace warning when idle, and after saving
+  au cursorhold,bufwritepost * unlet! b:statusline_trailing_space_warning
 
-  " prevent term vim error
-  if exists('&wildignorecase')
-    set wildignorecase            " ignore case when completing file names
-  endif
-  set wildmenu                    " cmd line completion shows list of matches
+  " recalculate the tab warning flag when idle and after writing
+  au cursorhold,bufwritepost * unlet! b:statusline_tab_warning
 
-  " persistent undo
-  if has('persistent_undo')
-    set undofile
-    set undodir=~/.vim/.backup/undo,~/tmp,.
-    " create the backup dir if it doesn't exist
-    if empty(glob('~/.vim/.backup/undo'))
-      silent call mkdir($HOME.'/.vim/.backup/undo', 'p')
-    endif
-  endif
-  " }
+  "recalculate the long line warning when idle and after saving
+  au cursorhold,bufwritepost * unlet! b:statusline_long_line_warning
 
-  " executing external commands {
-  if !g:sysvars.win
-    set shell=$SHELL              " shell to use for ext cmds
-  endif
-  " }
+  " automatically switch to the current file directory when a new
+  " buffer is opened
+  au BufEnter * if bufname("") !~ "^\[A-Za-z0-9\]*://" | lcd %:p:h | endif
 
-  " running make and jumping to errors {
-  " }
+  " remember last position in file
+  au BufReadPost *
+        \ if line("'\"") > 0 && line("'\"") <= line("$") |
+        \   exe "normal g`\"" |
+        \ endif
 
-  " language specific {
-  " }
+  " instead of reverting the cursor to the last position in the buffer,
+  " set it to the first line when editing a git commit message
+  au FileType gitcommit
+        \ au! BufEnter COMMIT_EDITMSG call setpos('.', [0, 1, 1, 0])
 
-  " multi-byte characters {
-  set encoding=utf-8              " character encoding
-  " }
+  " remove trailing whitespace and ^M chars
+  au FileType c,cpp,java,go,php,javascript,python,twig,xml,yml
+        \ au BufWritePre <buffer> call StripTrailingWhitespace()
 
-  " various {
-  set virtualedit=insert          " allow for cursor beyond last char
-  " better unix/win compatibility
-  set viewoptions=folds,options,cursor,unix,slash
-  if !exists('g:no_views')
-    " add exclusions to mkview and loadview
-    " eg: *.*, svn-commit.tmp
-    let g:skipview_files = [
-          \ '\[example pattern\]' ]
-  endif
-  " ctags {
-  set tags=./tags;/,~/.vimtags
-  " }
-  " }
+  " format go docs on load
+  au FileType go autocmd BufWritePre <buffer> Fmt
 
-  " autocmd {
-  if has('autocmd')
-    " recalculate the trailing whitespace warning when idle, and after saving
-    au cursorhold,bufwritepost * unlet! b:statusline_trailing_space_warning
+  " auto resize window splits
+  au VimResized * exe "normal! \<C-w>="
 
-    " recalculate the tab warning flag when idle and after writing
-    au cursorhold,bufwritepost * unlet! b:statusline_tab_warning
+  " set coffeescript filetype, just in case
+  au BufNewFile,BufRead *.coffee set filetype=coffee
+endif
+" }
 
-    "recalculate the long line warning when idle and after saving
-    au cursorhold,bufwritepost * unlet! b:statusline_long_line_warning
+" keybindings {
+" exit insert mode with jj
+inoremap jj <ESC>
 
-    " automatically switch to the current file directory when a new
-    " buffer is opened; to prevent this behavior, add the following to
-    " your .vimrc.before
-    "   let g:no_autochdir = 1
-    if !exists('g:no_autochdir')
-      au BufEnter * if bufname("") !~ "^\[A-Za-z0-9\]*://" | lcd %:p:h | endif
-    endif
+" make Y consistent with C and D
+nnoremap Y y$
 
-    " remember last position in file
-    au BufReadPost *
-          \ if line("'\"") > 0 && line("'\"") <= line("$") |
-          \   exe "normal g`\"" |
-          \ endif
+" easier window moving
+map <C-j> <C-w>j<C-w>_
+map <C-k> <C-w>k<C-w>_
+map <C-l> <C-w>l<C-w>_
+map <C-h> <C-w>h<C-w>_
+" }
 
-    " instead of reverting the cursor to the last position in the buffer,
-    " set it to the first line when editing a git commit message
-    au FileType gitcommit
-          \ au! BufEnter COMMIT_EDITMSG call setpos('.', [0, 1, 1, 0])
-
-    " remove trailing whitespace and ^M chars
-    au FileType c,cpp,java,go,php,javascript,python,twig,xml,yml
-          \ au BufWritePre <buffer> call StripTrailingWhitespace()
-
-    " format go docs on load
-    au FileType go autocmd BufWritePre <buffer> Fmt
-
-    " auto resize window splits
-    au VimResized * exe "normal! \<C-w>="
-
-    " set coffeescript filetype, just in case
-    au BufNewFile,BufRead *.coffee set filetype=coffee
-  endif
-  " }
-
-  " bindings {
-  " exit insert mode with jj
-  inoremap jj <ESC>
-
-  " make Y consistent with C and D
-  nnoremap Y y$
-
-  " easier window moving
-  map <C-j> <C-w>j<C-w>_
-  map <C-k> <C-w>k<C-w>_
-  map <C-l> <C-w>l<C-w>_
-  map <C-h> <C-w>h<C-w>_
-
-  " move to next row, not wrapped line
-  nnoremap j gj
-  nnoremap k gk
-
-  " move to first/last of row, not line
-  nnoremap 0 g0
-  nnoremap $ g$
-
-  " retain selection after (in/out)dent
-  vnoremap < <gv
-  vnoremap > >gv
-
-  " easier increment/decrement
-  nnoremap + <C-a>
-  nnoremap - <C-x>
-
-  " shift key fixes
-  if !exists('g:no_shiftkey_fixes') && has('user_commands')
-    command! -bang -nargs=* -complete=file E e<bang> <args>
-    command! -bang -nargs=* -complete=file W w<bang> <args>
-    command! -bang -nargs=* -complete=file Wq wq<bang> <args>
-    command! -bang -nargs=* -complete=file WQ wq<bang> <args>
-    command! -bang Wa wa<bang>
-    command! -bang WA wa<bang>
-    command! -bang Q q<bang>
-    command! -bang QA qa<bang>
-    command! -bang Qa qa<bang>
-
-    cmap Tabe tabe
-  endif
-
-  " toggle search highlighting
-  nmap <silent> <leader>/ :set invhlsearch<cr>
-
-  " code folding options
-  nmap <leader>f0 :set foldlevel=0<cr>
-  nmap <leader>f1 :set foldlevel=1<cr>
-  nmap <leader>f2 :set foldlevel=2<cr>
-  nmap <leader>f3 :set foldlevel=3<cr>
-  nmap <leader>f4 :set foldlevel=4<cr>
-  nmap <leader>f5 :set foldlevel=5<cr>
-  nmap <leader>f6 :set foldlevel=6<cr>
-  nmap <leader>f7 :set foldlevel=7<cr>
-  nmap <leader>f8 :set foldlevel=8<cr>
-  nmap <leader>f9 :set foldlevel=9<cr>
-
-  " fix home and end keybindings for screen, particularly on mac
-  " - for some reason this fixes the arrow keys too. huh.
-  map [F $
-  imap [F $
-  map [H g0
-  imap [H g0
-
-  " some helpers to edit mode (http://vimcasts.org/e/14)
-  cnoremap %% <C-r>=expand('%:h').'/'<cr>
-  map <leader>ew :e %%
-  map <leader>es :sp %%
-  map <leader>ev :vsp %%
-  map <leader>et :tabe %%
-
-  " maps Alt-[h,j,k,l] to resizing split window
-  nnoremap <M-h> <C-w><
-  nnoremap <M-j> <C-w>-
-  nnoremap <M-k> <C-w>+
-  nnoremap <M-l> <C-w>>
-  if g:sysvars.osx
-    nnoremap ˙ <C-w><
-    nnoremap ∆ <C-w>-
-    nnoremap ˚ <C-w>+
-    nnoremap ¬ <C-w>>
-  endif
-
-  " Shift-Alt-[h,j,k,l] will resize window
-  if g:sysvars.gui
-    nnoremap <S-M-h> :set columns+=5<cr>
-    nnoremap <S-M-j> :set lines-=1<cr>
-    nnoremap <S-M-k> :set lines+=1<cr>
-    nnoremap <S-M-l> :set columns-=5<cr>
-    if g:sysvars.osx
-      nnoremap Ó :set columns-=5<cr>
-      nnoremap Ô :set lines-=1<cr>
-      nnoremap  :set lines+=1<cr>
-      nnoremap Ò :set columns+=5<cr>
-    endif
-  endif
-
-  " map ctrl+s for saving
-  noremap <silent> <C-s> :update<cr>
-  vnoremap <silent> <C-s> <C-c>:update<cr>
-  inoremap <silent> <C-s> <C-o>:update<cr>
-
-  " adjust viewports to the same size
-  map <leader>= <C-w>=
-
-  " map <leader>ff to display all lines with keyword under cursor
-  " and ask which one to jump to
-  nmap <leader>ff [I:let nr = input("Which one: ")<bar>exe "normal " . nr ."[\t"<cr>
-
-  " easier horizontal scrolling
-  map zl zL
-  map zh zH
-
-  " <F1> + (buffer #/name fragment) to jump to it
-  " also removes help binding
-  map <F1> :ls<cr>:b<space>
-  " }
-
-  " colors {
-  if exists('&colorcolumn')
-    if g:sysvars.has256
-      highlight ColorColumn guibg=#444444 ctermbg=238
-    else
-      highlight ColorColumn ctermbg=7 ctermfg=1
-    endif
-  endif
-
-  if g:sysvars.has256
-    highlight SpellErrors guibg=#8700af ctermbg=91
+" colors {
+if exists('&colorcolumn')
+  if g:sys.has256
+    highlight ColorColumn guibg=#444444 ctermbg=238
   else
-    highlight SpellErrors ctermbg=5 ctermfg=0
+    highlight ColorColumn ctermbg=7 ctermfg=1
   endif
+endif
+
+if g:sys.has256
+  highlight SpellErrors guibg=#8700af ctermbg=91
+else
+  highlight SpellErrors ctermbg=5 ctermfg=0
+endif
+
+if isdirectory(expand(g:opts.plugin_dir . '/seoul256.vim'))
+  let g:seoul256_light_background = 256
+  let g:seoul256_background = 233
+endif
+
+if isdirectory(expand(g:opts.plugin_dir . '/vim-colorschemes/colors'))
+  let g:hybrid_custom_term_colors = 1
+  let g:hybrid_reduced_contrast = 1 " low contrast colors
+  let g:solarized_termcolors = 256
+  let g:solarized_termtrans = 1
+  let g:solarized_contrast = "high"
+  let g:solarized_visibility = "high"
+endif
+
+if !empty($ITERM_PROFILE)
+  " csapprox can look silly on iterm, do not load it
+  let g:CSApprox_loaded = 1
+  "let g:options.color_scheme = $ITERM_PROFILE
+endif
+
+if !empty($CONEMUBUILD)
+  set term=pcansi
+  set t_Co=256
+  let &t_AB="\e[48;5;%dm"
+  let &t_AF="\e[38;5;%dm"
+endif
+
+if g:opts.color_dark
+  set background=dark
+endif
+
+" default to base16 when term is 16 color or less
+if &t_Co <= 16 && isdirectory(expand(g:opts.plugin_dir . '/base16-vim/colors'))
+  let g:opts.color_scheme = 'base16-default'
+endif
+
+if !empty(g:opts.color_scheme)
+  execute 'colorscheme ' . g:opts.color_scheme
+endif
+" }
 
-  if isdirectory(expand('~/.vim/bundle/vim-colorschemes/colors'))
-    let g:solarized_termcolors = 256
-    let g:solarized_termtrans = 1
-    let g:solarized_contrast = "high"
-    let g:solarized_visibility = "high"
-  endif
-
-  if !empty($ITERM_PROFILE)
-    " csapprox can look silly on iterm, do not load it
-    let g:CSApprox_loaded = 1
-    " let g:options.color_scheme = $ITERM_PROFILE
-  endif
-
-  if g:options.color_dark == 1
-    set background=dark
-  endif
-
-  if !empty('g:options.color_scheme')
-    execute 'colorscheme '.g:options.color_scheme
-  endif
-  " }
-
-  " plugins {
-
-  " omnicomplete {
-  if has('autocmd') && exists('+omnifunc')
-    autocmd Filetype *
-          \if &omnifunc == "" |
-          \  setlocal omnifunc=syntaxcomplete#Complete |
-          \endif
-  endif
-
-  hi Pmenu      guifg=#000000 guibg=#F8F8F8 ctermfg=black ctermbg=Lightgray
-  hi PmenuSbar  guifg=#8A95A7 guibg=#F8F8F8 gui=NONE ctermfg=darkcyan ctermbg=lightgray cterm=NONE
-  hi PmenuThumb guifg=#F8F8F8 guibg=#8A95A7 gui=NONE ctermfg=lightgray ctermbg=darkcyan cterm=NONE
-
-  " some convenient mappings, otherwise, you have to use C-N, C-P to navigate
-  inoremap <expr> <Esc>   pumvisible() ? "\<C-e>" : "\<Esc>"
-  inoremap <expr> <CR>    pumvisible() ? "\<C-y>" : "\<CR>"
-  inoremap <expr> <Down>  pumvisible() ? "\<C-n>" : "\<Down>"
-  inoremap <expr> <Up>    pumvisible() ? "\<C-p>" : "\<Up>"
-  inoremap <expr> <C-d>   pumvisible() ? "\<PageDown>\<C-p>\<C-n>" : "\<C-d>"
-  inoremap <expr> <C-u>   pumvisible() ? "\<PageUp>\<C-p>\<C-n>" : "\<C-u>"
-
-  " automatically open and close the popup menu / preview window
-  au CursorMovedI,InsertLeave * if pumvisible() == 0|silent! pclose|endif
-  set completeopt=menu,preview,longest
-  " }
-
-  " ctrlp.vim {
-  if isdirectory(expand('~/.vim/bundle/ctrlp.vim'))
-    let g:ctrlp_working_path_mode = 'ra'
-    nnoremap <silent> <D-t> :CtrlP<CR>
-    nnoremap <silent> <D-r> :CtrlPMRU<CR>
-    let g:ctrlp_custom_ignore = {
-          \ 'dir':  '\.git$\|\.hg$\|\.svn|node_modules|bower_components$',
-          \ 'file': '\.exe$\|\.so$\|\.dll$\|\.pyc$' }
-
-    " On Windows use 'dir' as fallback command.
-    if g:sysvars.win
-      let s:ctrlp_fallback = 'dir %s /-n /b /s /a-d'
-    elseif executable('ag')
-      let s:ctrlp_fallback = 'ag %s --nocolor -l -g ""'
-    elseif executable('ack-grep')
-      let s:ctrlp_fallback = 'ack-grep %s --nocolor -f'
-    elseif executable('ack')
-      let s:ctrlp_fallback = 'ack %s --nocolor -f'
-    else
-      let s:ctrlp_fallback = 'find %s -type f'
-    endif
-
-    let g:ctrlp_user_command = {
-          \ 'types': {
-          \ 1: ['.git', 'cd %s && git ls-files . --cached --exclude-standard --others'],
-          \ 2: ['.hg', 'hg --cwd %s locate -I .'],
-          \ },
-          \ 'fallback': s:ctrlp_fallback
-          \ }
-  endif
-  " }
-
-  " emmet-vim {
-  if isdirectory(expand('~/.vim/bundle/emmet-vim'))
-    let g:user_emmet_mode = 'i' " only enable in insert mode
-    let g:user_emmet_leader_key = '<C-y>' " default, change, if necessary
-    " only enable for html,css,scss
-    let g:user_emmet_install_global = 0
-    autocmd FileType html,css,scss EmmetInstall
-  endif
-  " }
-
-  " fugitive {
-  if isdirectory(expand('~/.vim/bundle/vim-fugitive'))
-    nnoremap <silent> <leader>gs :Gstatus<CR>
-    nnoremap <silent> <leader>gd :Gdiff<CR>
-    nnoremap <silent> <leader>gc :Gcommit<CR>
-    nnoremap <silent> <leader>gb :Gblame<CR>
-    nnoremap <silent> <leader>gl :Glog<CR>
-    nnoremap <silent> <leader>gp :Git push<CR>
-    nnoremap <silent> <leader>gr :Gread<CR>
-    nnoremap <silent> <leader>gw :Gwrite<CR>
-    nnoremap <silent> <leader>ge :Gedit<CR>
-    " Mnemonic _i_nteractive
-    nnoremap <silent> <leader>gi :Git add -p %<CR>
-    nnoremap <silent> <leader>gg :SignifyToggle<CR>
-  endif
-  " }
-
-  " javascript-libraries-syntax.vim {
-  if isdirectory(expand('~/.vim/bundle/javascript-libraries-syntax.vim'))
-    " jquery,underscore,backbone,prelude,angularjs,angualrui,react,flux,requirejs,sugar,jasmine,chai,handlebars
-    let g:used_javascript_libs = 'jquery,underscore,angularjs,react,flux,chai'
-  endif
-  " }
-
-  " minibufexpl {
-  let g:miniBufExplMapWindowNavVim = 1
-  let g:miniBufExplMapWindowNavArrows = 1
-  let g:miniBufExplMapCTabSwitchBufs = 1
-  let g:miniBufExplModSelTarget = 1
-  " colors
-  hi MBENormal               guifg=#808080 guibg=fg
-  hi MBEChanged              guifg=#CD5907 guibg=fg
-  hi MBEVisibleNormal        guifg=#5DC2D6 guibg=fg
-  hi MBEVisibleChanged       guifg=#F1266F guibg=fg
-  hi MBEVisibleActiveNormal  guifg=#A6DB29 guibg=fg
-  hi MBEVisibleActiveChanged guifg=#F1266F guibg=fg
-  " }
-
-  " nerdtree {
-  if isdirectory(expand('~/.vim/bundle/nerdtree'))
-    map <C-e> <plug>NERDTreeTabsToggle<CR>
-    map <leader>e :NERDTreeFind<CR>
-    nmap <leader>nt :NERDTreeFind<CR>
-
-    let g:NERDShutUp = 1
-
-    let NERDTreeShowBookmarks = 1
-    let NERDTreeIgnore = ['\.pyc','\~$','\.swo$','\.swp$','\.git',
-          \ '\.hg','\.svn','\.bzr','\.DS_Store']
-    let NERDTreeChDirMode = 0
-    let NERDTreeQuitOnOpen = 1
-    let NERDTreeMouseMode = 2
-    let NERDTreeShowHidden = 1
-    let NERDTreeKeepTreeInNewTab = 1
-
-    if isdirectory(expand('~/.vim/bundle/vim-nerdtree-tabs'))
-      let g:nerdtree_tabs_open_on_gui_startup = 0 " do not show on gui start
-      let g:nerdtree_tabs_focus_on_files = 1 " switch to file not nerdtree
-    endif
-  endif
-  " }
-
-  " neocomplete.vim {
-  if isdirectory(expand('~/.vim/bundle/neocomplete.vim'))
-    " Disable AutoComplPop.
-    let g:acp_enableAtStartup = 0
-    " Use neocomplete.
-    let g:neocomplete#enable_at_startup = 1
-    " Use smartcase.
-    let g:neocomplete#enable_smart_case = 1
-    " Set maximum items to display.
-    let g:neocomplete#max_list = 15
-    " Set minimum syntax keyword length.
-    let g:neocomplete#sources#syntax#min_keyword_length = 3
-    let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
-    let g:neocomplete#enable_auto_delimiter = 1
-    let g:neocomplete#force_overwrite_completefunc = 1
-
-    " Define dictionary.
-    let g:neocomplete#sources#dictionary#dictionaries = {
-          \ 'default' : '',
-          \ 'vimshell' : $HOME.'/.vimshell_hist',
-          \ 'scheme' : $HOME.'/.gosh_completions'
-          \ }
-
-    " Define keyword.
-    if !exists('g:neocomplete#keyword_patterns')
-      let g:neocomplete#keyword_patterns = {}
-    endif
-    let g:neocomplete#keyword_patterns['default'] = '\h\w*'
-
-    " Plugin key-mappings.
-
-    inoremap <expr><C-g> neocomplete#undo_completion()
-    inoremap <expr><C-l> neocomplete#complete_common_string()
-
-    " Recommended key-mappings.
-    " <CR> close popup and save indent or expand snippet
-    imap <expr> <CR> CleverCr()
-
-    " <s-CR>: close popup and save indent.
-    inoremap <expr><s-CR> pumvisible() 
-          \ ? neocomplete#smart_close_popup()"\<CR>" : "\<CR>"
-
-    " <C-h>, <BS>: close popup and delete backword char.
-    inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
-    inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
-    inoremap <expr><C-y> neocomplete#close_popup()
-    " inoremap <expr><C-e> neocomplete#cancel_popup()
-
-    " <TAB>: completion.
-    inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
-    inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<TAB>"
-
-    imap <expr> <Tab> CleverTab()
-
-    " Enable omni completion.
-    autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-    autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-    autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-    autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-    autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-    autocmd FileType ruby setlocal omnifunc=rubycomplete#Complete
-    autocmd FileType haskell setlocal omnifunc=necoghc#omnifunc
-
-    " Enable heavy omni completion.
-    if !exists('g:neocomplete#sources#omni#input_patterns')
-      let g:neocomplete#sources#omni#input_patterns = {}
-    endif
-    let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-    let g:neocomplete#sources#omni#input_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
-    let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
-    let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
-    let g:neocomplete#sources#omni#input_patterns.ruby = '[^. *\t]\.\h\w*\|\h\w*::'
-  endif
-  " }
-
-  " neosnippet.vim {
-  if isdirectory(expand('~/.vim/bundle/neosnippet.vim'))
-    " Plugin key-mappings.
-    imap <C-k> <Plug>(neosnippet_expand_or_jump)
-    smap <C-k> <Plug>(neosnippet_expand_or_jump)
-    xmap <C-k> <Plug>(neosnippet_expand_target)
-
-    " SuperTab like snippets behavior.
-    imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-          \ "\<Plug>(neosnippet_expand_or_jump)"
-          \: pumvisible() ? "\<C-n>" : "\<TAB>"
-    smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-          \ "\<Plug>(neosnippet_expand_or_jump)"
-          \: "\<TAB>"
-
-    " For snippet_complete marker.
-    if has('conceal')
-      set conceallevel=2 concealcursor=niv
-    endif
-
-    " Enable snipMate compatibility feature.
-    let g:neosnippet#enable_snipmate_compatibility = 1
-
-    " Tell Neosnippet about the other snippets
-    let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets'
-
-    " Enable neosnippets when using go
-    let g:go_snippet_engine = "neosnippet"
-
-    " Disable the neosnippet preview candidate window
-    " When enabled, there can be too much visual noise
-    " especially when splits are used.
-    set completeopt-=preview
-  endif
-  " }
-
-  " syntastic {
-  if isdirectory(expand('~/.vim/bundle/syntastic'))
-    set statusline+=%#warningmsg#
-    set statusline+=%{SyntasticStatuslineFlag()}
-    set statusline+=%*
-    let g:syntastic_always_populate_loc_list = 1
-    let g:syntastic_auto_loc_list = 1
-    let g:syntastic_check_on_open = 1
-    let g:syntastic_check_on_wq = 0
-  endif
-  " }
-
-  " unite {
-  if isdirectory(expand('~/.vim/bundle/unite.vim'))
-    call unite#filters#matcher_default#use(['matcher_fuzzy'])
-    call unite#filters#sorter_default#use(['sorter_rank'])
-    "call unite#custom#source('file_rec/async','sorters','sorter_rank', )
-    " ctrl+p
-    let g:unite_data_directory='~/.vim/.cache/unite'
-    let g:unite_enable_start_insert = 1
-    let g:unite_source_history_yank_enable = 1
-    let g:unite_prompt = '» '
-    let g:unite_split_rule = 'botright'
-    if executable('ag')
-      let g:unite_source_grep_command = 'ag'
-      let g:unite_source_grep_default_opts = '--nocolor --nogroup -S -C4'
-      let g:unite_source_grep_recursive_opt = ''
-    endif
-    nnoremap <silent> <c-p> :Unite -auto-resize file file_mru file_rec<cr>
-
-    " ack.vim/ag.vim
-    nnoremap <Space>/ :Unite grep:.<CR>
-
-    " yankring/yankstack
-    nnoremap <Space>y :Unite history/yank<cr>
-
-    " LustyJuggler
-    nnoremap <Space>s :Unite -quick-match buffer<CR>
-  endif
-  " }
-
-  " ultisnips {
-  if isdirectory(expand('~/.vim/bundle/vim-snippets/UltiSnips'))
-    let g:UltiSnipsSnippetsDir = '~/.vim/bundle/vim-snippets/UltiSnips'
-  endif
-  " }
-
-  " vim-airline {
-  if isdirectory(expand('~/.vim/bundle/vim-airline'))
-    if !empty('g:options.airline_theme')
-      let g:airline_theme = g:options.airline_theme
-    endif
-
-    if isdirectory(expand('~/.vim/bundle/fonts'))
-      call InstallFonts('~/.vim/bundle/fonts', '*Powerline*.[ot]tf')
-      let g:airline_powerline_fonts = 1
-    else
-      if !exists('g:airline_symbols')
-        let g:airline_symbols = {}
-      endif
-
-      " unicode symbols
-      let g:airline_left_sep = '»'
-      let g:airline_left_sep = '▶'
-      let g:airline_right_sep = '«'
-      let g:airline_right_sep = '◀'
-      let g:airline_symbols.linenr = '␊'
-      let g:airline_symbols.linenr = '␤'
-      let g:airline_symbols.linenr = '¶'
-      let g:airline_symbols.branch = '⎇'
-      let g:airline_symbols.paste = 'ρ'
-      let g:airline_symbols.paste = 'Þ'
-      let g:airline_symbols.paste = '∥'
-      let g:airline_symbols.whitespace = 'Ξ'
-      " let g:airline_left_sep = "\ue0b0"
-      " let g:airline_left_alt_sep = "\ue0b1"
-      " let g:airline_right_sep = "\ue0b2"
-      " let g:airline_right_alt_sep = "\ue0b3"
-      " let g:airline_symbols.branch = "\ue0a0"
-      " let g:airline_symbols.readonly = "\ue0a2"
-      " let g:airline_symbols.linenr = "\ue0a1"
-    endif
-  endif
-  " }
-
-  " vim-css-color {
-  if isdirectory(expand('~/.vim/bundle/vim-css-color'))
-    let g:cssColorVimDoNotMessMyUpdatetime = 1
-  endif
-  " }
-
-  " vim-css3-syntax {
-  if isdirectory(expand('~/.vim/bundle/vim-css3-syntax'))
-    highlight VendorPrefix guifg=#00ffff gui=bold
-    match VendorPrefix /-\(moz\|webkit\|o\|ms\)-[a-zA-Z-]\+/
-  endif
-  " }
-
-  " vim-jsdoc {
-  if isdirectory(expand('~/.vim/bundle/vim-jsdoc'))
-    " turn on detecting underscore starting functions as private convention 
-    let g:jsdoc_underscore_private = 1
-    let g:jsdoc_allow_shorthand = 1 " allow ES6 shorthand syntax
-
-    " since v0.3 there is no longer a default mapping
-    nmap <silent> <C-j> <Plug>(jsdoc)
-  endif
-  " }
-
-  " vim-json {
-  if isdirectory(expand('~/.vim/bundle/vim-json'))
-    let g:vim_json_syntax_conceal = 0
-  endif
-  " }
-
-  " vim-jsx {
-  if isdirectory(expand('~/.vim/bundle/vim-jsx'))
-    let g:jsx_ext_required = 0 " allows for jsx syntax in .js files
-  endif
-  " }
-
-  " vim-less {
-  if isdirectory(expand('~/.vim/bundle/vim-less'))
-    if executable('lessc')
-      nnoremap <Leader>m :w <BAR> !lessc % > %:t:r.css<CR><space>
-    endif
-  endif
-  " }
-
-  " vim-multiple-cursors {
-  if isdirectory(expand('~/.vim/bundle/vim-multiple-cursors'))
-    let g:multi_cursor_start_key = '<C-n>'
-    let g:multi_cursor_next_key = '<C-n>'
-    let g:multi_cursor_prev_key = '<C-p>'
-    let g:multi_cursor_skip_key = '<C-x>'
-    let g:multi_cursor_quit_key = '<Esc>'
-
-    let g:multi_cursor_exit_from_visual_mode = 1
-    let g:multi_cursor_exit_from_insert_mode = 1
-
-    " account for neocomplete to improve perf
-    function! Multiple_cursors_before()
-      if exists(':NeoCompleteLock')==2
-        execute 'NeoCompleteLock'
-      endif
-    endfunction
-
-    function! Multiple_cursors_after()
-      if exists(':NeoCompleteUnlock')==2
-        execute 'NeoCompleteUnlock'
-      endif
-    endfunction
-
-    highlight multiple_cursors_cursor term=reverse cterm=reverse gui=reverse
-    highlight link multiple_cursors_visual Visual
-  endif
-  " }
-
-  " vim-webdevicons {
-  if isdirectory(expand('~/.vim/bundle/vim-webdevicons'))
-    let wdi_fontdir = '~/.vim/bundle/nerd-filetype-glyphs-fonts-patcher'
-    if isdirectory(expand(wdi_fontdir))
-      call InstallFonts(wdi_fontdir.'/patched-fonts', '*Nerd File*.[ot]tf')
-    endif
-
-    let g:webdevicons_enable = 1
-    let g:webdevicons_enable_nerdtree = 1
-    let g:webdevicons_enable_airline_tabline = 1
-    let g:webdevicons_enable_airline_statusline = 1
-    let g:WebDevIconsUnicodeDecorateFileNodes = 1
-    let g:WebDevIconsUnicodeGlyphDoubleWidth = 1
-    let g:webdevicons_conceal_nerdtree_brackets = 1
-    let g:WebDevIconsNerdTreeAfterGlyphPadding = '  '
-    " let g:WebDevIconsUnicodeDecorateFileNodesDefaultSymbol = 'ƛ'
-    let g:WebDevIconsUnicodeDecorateFolderNodes = 0
-    let g:WebDevIconsUnicodeDecorateFolderNodesExactMatches = 1
-    " let g:WebDevIconsUnicodeDecorateFolderNodeDefaultSymbol = 'ƛ'
-  endif
-  " }
-
-  if g:sysvars.gui
-    if exists('g:bundles.icons')
-      set guifont=Sauce\ Code\ Powerline\ Plus\ Nerd\ File\ Types\ Mono:h12
-    elseif exists('g:bundles.airline')
-      set guifont=Sauce\ Code\ Powerline:h12
-    endif
-  endif
-
-  " }
-
-  " allow for user customization after vimrc sourced
-  if filereadable(expand("~/.vimrc.after"))
-    source ~/.vimrc.after
-  endif
