@@ -416,6 +416,210 @@ Plug 'ryanoasis/nerd-fonts' | Plug 'ryanoasis/vim-devicons'
 call plug#end()
 " }
 
+" displaying text {
+set number
+" }
+
+" syntax, highlighting and spelling {
+set synmaxcol=2048 " no need to syntax color super long lines
+set hlsearch " highlights matched search pattern
+set cursorline " highlight screen line of cursor
+set textwidth=80 " highlight 80 column
+
+if exists('&colorcolumn')
+  " highlight column at #
+  set colorcolumn=80
+  let &colorcolumn="80,".join(range(120,999),",")
+else
+  au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%>80v.\+', -1)
+endif
+" }
+
+" printing {
+set printoptions=header:0,duplex:long,paper:letter
+" }
+
+" messages and info {
+set shortmess+=filmnrxoOtT      " abbr. of messages (avoids "hit enter")
+set showcmd                     " show partial cmd keys in status bar
+" ruler on steroids?
+set rulerformat=%30(%=\:b%n%y%m%r%w\ %l,%c%V\ %P%)
+set visualbell                  " use visual bell instead of beep
+" }
+
+" tabs and indenting {
+set tabstop=2 " # spaces <Tab> equals
+set shiftwidth=2 " # spaces used for each (auto)indent
+set softtabstop=2 " # spaces to insert for tab (<ctrl-v><TAB>)
+set shiftround " round to 'shiftwidth' for "<<" and ">>"
+set expandtab " expand <TAB> to spaces in Insert mode
+set smartindent " do clever autoindenting
+" }
+
+" selecting text {
+if has('unnamedplus')
+  set clipboard=unnamed,unnamedplus " use + register for copy/paste
+else
+  set clipboard=unnamed " use system clipboard
+endif
+" }
+
+" editing text {
+set completeopt=menu,preview,longest
+set showmatch " when inserting bracket, brief jump to match
+set nojoinspaces " do not add second space when joining lines
+" }
+
+" folding {
+if has('folding')
+  set foldenable " auto fold code
+  set foldmethod=marker " folding type
+endif
+" }
+
+" reading and writing files {
+set nobackup " do not keep a backup ~ file
+" list of dirs for backup file
+execute 'set backupdir=' . g:opts.backup_dir . ',.'
+set autoread " auto read file modified outside of vim
+" create the backup dir if it doesn't exist
+if empty(glob(g:opts.backup_dir))
+  silent call mkdir(g:opts.backup_dir, 'p')
+endif
+" }
+
+" the swap file {
+set noswapfile " do not use a swap file
+" list of dirs for swap files
+execute 'set directory=' . g:opts.backup_dir . ',~/tmp,.'
+" }
+
+" command line editing {
+" persistent undo
+if has('persistent_undo')
+  set undofile
+  execute 'set undodir=' . g:opts.undo_dir . ',~/tmp,.'
+  " create the backup dir if it doesn't exist
+  if empty(glob(g:opts.undo_dir))
+    silent call mkdir(g:opts.undo_dir, 'p')
+  endif
+endif
+" }
+
+" executing external commands {
+if g:sys.win
+  " change to powershell
+  "set shell=powershell.exe\ -ExecutionPolicy\ Unrestricted
+  "set shellcmdflag=-Command
+  "set shellpipe=>
+  "set shellredir=>
+elseif exists($SHELL)
+  set shell=$SHELL " shell to use for ext cmds
+endif
+" }
+
+" autocmd {
+if has('autocmd')
+  " recalculate the trailing whitespace warning when idle, and after saving
+  au cursorhold,bufwritepost * unlet! b:statusline_trailing_space_warning
+
+  " recalculate the tab warning flag when idle and after writing
+  au cursorhold,bufwritepost * unlet! b:statusline_tab_warning
+
+  "recalculate the long line warning when idle and after saving
+  au cursorhold,bufwritepost * unlet! b:statusline_long_line_warning
+
+  " automatically switch to the current file directory when a new
+  " buffer is opened
+  au BufEnter * if bufname("") !~ "^\[A-Za-z0-9\]*://" | lcd %:p:h | endif
+
+  " remember last position in file
+  au BufReadPost *
+        \ if line("'\"") > 0 && line("'\"") <= line("$") |
+        \   exe "normal g`\"" |
+        \ endif
+
+  " instead of reverting the cursor to the last position in the buffer,
+  " set it to the first line when editing a git commit message
+  au FileType gitcommit
+        \ au! BufEnter COMMIT_EDITMSG call setpos('.', [0, 1, 1, 0])
+
+  " remove trailing whitespace and ^M chars
+  au FileType c,cpp,java,go,php,javascript,python,twig,xml,yml
+        \ au BufWritePre <buffer> call StripTrailingWhitespace()
+
+  " format go docs on load
+  au FileType go autocmd BufWritePre <buffer> Fmt
+
+  " auto resize window splits
+  au VimResized * exe "normal! \<C-w>="
+
+  " set coffeescript filetype, just in case
+  au BufNewFile,BufRead *.coffee set filetype=coffee
+endif
+" }
+
+" GUI (here instead of .gvimrc) {
+if g:sys.gui
+  set lines=40
+
+  set guioptions-=m " remove the menu
+  set guioptions-=T " remove the toolbar
+  set guioptions-=t " remove tear-off menus
+  set guioptions+=a " visual mode is global
+  set guioptions+=c " use :ex prompt instead of modal dialogs
+
+  if g:sys.osx
+    " make Mac 'Option' key behave as 'Alt'
+    set mmta
+
+    set linespace=2 " # pixel lines between characters
+    set guifont=Inconsolata:h14,Monaco:h14,Consolas:h14,Courier\ New:h14,Courier:h14
+
+    " MacVIM shift+arrow-keys behavior (required in .vimrc)
+    let macvim_hig_shift_movement = 1
+  else
+    set guifont=Inconsolata:h12,Monaco:h12,Consolas:h12,Courier\ New:h12,Courier:h12
+  endif
+
+  if exists('transparency')
+    set transparency=5 " transparency of text bg as %
+  endif
+
+  " open macvim in fullscreen
+  if g:sys.macvim
+    set fuoptions=maxvert,maxhorz
+    "au GUIEnter * set fullscreen
+  endif
+
+  " setting these in GVim/MacVim because terminals cannot distinguish between
+  " <space> and <S-space> because curses sees them the same
+  nnoremap <space> <PageDown>
+  nnoremap <S-space> <PageUp>
+
+  if has('autocmd')
+    " auto resize splits when window resizes
+    "autocmd VimResized * wincdm =
+  endif
+elseif g:sys.has256
+  set t_Co=256 " enable 256 colors for CSApprox warning
+endif
+" }
+
+" keybindings {
+" exit insert mode with jj
+inoremap jj <ESC>
+
+" make Y consistent with C and D
+nnoremap Y y$
+
+" easier window moving
+map <C-j> <C-w>j<C-w>_
+map <C-k> <C-w>k<C-w>_
+map <C-l> <C-w>l<C-w>_
+map <C-h> <C-w>h<C-w>_
+" }
+
 " plugin config {
 " emmet-vim {
 if isdirectory(expand(g:opts.plugin_dir . '/emmet-vim'))
@@ -670,156 +874,6 @@ if isdirectory(expand(g:opts.plugin_dir . '/vim-multiple-cursors'))
   highlight link multiple_cursors_visual Visual
 endif
 " }
-" }
-
-" displaying text {
-set number
-" }
-
-" syntax, highlighting and spelling {
-set synmaxcol=2048 " no need to syntax color super long lines
-set hlsearch " highlights matched search pattern
-set cursorline " highlight screen line of cursor
-set textwidth=80 " highlight 80 column
-
-if exists('&colorcolumn')
-  " highlight column at #
-  set colorcolumn=80
-  let &colorcolumn="80,".join(range(120,999),",")
-else
-  au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%>80v.\+', -1)
-endif
-" }
-
-" messages and info {
-set shortmess+=filmnrxoOtT " abbr. of messages (avoids "hit enter")
-set visualbell " use visual bell instead of beep
-" }
-
-" selecting text {
-if has('unnamedplus')
-  set clipboard=unnamed,unnamedplus " use + register for copy/paste
-else
-  set clipboard=unnamed " use system clipboard
-endif
-" }
-
-" editing text {
-set backspace=indent,eol,start " backspace over everything
-if (v:version > 703)
-  " delete comment char on 2nd line when joining commented lines
-  set formatoptions+=j
-endif
-set completeopt=menu,preview,longest
-set showmatch " when inserting bracket, brief jump to match
-set nojoinspaces " do not add second space when joining lines
-" }
-
-" folding {
-if has('folding')
-  set foldenable " auto fold code
-  set foldmethod=marker " folding type
-endif
-" }
-
-" reading and writing files {
-set nobackup " do not keep a backup ~ file
-" list of dirs for backup file
-execute 'set backupdir=' . g:opts.backup_dir . ',.'
-set autoread " auto read file modified outside of vim
-" create the backup dir if it doesn't exist
-if empty(glob(g:opts.backup_dir))
-  silent call mkdir(g:opts.backup_dir, 'p')
-endif
-" }
-
-" the swap file {
-set noswapfile " do not use a swap file
-" list of dirs for swap files
-execute 'set directory=' . g:opts.backup_dir . ',~/tmp,.'
-" }
-
-" command line editing {
-" persistent undo
-if has('persistent_undo')
-  set undofile
-  execute 'set undodir=' . g:opts.undo_dir . ',~/tmp,.'
-  " create the backup dir if it doesn't exist
-  if empty(glob(g:opts.undo_dir))
-    silent call mkdir(g:opts.undo_dir, 'p')
-  endif
-endif
-" }
-
-" executing external commands {
-if g:sys.win
-  " change to powershell
-  "set shell=powershell.exe\ -ExecutionPolicy\ Unrestricted
-  "set shellcmdflag=-Command
-  "set shellpipe=>
-  "set shellredir=>
-elseif exists($SHELL)
-  set shell=$SHELL " shell to use for ext cmds
-endif
-" }
-
-" ctags {
-set tags=./tags;/,~/.vimtags
-" }
-
-" autocmd {
-if has('autocmd')
-  " recalculate the trailing whitespace warning when idle, and after saving
-  au cursorhold,bufwritepost * unlet! b:statusline_trailing_space_warning
-
-  " recalculate the tab warning flag when idle and after writing
-  au cursorhold,bufwritepost * unlet! b:statusline_tab_warning
-
-  "recalculate the long line warning when idle and after saving
-  au cursorhold,bufwritepost * unlet! b:statusline_long_line_warning
-
-  " automatically switch to the current file directory when a new
-  " buffer is opened
-  au BufEnter * if bufname("") !~ "^\[A-Za-z0-9\]*://" | lcd %:p:h | endif
-
-  " remember last position in file
-  au BufReadPost *
-        \ if line("'\"") > 0 && line("'\"") <= line("$") |
-        \   exe "normal g`\"" |
-        \ endif
-
-  " instead of reverting the cursor to the last position in the buffer,
-  " set it to the first line when editing a git commit message
-  au FileType gitcommit
-        \ au! BufEnter COMMIT_EDITMSG call setpos('.', [0, 1, 1, 0])
-
-  " remove trailing whitespace and ^M chars
-  au FileType c,cpp,java,go,php,javascript,python,twig,xml,yml
-        \ au BufWritePre <buffer> call StripTrailingWhitespace()
-
-  " format go docs on load
-  au FileType go autocmd BufWritePre <buffer> Fmt
-
-  " auto resize window splits
-  au VimResized * exe "normal! \<C-w>="
-
-  " set coffeescript filetype, just in case
-  au BufNewFile,BufRead *.coffee set filetype=coffee
-endif
-" }
-
-" keybindings {
-" exit insert mode with jj
-inoremap jj <ESC>
-
-" make Y consistent with C and D
-nnoremap Y y$
-
-" easier window moving
-map <C-j> <C-w>j<C-w>_
-map <C-k> <C-w>k<C-w>_
-map <C-l> <C-w>l<C-w>_
-map <C-h> <C-w>h<C-w>_
 " }
 
 " colors {
