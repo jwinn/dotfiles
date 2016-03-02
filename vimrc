@@ -349,17 +349,21 @@ endif
 " Dash doc integration
 if g:sys.osx && isdirectory('/Applications/Dash.app')
   Plug 'rizzatti/dash.vim'
-  :nmap <silent> <leader>d <Plug>DashSearch
+  nmap <silent> <leader>d <Plug>DashSearch
 endif
 
 " airline
 Plug 'vim-airline/vim-airline' | Plug 'vim-airline/vim-airline-themes'
+
+" async processes
+Plug 'Shougo/vimproc.vim', { 'do': 'make' }
 
 " colorschemes
 Plug 'chriskempson/base16-vim' " base16 theme
 Plug 'godlygeek/csapprox' " CSApprox
 Plug 'junegunn/seoul256.vim' " nice dark/light color
 Plug 'altercation/vim-colors-solarized' " old classic
+Plug 'morhetz/gruvbox' " gruvbox
 Plug 'w0ng/vim-hybrid' " dark color scheme
 
 " common
@@ -369,45 +373,59 @@ Plug 'terryma/vim-multiple-cursors' " multiple cursors
 Plug 'tpope/vim-surround' " surround things
 
 " css
-Plug 'skammer/vim-css-color', { 'for': 'css' } " colors css color strings
-Plug 'hail2u/vim-css3-syntax', { 'for': 'css' } " CSS / SCSS
+Plug 'skammer/vim-css-color' " colors css color strings
+Plug 'hail2u/vim-css3-syntax' " CSS / SCSS
 
 " git
 Plug 'tpope/vim-fugitive' " git
 Plug 'airblade/vim-gitgutter' " git changes in gutter
 
 " go
-Plug 'fatih/vim-go', { 'for': 'go' } " go lang support
+Plug 'fatih/vim-go' " go lang support
 
 " html
-Plug 'mattn/emmet-vim', { 'for': 'html' } " emmet support
-Plug 'othree/html5.vim', { 'for': 'html' } " html5 + svg support
+Plug 'mattn/emmet-vim' " emmet support
+Plug 'othree/html5.vim' " html5 + svg support
 
 " js
-Plug 'othree/javascript-libraries-syntax.vim', { 'for': 'javascript' } " js lib syntax
-Plug 'heavenshell/vim-jsdoc', { 'for': 'javascript' } " generate jsdoc
-Plug 'elzr/vim-json', { 'for': ['javascript', 'json'] } " json support
-Plug 'mxw/vim-jsx', { 'for': 'javascript' } " jsx support
-Plug 'moll/vim-node', { 'for': 'javascript' } " node.js support
+Plug 'othree/javascript-libraries-syntax.vim' " js lib syntax
+Plug 'heavenshell/vim-jsdoc' " generate jsdoc
+Plug 'elzr/vim-json' " json support
+Plug 'mxw/vim-jsx' " jsx support
+Plug 'moll/vim-node' " node.js support
 Plug 'othree/yajs.vim', { 'for': 'javascript' } " js syntax
+Plug 'othree/jspc.vim' " parameter completion
 
 " less
-Plug 'groenewege/vim-less', { 'for': 'less' } " LESS support
+Plug 'groenewege/vim-less' " LESS support
 
 " NERDTree
-Plug 'scrooloose/nerdtree' | Plug 'Xuyuanp/nerdtree-git-plugin' | Plug 'jistr/vim-nerdtree-tabs', { 'on': ['NERDTree', 'NERDTreeToggle'] }
+Plug 'scrooloose/nerdtree' 
+      \| Plug 'Xuyuanp/nerdtree-git-plugin' 
+      \| Plug 'jistr/vim-nerdtree-tabs',
+      \{ 'on': ['NERDTree', 'NERDTreeToggle'] }
 
 " markdown
-Plug 'tpope/vim-markdown', { 'for': 'markdown' } " markdown syntax
+Plug 'vim-pandoc/vim-pandoc-syntax' " markdown syntax
+if executable('npm')
+  Plug 'suan/vim-instant-markdown',
+        \{ 'do': 'npm install -g instant-markdown-d' }
+endif
 
 " rust
-Plug 'rust-lang/rust.vim', { 'for': 'rust' } " rust lang support
+Plug 'rust-lang/rust.vim' " rust lang support
 
 " swift
-Plug 'Keithbsmiley/swift.vim', { 'for': 'swift' } " swift syntax support
+Plug 'Keithbsmiley/swift.vim' " swift syntax support
 
 " unite and MRU features
-Plug 'Shougo/neomru.vim' | Plug 'Shougo/unite.vim'
+if exists("g:plugs['vimproc.vim']")
+Plug 'Shougo/unite.vim' 
+      \| Plug 'Shougo/vimfiler.vim'
+      \| Plug 'Shougo/neomru.vim'
+      \| Plug 'Shougo/unite-outline'
+      \| Plug 'tsukkee/unite-tag'
+endif
 
 " vim-devicons and pre-patched fonts
 " should be loaded after NEDTree, airline and unite
@@ -579,7 +597,7 @@ if g:sys.gui
     " MacVIM shift+arrow-keys behavior (required in .vimrc)
     let macvim_hig_shift_movement = 1
   else
-    set guifont=Inconsolata:h12,Monaco:h12,Consolas:h12,Courier\ New:h12,Courier:h12
+    set guifont=Inconsolata:h14,Monaco:h14,Consolas:h14,Courier\ New:h14,Courier:h14
   endif
 
   if exists('transparency')
@@ -666,11 +684,9 @@ if isdirectory(expand(g:opts.plugin_dir . '/nerd-fonts'))
 
   if g:sys.gui
     if g:sys.linux
-      execute 'set guifont=' . font_name . '\ 12'
-    elseif g:sys.win
-      execute 'set guifont=' . font_name . ':h12:cANSI'
+      execute 'set guifont=' . font_name . '\ 14'
     else
-      execute 'set guifont=' . font_name . ':h12'
+      execute 'set guifont=' . font_name . ':h14'
     endif
   endif
 endif
@@ -821,7 +837,7 @@ if isdirectory(expand(g:opts.plugin_dir . '/vim-jsdoc'))
   let g:jsdoc_enable_es6 = 1 " allow ES6 shorthand syntax
 
   " since v0.3 there is no longer a default mapping
-  nmap <silent> <C-j> <Plug>(jsdoc)
+  nmap <silent> <C-b> <Plug>(jsdoc)
 endif
 " }
 
