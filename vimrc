@@ -420,7 +420,7 @@ Plug 'Keithbsmiley/swift.vim' " swift syntax support
 
 " unite and MRU features
 if exists("g:plugs['vimproc.vim']")
-Plug 'Shougo/unite.vim' 
+  Plug 'Shougo/unite.vim' 
       \| Plug 'Shougo/vimfiler.vim'
       \| Plug 'Shougo/neomru.vim'
       \| Plug 'Shougo/unite-outline'
@@ -907,18 +907,21 @@ else
   highlight SpellErrors ctermbg=5 ctermfg=0
 endif
 
-if isdirectory(expand(g:opts.plugin_dir . '/seoul256.vim'))
+if exists("g:plugs['seoul256.vim']")
   let g:seoul256_light_background = 256
   let g:seoul256_background = 233
 endif
 
-if isdirectory(expand(g:opts.plugin_dir . '/vim-colorschemes/colors'))
-  let g:hybrid_custom_term_colors = 1
-  let g:hybrid_reduced_contrast = 1 " low contrast colors
+if exists("g:plugs['vim-colors-solarized']")
   let g:solarized_termcolors = 256
   let g:solarized_termtrans = 1
   let g:solarized_contrast = "high"
   let g:solarized_visibility = "high"
+endif
+
+if exists("g:plugs['vim-hybrid']")
+  let g:hybrid_custom_term_colors = 1
+  let g:hybrid_reduced_contrast = 1 " low contrast colors
 endif
 
 if !empty($ITERM_PROFILE)
@@ -939,12 +942,12 @@ if g:opts.color_dark
 endif
 
 " default to base16 when term is 16 color or less
-if &t_Co <= 16 && isdirectory(expand(g:opts.plugin_dir . '/base16-vim/colors'))
+if &t_Co <= 16 && exists("g:plugs['base16-vim']")
   let g:opts.color_scheme = 'base16-default'
 endif
 
 if !empty(g:opts.color_scheme)
-  execute 'colorscheme ' . g:opts.color_scheme
+  silent! execute 'colorscheme ' . g:opts.color_scheme
 endif
 " }
 
