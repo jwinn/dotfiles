@@ -28,9 +28,6 @@
 [submodule "vim/bundle/papercolor-theme"]
 	path = vim/bundle/papercolor-theme
 	url = https://github.com/NLKNguyen/papercolor-theme
-[submodule "vim/bundle/seoul256"]
-	path = vim/bundle/seoul256
-	url = https://github.com/junegunn/seoul256.vim
 [submodule "vim/bundle/vim-colors-solarized"]
 	path = vim/bundle/vim-colors-solarized
 	url = https://github.com/altercation/vim-colors-solarized
@@ -91,9 +88,6 @@
 [submodule "vim/bundle/vim-jsdoc"]
 	path = vim/bundle/vim-jsdoc
 	url = https://github.com/heavenshell/vim-jsdoc
-[submodule "vim/vim-json"]
-	path = vim/vim-json
-	url = https://github.com/elzr/vim-json
 [submodule "vim/bundle/vim-json"]
 	path = vim/bundle/vim-json
 	url = https://github.com/elzr/vim-json
