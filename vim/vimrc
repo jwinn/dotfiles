@@ -68,6 +68,10 @@ if g:sys.osx
   let g:opts.font_dir = expand('~/Library/Fonts')
 endif
 
+if g:opts.leader ==? '\<space>' || g:opts.leader ==? ' '
+  let s:leader_is_space = 1
+endif
+
 if g:opts.colors.use_dark
   let s:colors = g:opts.colors.dark
 else
@@ -93,7 +97,7 @@ scriptencoding g:opts.encoding
 set pastetoggle=<F12> " pastetoggle (sane indentation on paste)
 
 " if g:opts.leader is a space, map <space> to <leader>
-if g:opts.leader ==? '\<space>' || g:opts.leader ==? ' '
+if s:leader_is_space
   map <space> <leader>
   map <space><space> <leader><leader>
 else
@@ -450,10 +454,12 @@ if g:sys.gui
     "au GUIEnter * set fullscreen
   endif
 
-  " setting these in GVim/MacVim because terminals cannot distinguish between
-  " <space> and <S-space> because curses sees them the same
-  nnoremap <space> <PageDown>
-  nnoremap <S-space> <PageUp>
+  if !s:leader_is_space
+    " setting these in GVim/MacVim because terminals cannot distinguish between
+    " <space> and <S-space> because curses sees them the same
+    nnoremap <space> <PageDown>
+    nnoremap <S-space> <PageUp>
+  endif
 
   if has('autocmd')
     " auto resize splits when window resizes
