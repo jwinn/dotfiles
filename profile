@@ -306,3 +306,5 @@ PS1="\[${clr_time}\]\t\[${clr_rst}\] "
 PS1="${PS1}\[${clr_user}\]\u\[${clr_rst}\]@\[${clr_host}\]\h"
 PS1="${PS1}\[${clr_rst}\]:\[${clr_pwd}\]\w"
 export PS1="${PS1}\[${clr_rst}\]\n\$ "
+
+test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"
