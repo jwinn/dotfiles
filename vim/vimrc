@@ -86,7 +86,7 @@ endif
 
 " }
 
-" important {
+" 1 important {
 if &compatible
   set nocompatible
 endif
@@ -131,7 +131,7 @@ function! InstallFont(src, dest)
   let dest_font = expand(a:dest . '/' . src_font)
 
   if filereadable(src_font_path)
-    call MakeDir(dest_dir)
+    call s:MakeDir(dest_dir)
 
     if !filereadable(dest_font)
       echom "Copying font from: '" . src_font_path . "' to: '" . dest_font . "'"
@@ -141,7 +141,7 @@ function! InstallFont(src, dest)
         echom "Attempting to install font: " .  dest_font
         let font_name = fnamemodify(dest_font, ':t')
 
-        call PowerShellCmd([
+        call s:PowerShellCmd([
               \ "(New-Object -ComObject Shell.Application).Namespace(0x14).CopyHere('" . dest_font . "', 0x10)"
               \ ])
 
@@ -162,12 +162,12 @@ endfunction
 " }
 
 " InstallFonts {
-function! InstallFonts(src, dest)
+function! s:InstallFonts(src, dest)
   let src_dir = expand(a:src)
   let dest_dir = expand(a:dest)
 
   if isdirectory(src_dir)
-    call MakeDir(dest_dir)
+    call s:MakeDir(dest_dir)
 
     let src_fonts = split(globpath(src_dir, '**/*.[ot]tf'), '\n')
     for src_font in src_fonts
@@ -178,7 +178,7 @@ endfunction
 "}
 
 " MakeDir {
-function! MakeDir(path)
+function! s:MakeDir(path)
   if !isdirectory(expand(a:path))
     silent call mkdir(expand(a:path), 'p')
   endif
@@ -186,7 +186,7 @@ endfunction
 " }
 
 " PowerShellCmd {
-function! PowerShellCmd(cmds)
+function! s:PowerShellCmd(cmds)
   let tmp = {
         \ 'shell': &shell,
         \ 'shellcmdflag': &shellcmdflag,
@@ -208,6 +208,29 @@ function! PowerShellCmd(cmds)
   let &shellpipe = tmp.shellpipe
   let &shellredir = tmp.shellredir
   unlet tmp
+endfunction
+" }
+
+" ToggleLineNumbers {
+nmap <leader>N :call <sid>ToggleLineNumbers()<cr>
+function! s:ToggleLineNumbers()
+  if &number
+    set nonumber
+  else
+    set number
+  endif
+endfunction
+" }
+
+" TrimTrailingWhitespace {
+nmap <leader>$ :call <sid>TrimTrailingWhitespace()<cr>
+function! s:TrimTrailingWhitespace()
+  let _s=@/
+  :%s/\s\+$//e
+  let @/=_s
+  echohl Question
+  echo 'Trailing whitespace cleared'
+  echohl none
 endfunction
 " }
 
@@ -252,37 +275,39 @@ call pathogen#infect()
 
 " }
 
-" vim-plug {
-
-" async processes
-" Plug 'Shougo/vimproc.vim', { 'do': 'make' }
-
-" NERDTree
-" Plug 'scrooloose/nerdtree'
-"       \| Plug 'Xuyuanp/nerdtree-git-plugin'
-"       \| Plug 'jistr/vim-nerdtree-tabs',
-"       \{ 'on': ['NERDTree', 'NERDTreeToggle', 'NERDTreeTabsToggle'] }
-
-" unite and MRU features
-" if g:sys.lua && exists("g:plugs['vimproc.vim']")
-"   Plug 'Shougo/unite.vim'
-"       \| Plug 'Shougo/vimfiler.vim'
-"       \| Plug 'Shougo/neomru.vim'
-"       \| Plug 'Shougo/unite-outline'
-"       \| Plug 'tsukkee/unite-tag'
-" endif
-
-" vim-devicons and pre-patched fonts
-" should be loaded after NEDTree, airline and unite
-" Plug 'ryanoasis/nerd-fonts' | Plug 'ryanoasis/vim-devicons'
-
+" 2 moving around, searching and patterns {
+set ignorecase
+set smartcase
+set incsearch
 " }
 
-" displaying text {
+" 3 tags {
+set tags=./tags;/,~/.vimtags
+
+" Make tags placed in .git/tags file available in all levels of a repository
+let gitroot = substitute(system('git rev-parse --show-toplevel'), '[\n\r]', '', 'g')
+if gitroot != ''
+  let &tags = &tags . ',' . gitroot . '/.git/tags'
+endif
+" }
+
+" 4 displaying text {
+set scrolloff=5
+set sidescroll=1
+set sidescrolloff=8
+set display+=lastline
+set lines=40
 set number
+set norelativenumber
+set numberwidth=5
+if has('conceal')
+  set conceallevel=0
+  set concealcursor=nvc
+endif
 " }
 
-" syntax, highlighting and spelling {
+" 5 syntax, highlighting and spelling {
+filetype plugin indent on
 set synmaxcol=2048 " no need to syntax color super long lines
 set hlsearch " highlights matched search pattern
 set cursorline " highlight screen line of cursor
@@ -295,13 +320,68 @@ if exists('&colorcolumn')
 else
   au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%>80v.\+', -1)
 endif
+if has('spell')
+  set nospell
+  let &spellfile = expand(g:opts.vim_home . '/spells/en.add')
+  if !isdirectory(expand(g:opts.vim_home . '/spells'))
+    call s:MakeDir(expand(g:opts.vim_home . '/spells', 'p'))
+  endif
+endif
 " }
 
-" printing {
+" 10 GUI (here instead of .gvimrc) {
+if g:sys.gui
+  set guioptions-=m " remove the menu
+  set guioptions-=T " remove the toolbar
+  set guioptions-=t " remove tear-off menus
+  set guioptions+=a " visual mode is global
+  set guioptions+=c " use :ex prompt instead of modal dialogs
+
+  if g:sys.osx
+    " make Mac 'Option' key behave as 'Alt'
+    set macmeta
+
+    set linespace=2 " # pixel lines between characters
+    set guifont=Inconsolata:h14,Monaco:h14,Consolas:h14,Courier\ New:h14,Courier:h14
+
+    " MacVIM shift+arrow-keys behavior (required in .vimrc)
+    let macvim_hig_shift_movement = 1
+  else
+    set guifont=Inconsolata:h14,Monaco:h14,Consolas:h14,Courier\ New:h14,Courier:h14
+  endif
+
+  if has('transparency')
+    set transparency=5 " transparency of text bg as %
+    set blurradius=1 " blur effect on transparent bg
+  endif
+
+  " open macvim in fullscreen
+  if g:sys.macvim
+    set fuoptions=maxvert,maxhorz
+    "au GUIEnter * set fullscreen
+  endif
+
+  if !s:leader_is_space
+    " setting these in GVim/MacVim because terminals cannot distinguish between
+    " <space> and <S-space> because curses sees them the same
+    nnoremap <space> <PageDown>
+    nnoremap <S-space> <PageUp>
+  endif
+
+  if has('autocmd')
+    " auto resize splits when window resizes
+    "autocmd VimResized * wincdm =
+  endif
+elseif g:sys.has256
+  set t_Co=256 " enable 256 colors for CSApprox warning
+endif
+" }
+
+" 11 printing {
 set printoptions=header:0,duplex:long,paper:letter
 " }
 
-" messages and info {
+" 12 messages and info {
 set shortmess+=filmnrxoOtT      " abbr. of messages (avoids "hit enter")
 set showcmd                     " show partial cmd keys in status bar
 " ruler on steroids?
@@ -309,7 +389,21 @@ set rulerformat=%30(%=\:b%n%y%m%r%w\ %l,%c%V\ %P%)
 set visualbell                  " use visual bell instead of beep
 " }
 
-" tabs and indenting {
+" 13 selecting text {
+if has('unnamedplus')
+  set clipboard=unnamed,unnamedplus " use + register for copy/paste
+else
+  set clipboard=unnamed " use system clipboard
+endif
+" }
+
+" 14 editing text {
+set completeopt=menu,preview,longest
+set showmatch " when inserting bracket, brief jump to match
+set nojoinspaces " do not add second space when joining lines
+" }
+
+" 15 tabs and indenting {
 set tabstop=2 " # spaces <Tab> equals
 set shiftwidth=2 " # spaces used for each (auto)indent
 set softtabstop=2 " # spaces to insert for tab (<ctrl-v><TAB>)
@@ -318,28 +412,14 @@ set expandtab " expand <TAB> to spaces in Insert mode
 set smartindent " do clever autoindenting
 " }
 
-" selecting text {
-if has('unnamedplus')
-  set clipboard=unnamed,unnamedplus " use + register for copy/paste
-else
-  set clipboard=unnamed " use system clipboard
-endif
-" }
-
-" editing text {
-set completeopt=menu,preview,longest
-set showmatch " when inserting bracket, brief jump to match
-set nojoinspaces " do not add second space when joining lines
-" }
-
-" folding {
+" 16 folding {
 if has('folding')
   set foldenable " auto fold code
   set foldmethod=marker " folding type
 endif
 " }
 
-" reading and writing files {
+" 19 reading and writing files {
 set nobackup " do not keep a backup ~ file
 " list of dirs for backup file
 let &backupdir = g:opts.backup_dir . ',.'
@@ -350,13 +430,13 @@ if empty(glob(g:opts.backup_dir))
 endif
 " }
 
-" the swap file {
+" 20 the swap file {
 set noswapfile " do not use a swap file
 " list of dirs for swap files
 let &directory = g:opts.backup_dir . ',~/tmp,.'
 " }
 
-" command line editing {
+" 21 command line editing {
 " persistent undo
 if has('persistent_undo')
   set undofile
@@ -368,7 +448,7 @@ if has('persistent_undo')
 endif
 " }
 
-" executing external commands {
+" 22 executing external commands {
 if g:sys.win
   " change to powershell
   "set shell=powershell.exe\ -ExecutionPolicy\ Unrestricted
@@ -408,7 +488,7 @@ if has('autocmd')
 
   " remove trailing whitespace and ^M chars
   au FileType c,cpp,java,go,php,javascript,python,twig,xml,yml
-        \ au BufWritePre <buffer> call StripTrailingWhitespace()
+        \ au BufWritePre <buffer> call s:TrimTrailingWhitespace()
 
   " format go docs on load
   au FileType go autocmd BufWritePre <buffer> Fmt
@@ -418,55 +498,6 @@ if has('autocmd')
 
   " set coffeescript filetype, just in case
   au BufNewFile,BufRead *.coffee set filetype=coffee
-endif
-" }
-
-" GUI (here instead of .gvimrc) {
-if g:sys.gui
-  set lines=40
-
-  set guioptions-=m " remove the menu
-  set guioptions-=T " remove the toolbar
-  set guioptions-=t " remove tear-off menus
-  set guioptions+=a " visual mode is global
-  set guioptions+=c " use :ex prompt instead of modal dialogs
-
-  if g:sys.osx
-    " make Mac 'Option' key behave as 'Alt'
-    set mmta
-
-    set linespace=2 " # pixel lines between characters
-    set guifont=Inconsolata:h14,Monaco:h14,Consolas:h14,Courier\ New:h14,Courier:h14
-
-    " MacVIM shift+arrow-keys behavior (required in .vimrc)
-    let macvim_hig_shift_movement = 1
-  else
-    set guifont=Inconsolata:h14,Monaco:h14,Consolas:h14,Courier\ New:h14,Courier:h14
-  endif
-
-  if exists('transparency')
-    set transparency=5 " transparency of text bg as %
-  endif
-
-  " open macvim in fullscreen
-  if g:sys.macvim
-    set fuoptions=maxvert,maxhorz
-    "au GUIEnter * set fullscreen
-  endif
-
-  if !s:leader_is_space
-    " setting these in GVim/MacVim because terminals cannot distinguish between
-    " <space> and <S-space> because curses sees them the same
-    nnoremap <space> <PageDown>
-    nnoremap <S-space> <PageUp>
-  endif
-
-  if has('autocmd')
-    " auto resize splits when window resizes
-    "autocmd VimResized * wincdm =
-  endif
-elseif g:sys.has256
-  set t_Co=256 " enable 256 colors for CSApprox warning
 endif
 " }
 
@@ -485,16 +516,6 @@ map <C-h> <C-w>h<C-w>_
 " }
 
 " plugin config {
-
-" Ctags {
-set tags=./tags;/,~/.vimtags
-
-" Make tags placed in .git/tags file available in all levels of a repository
-let gitroot = substitute(system('git rev-parse --show-toplevel'), '[\n\r]', '', 'g')
-if gitroot != ''
-  let &tags = &tags . ',' . gitroot . '/.git/tags'
-endif
-" }
 
 " ctrlp {
 if isdirectory(expand(g:opts.plugin_dir . '/ctrlp.vim'))
@@ -666,10 +687,16 @@ if isdirectory(expand(g:opts.plugin_dir . '/syntastic'))
   set statusline+=%{SyntasticStatuslineFlag()}
   set statusline+=%*
 
+  nmap <leader>l :SyntasticToggleMode<cr>
+  nmap <leader>L :SyntasticCheck<cr>
+
   let g:syntastic_always_populate_loc_list = 1
   let g:syntastic_auto_loc_list = 1
   let g:syntastic_check_on_open = 1
   let g:syntastic_check_on_wq = 0
+
+  let g:syntastic_javascript_checkers = [ 'eslint', 'jscs' ]
+  let g:syntastic_python_checkers = [ 'python' ]
 endif
 " }
 
