@@ -1,29 +1,35 @@
+# OS determinations
 os=${OSTYPE%%[0-9]*}
-
-has_bash=$(echo $SHELL | grep bash)
-has_brew=$(command -v brew)
-if [ $has_brew ]; then
-  [ -n "$(brew ls --versions nvm 2>/dev/null)" ] && \
-    has_brew_nvm=$(brew --prefix nvm)
-fi
-has_git=$(command -v git)
-hass_google_chrome=$(command -v google-chrome)
-has_java=$(command -v java)
-has_java_home=$(command -v /usr/libexec/java_home)
-has_less=$(command -v less)
-has_node=$(command -v node)
-has_sshfs=$(command -v sshfs)
-has_tput=$(command -v tput)
-has_vi=$(command -v vi)
-has_vim=$(command -v vim)
-
-case "$TERM" in
-  *256*) term_colors=${term_colors:-256};;
-  *) term_colors=${term_colors:-8}
-esac
-[ $has_tput ] && term_colors=$(tput colors)
+[ "${os}" = "darwin" ] && os_darwin=1
 
 # Functions
+resolve_link() {
+  local has_readlink resolved
+  has_readlink=$(command -v readlink || true)
+  [ $has_readlink && $os_darwin ] && resolved=$(readlink $1) 
+  [ $has_readlink && ! $os_darwin ] && resolved=$(readlink -f $1) 
+  [ $(command -v realpath || true) ] && resolved=$(realpath $1)
+  printf "%s" "${resolved}"
+}
+
+path_contains() {
+  local contains
+  contains=$(printf $PATH | grep -m 1 -o "$1" | head -1)
+  printf "%s" "${contains}"
+}
+
+path_prepend() {
+  local path
+  path=$1:${PATH}
+  printf "%s" "${path}"
+}
+
+path_append() {
+  local path
+  path=${PATH}:$1
+  printf "%s" "${path}"
+}
+
 is_var () {
   [ $(declare | grep ${1}\=) ] && printf $1 || return 1
 }
@@ -38,7 +44,7 @@ is_set () {
 
 current_git_status() {
   if [ -n "$(__git_ps1)" ]; then
-    gitdf=$(git status -s | wc -l | tr -d '[:blank:]' 2>/dev/null)
+    gitdf=$(git status -s | wc -l | tr -d "[:blank:]" 2>/dev/null)
     gitb=$(__git_ps1 "%s")
     if [ $gitdf -eq 0 ]; then
       printf "%s%s%s%s " "${clr_rst}" "${clr_ok}" "${gitb}" "${clr_rst}"
@@ -55,9 +61,7 @@ print_tput_colors() {
     tput setaf $color
     printf " %3s " "$color"
     tput sgr0
-    if [ $((($color + 1) % 16)) == 0 ]; then
-      printf "\\n"
-    fi
+    [ $((($color + 1) % 16)) == 0 ] && printf "\\n"
     color=$(($color + 1))
   done
 }
@@ -66,25 +70,78 @@ print_ansi_colors() {
   color=0
   while [ $color -lt $term_colors ]; do
     printf "\e[38;5;%sm %3s \e[0m" "${color}" "${color}"
-    if [ $((($color + 1) % 16)) == 0 ]; then
-      printf "\\n"
-    fi
+    [ $((($color + 1) % 16)) == 0 ] && printf "\\n"
     color=$(($color + 1))
   done
 }
 
-chrome () {
-  if [ "$os" = "darwin" ]; then
+chrome() {
+  if [ $os_darwin ]; then
     open -a "Google Chrome" $@ --args --allow-file-access-from-files
   elif [ $has_google_chrome ]; then
     google-chrome $@ --allow-file-access-from-files
   fi
 }
 
+# FreeDesktop XDG ENV variable declarations
+export XDG_CACHE_HOME=${XDG_CACHE_HOME:="${HOME}/.cache"}
+export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:="${HOME}/.config"}
+export XDG_DATA_HOME=${XDG_DATA_HOME:="${HOME}/.local/share"}
+export XDG_CONFIG_DIRS=${XDG_CONFIG_DIRS:="/etc/xdg"}
+export XDG_DATA_DIRS=${XDG_DATA_DIRS:="/usr/local/share/:/usr/share/"}
+export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:=""}
+
+# brew
+if [ -d ${HOME}/.brew ]; then
+  brew_home=${HOME}/.brew
+  [ -L "$brew_home" ] && brew_home=$(resolve_link $brew_home)
+  has_brew=${brew_home}/bin/brew
+else
+  has_brew=$(command -v brew || true)
+fi
+
+if [ $has_brew ]; then
+  brew_bin=$(dirname -- "${has_brew}")
+  [ ! $(path_contains $brew_bin) ] && export PATH=$(path_prepend $brew_bin)
+
+  brew_home=$(brew --prefix)
+
+  # tap the core, if it doesn't exist
+  [ ! -d "${brew_home}/Library/Taps/homebrew/homebrew-core" ] && \
+    brew tap homebrew/homebrew-core
+
+  [ -n "$(brew ls --versions nvm 2>/dev/null)" ] && \
+    has_brew_nvm=$(brew --prefix nvm)
+fi
+
+# command/executable locations/existence
+has_bash=$(echo $SHELL | grep bash)
+has_git=$(command -v git || true)
+has_google_chrome=$(command -v google-chrome || true)
+has_java=$(command -v java || true)
+has_java_home=$(command -v /usr/libexec/java_home || true)
+has_less=$(command -v less || true)
+has_node=$(command -v node || true)
+has_sshfs=$(command -v sshfs || true)
+has_tput=$(command -v tput || true)
+has_vi=$(command -v vi || true)
+has_vim=$(command -v vim || true)
+
+case "$TERM" in
+  *256*) term_colors=${term_colors:-256};;
+  *) term_colors=${term_colors:-8}
+esac
+[ $has_tput ] && term_colors=$(tput colors)
+
+# have vim "respect" XDG settings
+[ $has_vim ] && \
+  export VIMINIT='let $MYVIMRC="$XDG_CONFIG_HOME/vim/vimrc" | source $MYVIMRC'
+
+# sshfs
 if [ $has_sshfs ]; then
   # Remote Mount (sshfs)
   # creates mount folder and mounts the remote filesystem
-  rmount () {
+  rmount() {
     local host folder mname
     host="${1%%:*}:"
     [ "${1%:}" = "${host%%:*}" ] && folder="" || folder=${1##*:}
@@ -94,7 +151,7 @@ if [ $has_sshfs ]; then
       mname=${folder##*/}
       [ "$mname" = "" ] && mname=${host%%:*}
     fi
-    if [ "$(grep -i 'host ${host%%:*}' ~/.ssh/config)" != "" ]]; then
+    if [ "$(grep -i "host ${host%%:*}" ~/.ssh/config)" != "" ]]; then
       mkdir -p ~/_mounts/g/$mname > /dev/null
       sshfs $host$folder ~/_mounts/g/$mname -oauto_cache,reconnect,defer_permissions,negative_vncache,volname=$mname,noappledouble && echo "mounted ~/_mounts/g/$mname"
     else
@@ -105,46 +162,30 @@ if [ $has_sshfs ]; then
 
   # Remote Umount, unmounts and deletes local folder
   # (experimental, watch your step)
-  rumount () {
+  rumount() {
     if [ "$1" = "-a" ]]; then
-      ls -1 ~/_mounts/g/|while read dir
-    do
-      [ $(mount | grep "_mounts/g/$dir") ] && umount ~/_mounts/g/$dir
-      [ $(ls ~/_mounts/g/$dir) ] || rm -rf ~/_mounts/g/$dir
-    done
-  else
-    [ $(mount | grep "_mounts/g/$1") ] && umount ~/_mounts/g/$1
-    [ $(ls ~/_mounts/g/$1) ] || rm -rf ~/_mounts/g/$1
-  fi
-}
+      ls -1 ~/_mounts/g/ | \
+        while read dir
+        do
+          [ $(mount | grep "_mounts/g/$dir") ] && umount ~/_mounts/g/$dir
+          [ $(ls ~/_mounts/g/$dir) ] || rm -rf ~/_mounts/g/$dir
+        done
+    else
+      [ $(mount | grep "_mounts/g/$1") ] && umount ~/_mounts/g/$1
+      [ $(ls ~/_mounts/g/$1) ] || rm -rf ~/_mounts/g/$1
+    fi
+  }
 fi
 
 # Aliases
 alias ls="ls -G"
 alias ll="ls -la"
-if [ ! $(is_set llg) ]; then
-  llg () {
-    ls -al "$1" | grep ${@:2}
-  }
-fi
-if [ ! $(is_set llgi) ]; then
-  llgi () {
-    ls -al "$1" | grep -i ${@:2}
-  }
-fi
-if [ ! $(is_set llm) ]; then
-  function llm () {
-  if [ $has_less ]; then
-    ls -al "$1" | less
-  else
-    ls -al "$1" | more
-  fi
-}
-fi
+# use vim for vi, if available
+[ $has_vim ] && alias vi=vim
 
 # git prompt/completion
 if [ $has_git ]; then
-  git_version=$(git --version | sed -e "s/git version \([0-9]*\.[0-9]*\.[0-9]*\).*/\1/")
+  git_version=$(git --version | sed -e 's/git version \([0-9]*\.[0-9]*\.[0-9]*\).*/\1/')
 
   if [ -f "/usr/doc/git-${git_version}/contrib/completion/git-prompt.sh" ]; then
     . /usr/doc/git-${git_version}/contrib/completion/git-prompt.sh
@@ -161,76 +202,52 @@ if [ $has_git ]; then
     fi
   fi
 
-  if [ "$os" = "darwin" ] && [ $has_brew ]; then
-    if [ -d $(brew --prefix)/etc/bash_completion.d ]; then
+  if [ $has_brew ]; then
+    if [ -e "${brew_home}/etc/bash_completion.d/git-prompt.sh" ]; then
       has_git_prompt=1
-      . $(brew --prefix)/etc/bash_completion.d/git-prompt.sh
+      . ${brew_home}/etc/bash_completion.d/git-prompt.sh
     fi
     # git bash completion
-    if [ $has_bash ]; then
-      if [ -f $(brew --prefix)/etc/bash_completion ]; then
-        . $(brew --prefix)/etc/bash_completion
-      fi
-    fi
+    [ $has_bash ] && [ -f "{brew_home}/etc/bash_completion" ] && \
+      . ${brew_home}/etc/bash_completion
   fi
-fi
-
-if [ "$os" = "darwin" ] && [ $has_brew ]; then
-  path_has_local_bin=$(printf $PATH | grep -o '/usr/local/bin')
-  if [ $path_has_local_bin ]; then
-    # strip out other occurrences and add to first check
-    PATH=$(printf $PATH | sed 's/:*\/usr\/local\/bin//g')
-  fi
-  export PATH=/usr/local/bin:$PATH
-
-  path_has_local_sbin=$(printf $PATH | grep -o '/usr/local/sbin')
-  if [ $path_has_local_sbin ]; then
-    # strip out other occurrences and add to first check
-    PATH=$(printf $PATH | sed 's/:*\/usr\/local\/sbin//g')
-  fi
-  export PATH=/usr/local/sbin:$PATH
 fi
 
 # Load RVM into a shell session *as a function*
 [ -s "${HOME}/.rvm/scripts/rvm" ] && . ${HOME}/.rvm/scripts/rvm
 
 # rbenv config
-[ $(command -v rbenv) ] && eval "$(rbenv init -)"
-[ -d "${HOME}/.sm" ] && export PATH="${PATH}:${HOME}/.sm/bin:${HOME}/.sm/pkg/active/bin:${HOME}/.sm/pkg/active/sbin"
+[ $(command -v rbenv || true) ] && eval "$(rbenv init -)"
+[ -d "${HOME}/.sm" ] && \
+  export PATH="${PATH}:${HOME}/.sm/bin:${HOME}/.sm/pkg/active/bin:${HOME}/.sm/pkg/active/sbin"
 
 if [ $has_node ]; then
   node_prefix=$(command -v node | sed 's#^\(.*\)/bin/node$#\1#')
-  path_has_npm=$(printf $PATH | grep -o '/npm/bin')
-  path_has_local_npm=$(printf $PATH | grep -o 'node_modules/.bin')
+  path_has_npm=$(path_contains "/npm/bin")
 
-  if [ -z "$path_has_npm" ] && [ -d ${node_prefix}/share/npm/bin ]; then
-    export PATH=${node_prefix}/share/npm/bin:$PATH
-  fi
+  [ $path_has_npm ] && [ -d "${node_prefix}/share/npm/bin" ] && \
+    [ ! $(path_contains "${node_prefix}/share/npm/bin") ] && \
+    export PATH=$(path_prepend "${node_prefix}/share/npm/bin")
 
-  [ -z "$path_has_local_npm" ] && export PATH=./node_modules/.bin:$PATH
+  [ ! $(path_contains "./node_modules/.bin") ] && \
+    export PATH=$(path_prepend "./node_modules/.bin")
 fi
 
 # nvm
 export NVM_DIR=${NVM_DIR:-${HOME}/.nvm}
 [ -s "${has_brew_nvm}/nvm.sh" ] && . ${has_brew_nvm}/nvm.sh
 [ -s "${NVM_DIR}/nvm.sh" ] && . ${NVM_DIR}/nvm.sh  # This loads nvm
-[ $has_bash ] && [ -r ${NVM_DIR}/bash_completion ] && . ${NVM_DIR}/bash_completion
-
-if [ $has_vi ] && [ $has_vim ]; then
-  vi_prefix=$(command -v vi | sed 's#^\(.*\)/vi$#\1#')
-  vim_prefix=$(command -v vim | sed 's#^\(.*\)/vim$#\1#')
-  [ ! -h "${vim_prefix}/vi" ] && [ -w "${vim_prefix}/vi" ] && ln -sf $has_vim ${vim_prefix}/vi
-fi
+[ $has_bash ] && [ -r "${NVM_DIR}/bash_completion" ] && \
+  . ${NVM_DIR}/bash_completion
 
 # JAVA
 if [ $has_java_home ] && [ -x $has_java_home ]; then
-  should_install_java=$($has_java_home 2>&1 | grep -i 'no java runtime')
+  should_install_java=$($has_java_home 2>&1 | grep -i "no java runtime")
   if [ ! $JAVA_HOME ] && [ -z "${should_install_java}" ]; then
-    export JAVA_HOME=$has_java_home
-    alias resetjdk='export JAVA_HOME=$($has_java_home)'
-    alias setjdk16='export JAVA_HOME=$($has_java_home -v 1.6)'
-    alias setjdk17='export JAVA_HOME=$($has_java_home -v 1.7)'
-    alias setjdk18='export JAVA_HOME=$($has_java_home -v 1.8)'
+    export JAVA_HOME=$($has_java_home)
+    alias resetjdk="export JAVA_HOME=$($has_java_home)"
+    alias setjdk17="export JAVA_HOME=$($has_java_home -v 1.7)"
+    alias setjdk18="export JAVA_HOME=$($has_java_home -v 1.8)"
   fi
 fi
 
@@ -301,10 +318,13 @@ if [ $has_tput ]; then
   fi
 fi
 
+# PS1
 PS1="\[${clr_time}\]\t\[${clr_rst}\] "
-[ $has_git_prompt ] && PS1="$PS1\$(current_git_status)"
+[ $has_git_prompt ] && PS1="${PS1}\$(current_git_status)"
 PS1="${PS1}\[${clr_user}\]\u\[${clr_rst}\]@\[${clr_host}\]\h"
 PS1="${PS1}\[${clr_rst}\]:\[${clr_pwd}\]\w"
 export PS1="${PS1}\[${clr_rst}\]\n\$ "
 
-test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"
+[ $has_bash ] && \
+  [ -e "${HOME}/.iterm2_shell_integration.bash" ] && \
+  source "${HOME}/.iterm2_shell_integration.bash"
