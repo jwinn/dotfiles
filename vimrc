@@ -11,13 +11,8 @@ endif
 let g:jw = {}
 
 " g:jw.sys {{{
-" store current ignorecase and set to on (will be reset later)
-let s:tmp_ignorecase = &ignorecase
-let &ignorecase = 1
-let s:system_uname = system('uname -s')
 
 let g:jw.sys = {
-      \ 'darwin': 0,
       \ 'unix': has('unix'),
       \ 'win16': has('win16'),
       \ 'win32': has('win32'),
@@ -25,17 +20,21 @@ let g:jw.sys = {
       \ }
 
 if executable('uname')
+  " store current ignorecase and set to on (will be reset later)
+  let s:tmp_ignorecase = &ignorecase
+  let &ignorecase = 1
   let s:system_uname = system('uname -s')
+
   let g:jw.sys.darwin = (s:system_uname =~ 'darwin')
+  let g:jw.sys.linux = g:jw.sys.unix && (s:system_uname =~ 'linux')
+  let g:jw.sys.mac = g:jw.sys.darwin || has('macunix')
+
+  " reset changes and clean up
+  let &ignorecase = s:tmp_ignorecase
+  unlet s:tmp_ignorecase
 endif
 
-let g:jw.sys.linux = g:jw.sys.unix && (s:system_uname =~ 'linux')
-let g:jw.sys.mac = g:jw.sys.darwin || has('macunix')
 let g:jw.sys.win = g:jw.sys.win64 || g:jw.sys.win32 || g:jw.sys.win16
-
-" reset changes and clean up
-let &ignorecase = s:tmp_ignorecase
-unlet s:tmp_ignorecase
 " }}}
 
 " g:jw.has {{{
@@ -94,10 +93,12 @@ let g:jw.xdg = {
 let g:jw.opts = {
       \ 'colors': {
       \   'dark': {
+      \     'airline': 'hybrid',
       \     'background': 'dark',
-      \     'scheme': 'base16-default-dark',
+      \     'scheme': 'hybrid',
       \   },
       \   'light': {
+      \     'airline': 'base16',
       \     'background': 'light',
       \     'scheme': 'base16-default-light',
       \   },
@@ -517,7 +518,9 @@ if ! g:jw.opts.minimal
   " status line goodness -- issue with NeoVim to remedy
   if ! g:jw.has.nvim
     Plug 'vim-airline/vim-airline'
+    Plug 'vim-airline/vim-airline-themes'
     let g:airline_powerline_fonts = 1
+    let g:airline_theme = s:colors.airline
   endif
 
   " arbitrary alignment by symbol
