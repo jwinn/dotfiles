@@ -222,6 +222,9 @@ if [ "${has_nvm}" ]; then
     . "${NVM_DIR}/bash_completion"
 fi
 
+# fzf
+[ "${has_bash}" ] && [ -f "${HOME}/.fzf.bash" ] && source "${HOME}/.fzf.bash"
+
 # JAVA
 # OSX java
 if [ "${has_java_home}" ] && [ -x "${has_java_home}" ]; then

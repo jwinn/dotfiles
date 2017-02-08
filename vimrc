@@ -17,12 +17,17 @@ let &ignorecase = 1
 let s:system_uname = system('uname -s')
 
 let g:jw.sys = {
-      \ 'darwin': (s:system_uname =~ 'darwin'),
+      \ 'darwin': 0,
       \ 'unix': has('unix'),
       \ 'win16': has('win16'),
       \ 'win32': has('win32'),
       \ 'win64': has('win64'),
       \ }
+
+if executable('uname')
+  let s:system_uname = system('uname -s')
+  let g:jw.sys.darwin = (s:system_uname =~ 'darwin')
+endif
 
 let g:jw.sys.linux = g:jw.sys.unix && (s:system_uname =~ 'linux')
 let g:jw.sys.mac = g:jw.sys.darwin || has('macunix')
@@ -77,26 +82,26 @@ let g:jw.has.256color = g:jw.has.gui || (&term =~ '256color')
 
 let g:jw.xdg = {
       \ 'cache_home': exists('$XDG_CACHE_HOME')
-      \ ? $XDG_CACHE_HOME : expand('$HOME/.cache'),
+      \   ? $XDG_CACHE_HOME : expand('$HOME/.cache'),
       \ 'config_home': exists('$XDG_CONFIG_HOME')
-      \ ? $XDG_CONFIG_HOME : expand('$HOME/.config'),
+      \   ? $XDG_CONFIG_HOME : expand('$HOME/.config'),
       \ 'data_home': exists('$XDG_DATA_HOME')
-      \ ? $XDG_DATA_HOME : expand('$HOME/.local/share'),
+      \   ? $XDG_DATA_HOME : expand('$HOME/.local/share'),
       \ }
 " }}}
 
 " g:jw.opts {{{
 let g:jw.opts = {
       \ 'colors': {
-      \ 'dark': {
-      \ 'background': 'dark',
-      \ 'scheme': 'base16-default-dark',
-      \ },
-      \ 'light': {
-      \ 'background': 'light',
-      \ 'scheme': 'base16-default-light',
-      \ },
-      \ 'use': 'dark',
+      \   'dark': {
+      \     'background': 'dark',
+      \     'scheme': 'base16-default-dark',
+      \   },
+      \   'light': {
+      \     'background': 'light',
+      \     'scheme': 'base16-default-light',
+      \   },
+      \   'use': 'dark',
       \ },
       \ 'encoding': 'utf-8',
       \ 'font_dir': expand('$HOME/.fonts'),
@@ -215,10 +220,10 @@ function! s:InstallPlug(vhome)
     if g:jw.sys.win
       call s:MakeDir(autoload_dir)
       call s:PowerShellCmd([
-            \ '(New-Object Net.WebClient)' .
-            \ '.DownloadFile("' . plug_uri . '", ' .
-            \ $ExecutionContext.SessionState.Path' .
-            \ '.GetUnresolvedProviderPathFromPSPath("' . plug_file . '"))'
+            \ "(New-Object System.Net.WebClient)" .
+            \ ".DownloadFile('" . plug_uri . "', " .
+            \ "$ExecutionContext.SessionState.Path" .
+            \ ".GetUnresolvedProviderPathFromPSPath('" . plug_file . "'))"
             \ ])
     else
       if g:jw.has.curl
@@ -297,8 +302,8 @@ endif
 " }}}
 
 " set directories to those provided {{{
-let &backupdir = g:jw.dirs.backup . ',~/,/tmp' " .bak files
-let &directory = g:jw.dirs.backup . ',~/,/tmp' " .swp files
+let &backupdir = g:jw.dirs.backup . ',' . &backupdir " .bak files
+let &directory = g:jw.dirs.backup . ',' . &directory " .swp files
 let &viminfo = &viminfo . 'n' . g:jw.dirs.viminfo
 if g:jw.has.undo
   set undofile
@@ -310,7 +315,7 @@ if g:jw.sys.win
   " for windows, use our defined vim location instead of default vimfiles
   let s:rt_vimfiles = expand($VIM . '/vimfiles')
   let &runtimepath = g:jw.dirs.vim . ',' .
-        \ s:rt_vimfiles . ',' . $VIMRUNTIME .  ','
+        \ s:rt_vimfiles . ',' . $VIMRUNTIME .  ',' .
         \ expand(s:rt_vimfiles . '/after') . ',' . s:dir_vim_after
 else
   let &runtimepath = g:jw.dirs.vim . ',' .
@@ -425,6 +430,9 @@ if ! g:jw.opts.minimal
   if g:jw.has.256color
     let base16colorspace = 256
   endif
+  Plug 'w0ng/vim-hybrid'
+  Plug 'morhetz/gruvbox'
+  Plug 'colepeters/spacemacs-theme.vim'
 
   " improve? netrw
   Plug 'tpope/vim-vinegar'
@@ -439,19 +447,29 @@ if ! g:jw.opts.minimal
   Plug 'Shougo/vimproc.vim', { 'do': 'make' }
 
   " fuzzy file finder {{{
-  if ! g:jw.has.fzf
-    " TODO: may want to change to XDG dir?
-    let g:jw.fzf_dir = expand($HOME . '/.fzf')
+  " TODO: may want to change to XDG dir?
+  let g:jw.fzf_dir = expand($HOME . '/.fzf')
 
+  if g:jw.has.fzf
     if ! isdirectory(g:jw.fzf_dir)
-      Plug 'junegunn/fzf', {
-            \ 'dir': g:jw.fzf_dir,
-            \ 'do': './install --all'
-            \ }
+      " TODO: find the fzf home
     endif
   endif
-  Plug 'junegunn/fzf.vim'
-  map <C-p> :FZF<CR>
+  if g:jw.sys.win
+    Plug 'ctrlpvim/ctrlp.vim'
+    " use .gitignore
+    let g:ctrlp_user_command = [
+          \ '.git',
+          \ 'cd %s && git ls-files -co --exclude-standard'
+          \ ]
+  else
+    Plug 'junegunn/fzf', {
+          \ 'dir': g:jw.fzf_dir,
+          \ 'do': './install --all'
+          \ }
+    Plug 'junegunn/fzf.vim'
+    map <C-p> :Files<CR>
+  endif
   " }}}
 
   " Snippets {{{
@@ -511,7 +529,7 @@ if ! g:jw.opts.minimal
 
   " multiple cursors
   Plug 'terryma/vim-multiple-cursors'
-  let g:multi_cursor_start_key = '<F6>'
+  let g:multi_cursor_start_key = '<C-d>'
   nnoremap <silent> <M-j> :MultipleCursorsFind <C-r>/<CR>
   vnoremap <silent> <M-j> :MultipleCursorsFind <C-r>/<CR>
   " }}}
@@ -553,6 +571,13 @@ if ! g:jw.opts.minimal
   " Elixir
   Plug 'elixir-lang/vim-elixir'
   Plug 'slashmili/alchemist.vim'
+
+  Plug 'lambdatoast/elm.vim'
+  nnoremap <leader>el :ElmEvalLine<CR>
+  vnoremap <leader>es :<C-u>ElmEvalSelection<CR>
+  nnoremap <leader>em :ElmMakeCurrentFile<CR>
+  "autocmd BufWritePost *.elm ElmMakeCurrentFile
+  "autocmd BufWritePost *.elm ElmMakeFile("Main.elm")
 
   " Go {{{
   Plug 'fatih/vim-go', { 'for': 'go' }
