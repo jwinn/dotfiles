@@ -13,6 +13,8 @@ let g:jw = {}
 " g:jw.sys {{{
 
 let g:jw.sys = {
+      \ 'darwin': 0,
+      \ 'linux': 0,
       \ 'unix': has('unix'),
       \ 'win16': has('win16'),
       \ 'win32': has('win32'),
@@ -27,13 +29,13 @@ if executable('uname')
 
   let g:jw.sys.darwin = (s:system_uname =~ 'darwin')
   let g:jw.sys.linux = g:jw.sys.unix && (s:system_uname =~ 'linux')
-  let g:jw.sys.mac = g:jw.sys.darwin || has('macunix')
 
   " reset changes and clean up
   let &ignorecase = s:tmp_ignorecase
   unlet s:tmp_ignorecase
 endif
 
+let g:jw.sys.mac = g:jw.sys.darwin || has('macunix')
 let g:jw.sys.win = g:jw.sys.win64 || g:jw.sys.win32 || g:jw.sys.win16
 " }}}
 
