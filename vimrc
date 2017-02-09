@@ -97,9 +97,9 @@ let g:jw.xdg = {
 let g:jw.opts = {
       \ 'colors': {
       \   'dark': {
-      \     'airline': 'hybrid',
+      \     'airline': 'base16',
       \     'background': 'dark',
-      \     'scheme': 'hybrid',
+      \     'scheme': 'base16-default-dark',
       \   },
       \   'light': {
       \     'airline': 'base16',
