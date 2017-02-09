@@ -52,6 +52,7 @@ let g:jw.has = {
       \ 'ctags': executable('ctags'),
       \ 'dash': g:jw.sys.darwin && isdirectory('/Applications/Dash.app'),
       \ 'dotnet': executable('dotnet'),
+      \ 'elm': executable('elm'),
       \ 'fzf': executable('fzf'),
       \ 'go': executable('go'),
       \ 'gui': has('gui_running'),
@@ -59,6 +60,7 @@ let g:jw.has = {
       \ 'lessc': executable('lessc'),
       \ 'lua': has('lua'),
       \ 'macvim': has('macvim'),
+      \ 'make': executable('make'),
       \ 'node': executable('node'),
       \ 'npm': executable('npm'),
       \ 'nvim': has('nvim'),
@@ -435,6 +437,7 @@ if ! g:jw.opts.minimal
   endif
   Plug 'w0ng/vim-hybrid'
   Plug 'morhetz/gruvbox'
+  Plug 'altercation/vim-colors-solarized'
   Plug 'colepeters/spacemacs-theme.vim'
 
   " improve? netrw
@@ -447,31 +450,31 @@ if ! g:jw.opts.minimal
   let NERDTreeIgnore = ['tmp[[dir]]', '.yardoc', 'pkg']
 
   " async commands
-  Plug 'Shougo/vimproc.vim', { 'do': 'make' }
+  if g:jw.has.make
+    Plug 'Shougo/vimproc.vim', { 'do': 'make' }
+  endif
 
   " fuzzy file finder {{{
-  " TODO: may want to change to XDG dir?
-  let g:jw.fzf_dir = expand($HOME . '/.fzf')
-
   if g:jw.has.fzf
+    " TODO: may want to change to XDG dir?
+    let g:jw.fzf_dir = expand($HOME . '/.fzf')
+
     if ! isdirectory(g:jw.fzf_dir)
       " TODO: find the fzf home
     endif
-  endif
-  if g:jw.sys.win
-    Plug 'ctrlpvim/ctrlp.vim'
-    " use .gitignore
-    let g:ctrlp_user_command = [
-          \ '.git',
-          \ 'cd %s && git ls-files -co --exclude-standard'
-          \ ]
-  else
     Plug 'junegunn/fzf', {
           \ 'dir': g:jw.fzf_dir,
           \ 'do': './install --all'
           \ }
     Plug 'junegunn/fzf.vim'
     map <C-p> :Files<CR>
+  else
+    Plug 'ctrlpvim/ctrlp.vim'
+    " use .gitignore
+    let g:ctrlp_user_command = [
+          \ '.git',
+          \ 'cd %s && git ls-files -co --exclude-standard'
+          \ ]
   endif
   " }}}
 
@@ -491,27 +494,27 @@ if ! g:jw.opts.minimal
   Plug 'luochen1990/rainbow'
   let g:rainbow_active = 1 " 0 if you want to enable it later via :RainbowToggle
   let g:rainbow_conf = {
-        \   'guifgs': ['royalblue3', 'darkorange3', 'seagreen3', 'firebrick'],
-        \   'ctermfgs': ['lightblue', 'lightyellow', 'lightcyan', 'lightmagenta'],
-        \   'operators': '_,_',
-        \   'parentheses': ['start=/(/ end=/)/ fold', 'start=/\[/ end=/\]/ fold', 'start=/{/ end=/}/ fold'],
-        \   'separately': {
-        \       '*': {},
-        \       'tex': {
-        \           'parentheses': ['start=/(/ end=/)/', 'start=/\[/ end=/\]/'],
-        \       },
-        \       'lisp': {
-        \           'guifgs': ['royalblue3', 'darkorange3', 'seagreen3', 'firebrick', 'darkorchid3'],
-        \       },
-        \       'vim': {
-        \           'parentheses': ['start=/(/ end=/)/', 'start=/\[/ end=/\]/', 'start=/{/ end=/}/ fold', 'start=/(/ end=/)/ containedin=vimFuncBody', 'start=/\[/ end=/\]/ containedin=vimFuncBody', 'start=/{/ end=/}/ fold containedin=vimFuncBody'],
-        \       },
-        \       'html': {
-        \           'parentheses': ['start=/\v\<((area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)[ >])@!\z([-_:a-zA-Z0-9]+)(\s+[-_:a-zA-Z0-9]+(\=("[^"]*"|'."'".'[^'."'".']*'."'".'|[^ '."'".'"><=`]*))?)*\>/ end=#</\z1># fold'],
-        \       },
-        \       'css': 0,
-        \   }
-        \}
+        \ 'guifgs': ['royalblue3', 'darkorange3', 'seagreen3', 'firebrick'],
+        \ 'ctermfgs': ['lightblue', 'lightyellow', 'lightcyan', 'lightmagenta'],
+        \ 'operators': '_,_',
+        \ 'parentheses': ['start=/(/ end=/)/ fold', 'start=/\[/ end=/\]/ fold', 'start=/{/ end=/}/ fold'],
+        \ 'separately': {
+        \   '*': {},
+        \   'tex': {
+        \     'parentheses': ['start=/(/ end=/)/', 'start=/\[/ end=/\]/'],
+        \   },
+        \   'lisp': {
+        \     'guifgs': ['royalblue3', 'darkorange3', 'seagreen3', 'firebrick', 'darkorchid3'],
+        \   },
+        \   'vim': {
+        \     'parentheses': ['start=/(/ end=/)/', 'start=/\[/ end=/\]/', 'start=/{/ end=/}/ fold', 'start=/(/ end=/)/ containedin=vimFuncBody', 'start=/\[/ end=/\]/ containedin=vimFuncBody', 'start=/{/ end=/}/ fold containedin=vimFuncBody'],
+        \   },
+        \   'html': {
+        \     'parentheses': ['start=/\v\<((area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)[ >])@!\z([-_:a-zA-Z0-9]+)(\s+[-_:a-zA-Z0-9]+(\=("[^"]*"|'."'".'[^'."'".']*'."'".'|[^ '."'".'"><=`]*))?)*\>/ end=#</\z1># fold'],
+        \   },
+        \   'css': 0,
+        \ }
+        \ }
   " }}}
 
   " work with variants of words
@@ -577,22 +580,26 @@ if ! g:jw.opts.minimal
   Plug 'elixir-lang/vim-elixir'
   Plug 'slashmili/alchemist.vim'
 
-  Plug 'lambdatoast/elm.vim'
-  nnoremap <leader>el :ElmEvalLine<CR>
-  vnoremap <leader>es :<C-u>ElmEvalSelection<CR>
-  nnoremap <leader>em :ElmMakeCurrentFile<CR>
-  "autocmd BufWritePost *.elm ElmMakeCurrentFile
-  "autocmd BufWritePost *.elm ElmMakeFile("Main.elm")
+  if g:jw.has.elm
+    Plug 'lambdatoast/elm.vim'
+    nnoremap <leader>el :ElmEvalLine<CR>
+    vnoremap <leader>es :<C-u>ElmEvalSelection<CR>
+    nnoremap <leader>em :ElmMakeCurrentFile<CR>
+    "autocmd BufWritePost *.elm ElmMakeCurrentFile
+    "autocmd BufWritePost *.elm ElmMakeFile("Main.elm")
+  endif
 
   " Go {{{
-  Plug 'fatih/vim-go', { 'for': 'go' }
-  augroup vimGo
-    autocmd!
+  if g:jw.has.go
+    Plug 'fatih/vim-go', { 'for': 'go' }
+    augroup vimGo
+      autocmd!
 
-    autocmd FileType go nmap <Leader>s <Plug>(go-implements)
-    autocmd FileType go nmap <Leader>i <Plug>(go-info)
-    autocmd FileType go nmap <Leader>t <Plug>(go-test)
-  augroup END
+      autocmd FileType go nmap <Leader>s <Plug>(go-implements)
+      autocmd FileType go nmap <Leader>i <Plug>(go-info)
+      autocmd FileType go nmap <Leader>t <Plug>(go-test)
+    augroup END
+  endif
   " }}}
 
   " HTML
