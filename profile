@@ -42,6 +42,11 @@ current_git_status() {
   fi
 }
 
+# local sbin added to PATH
+path_has_local_sbin=$(path_contains "/usr/local/sbin")
+[ -z "${path_has_local_sbin}" ] && [ -d "/usr/local/sbin" ] && \
+  path_prepend "/usr/local/sbin"
+
 # FreeDesktop XDG ENV variable declarations
 export XDG_CACHE_HOME=${XDG_CACHE_HOME:-"${HOME}/.cache"}
 export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"${HOME}/.config"}
@@ -50,11 +55,17 @@ export XDG_CONFIG_DIRS=${XDG_CONFIG_DIRS:-"/etc/xdg"}
 export XDG_DATA_DIRS=${XDG_DATA_DIRS:-"/usr/local/share/:/usr/share/"}
 export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-""}
 
-# brew
+# homebrew
 if [ -d "${HOME}/.brew" ]; then
   brew_home="${HOME}/.brew"
   [ -L "${brew_home}" ] && brew_home=$(resolve_link "${brew_home}")
   has_brew="${brew_home}/bin/brew"
+
+  # tap the core, if it doesn't exist
+  [ ! -d "${brew_home}/Library/Taps/homebrew/homebrew-core" ] && \
+  #brew_tap=$(brew tap | awk '/homebrew/{f=1} f{print; if (/}/) exit}' || false)
+  #[ -z "${brew_tap}" ] && brew tap homebrew/core
+    brew tap homebrew/core
 else
   has_brew="$(command -v brew || true)"
 fi
@@ -68,10 +79,6 @@ if [ "${has_brew}" ]; then
   brew_share="${brew_home}/share"
   string_contains $XDG_DATA_DIRS $brew_share || \
     export XDG_DATA_DIRS="${brew_share}/:${XDG_DATA_DIRS}"
-
-  # tap the core, if it doesn't exist
-  [ ! -d "${brew_home}/Library/Taps/homebrew/homebrew-core" ] && \
-    brew tap homebrew/homebrew-core
 fi
 
 # command/executable locations/existence
@@ -157,6 +164,7 @@ alias ll="ls -la"
 # use vim for vi, if available
 #[ "${has_vim}" ] && alias vi=vim
 #[ "${has_nvim}" ] && alias vi=nvim
+[ -x "/usr/local/sbin/mtr" ] && alias mtr="PATH=/usr/local/sbin:$PATH sudo mtr"
 
 # git prompt/completion
 if [ "${has_git}" ]; then
@@ -232,14 +240,17 @@ if [ "${has_java_home}" ] && [ -x "${has_java_home}" ]; then
   if [ ! "${JAVA_HOME}" ] && [ -z "${should_install_java}" ]; then
     JAVA_HOME=$($has_java_home) && export JAVA_HOME
     jdk="$(${has_java_home})"
-    jdk17="$(${has_java_home} -v 1.7)"
-    jdk18="$(${has_java_home} -v 1.8)"
+    jdk7="$(${has_java_home} -v 7 2>/dev/null)"
+    jdk8="$(${has_java_home} -v 8 2>/dev/null)"
+    jdk9="$(${has_java_home} -v 9 2>/dev/null)"
     # shellcheck disable=SC2139
     alias resetjdk="export JAVA_HOME=${jdk}"
     # shellcheck disable=SC2139
-    alias setjdk17="export JAVA_HOME=${jdk17}"
+    [ -n "${jdk7}" ] && alias setjdk7="export JAVA_HOME=${jdk7}"
     # shellcheck disable=SC2139
-    alias setjdk18="export JAVA_HOME=${jdk18}"
+    [ -n "${jdk8}" ] && alias setjdk8="export JAVA_HOME=${jdk8}"
+    # shellcheck disable=SC2139
+    [ -n "${jdk9}" ] && alias setjdk9="export JAVA_HOME=${jdk9}"
   fi
 fi
 
