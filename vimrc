@@ -420,11 +420,11 @@ if ! g:jw.opts.minimal
   Plug 'easymotion/vim-easymotion'
 
   " allow % to match more than chars
-  Plug 'matchit.zip'
+  Plug 'adelarsq/vim-matchit'
 
   " tags for source code files
   if g:jw.has.ctags
-    Plug 'taglist.vim'
+    Plug 'vim-scripts/taglist.vim'
     set tags+=./tags
     map <Leader>c :TlistToggle<CR>
     map <Leader>r :!ctags -R --exclude=.git --exclude=logs --exclude=doc .<CR>
