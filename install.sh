@@ -1,7 +1,8 @@
 #!/bin/sh -e
 
-cwd=$(dirname -- "$0")
-ignore="README.md install.sh iterm.base16.itermcolors"
+#cwd=$(dirname -- "$0")
+cwd=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+ignore="README.md install.sh base16-default.dark.itermcolors iterm.base16.itermcolors"
 
 if [ -n "${XDG_CONFIG_HOME}" ]; then
   ignore="${ignore} vimrc"
