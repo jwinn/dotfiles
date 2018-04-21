@@ -22,9 +22,9 @@ str_in() { [ "${1#*$2}" != "$1" ] && return 0 || return 1; }
 
 for file in "${cwd}"/[!.]*;
 do
-	filename=$(basename -- "${file}")
-	if [ -f "${file}" ] && ! str_in "${ignore}" "${filename}"; then
-		ln -sf "${file}" "${HOME}/.${filename}"
-		printf "linked %s -> %s\\n" "${file}" ".${filename}"
-	fi
+  filename=$(basename -- "${file}")
+  if [ -f "${file}" ] && ! str_in "${ignore}" "${filename}"; then
+    ln -sf "${file}" "${HOME}/.${filename}"
+    printf "linked %s -> %s\\n" "${file}" ".${filename}"
+  fi
 done

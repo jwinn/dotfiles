@@ -222,9 +222,11 @@ if [ "${has_node}" ]; then
 fi
 
 # nvm
-if [ "${has_nvm}" ]; then
+if [ "${has_nvm}" -o \( -n "${has_brew}" -a "$(brew ls --versions nvm) > /dev/null" \) ]; then
   export NVM_DIR=${NVM_DIR:-${XDG_CONFIG_HOME}/nvm}
-  [ -s "${NVM_DIR}/nvm.sh" ] && . "${NVM_DIR}/nvm.sh"  # This loads nvm
+  [ ! -d $NVM_DIR ] && mkdir -p $NVM_DIR
+  . "/usr/local/opt/nvm/nvm.sh"
+  #[ -s "${NVM_DIR}/nvm.sh" ] && . "${NVM_DIR}/nvm.sh"  # This loads nvm
   # shellcheck disable=SC1090
   [ "${has_bash}" ] && [ -r "${NVM_DIR}/bash_completion" ] && \
     . "${NVM_DIR}/bash_completion"

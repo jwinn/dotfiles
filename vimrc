@@ -1,3 +1,5 @@
+" vim:set ft=vim et sw=2 ts=2 sts=2 tw=78 foldmethod=marker:
+
 " compatability {{{
 if &compatible
   set nocompatible
@@ -57,6 +59,7 @@ let g:jw.has = {
       \ 'go': executable('go'),
       \ 'gui': has('gui_running'),
       \ 'iterm': !empty($ITERM_PROFILE),
+      \ 'job': has('job'),
       \ 'lessc': executable('lessc'),
       \ 'lua': has('lua'),
       \ 'macvim': has('macvim'),
@@ -66,10 +69,12 @@ let g:jw.has = {
       \ 'nvim': has('nvim'),
       \ 'python': has('python'),
       \ 'python3': has('python3'),
+      \ 'pythonx': has('pythonx'),
       \ 'ruby': has('ruby'),
       \ 'rustc': executable('rustc'),
       \ 'spell': has('spell'),
       \ 'termguicolors': has('termguicolors'),
+      \ 'timers': has('timers'),
       \ 'tmux': executable('tmux'),
       \ 'tsserver': executable('tsserver'),
       \ 'undo': has('persistent_undo'),
@@ -133,10 +138,10 @@ else
   let g:jw.dirs.font = expand('$HOME/.fonts')
 endif
 
-let g:jw.dirs.backup = expand(g:jw.dirs.cache . '/.backup')
+let g:jw.dirs.backup = expand(g:jw.dirs.cache . '/backup')
 let g:jw.dirs.plugin = expand(g:jw.dirs.vim . '/plugged')
 let g:jw.dirs.undo = expand(g:jw.dirs.cache . '/undo')
-let g:jw.dirs.viminfo = expand(g:jw.dirs.cache . '/viminfo')
+let g:jw.dirs.viminfo = expand(g:jw.dirs.cache)
 " }}}
 
 " used for color determinations
@@ -307,11 +312,20 @@ endif
 " }}}
 
 " set directories to those provided {{{
-let &backupdir = g:jw.dirs.backup . ',' . &backupdir " .bak files
-let &directory = g:jw.dirs.backup . ',' . &directory " .swp files
-let &viminfo = &viminfo . 'n' . g:jw.dirs.viminfo
+if stridx(&backupdir, g:jw.dirs.backup) == -1
+  let &backupdir = g:jw.dirs.backup . ',' . &backupdir " .bak files
+endif
+if stridx(&directory, g:jw.dirs.backup) == -1
+  let &directory = g:jw.dirs.backup . ',' . &directory " .swp files
+endif
+if stridx(&viminfo, g:jw.dirs.viminfo) == -1
+  call s:MakeDir(expand(g:jw.dirs.viminfo))
+  let &viminfo = &viminfo . ',n' . g:jw.dirs.viminfo . '/viminfo'
+  "silent! execute 'set viminfo+=n' . g:jw.dirs.viminfo
+endif
 if g:jw.has.undo
   set undofile
+  call s:MakeDir(expand(g:jw.dirs.undo))
   let &undodir = g:jw.dirs.undo
 endif
 
@@ -335,11 +349,18 @@ if g:jw.has.nvim
 endif
 
 "set cursorline
+set number
+set ignorecase smartcase
 set expandtab shiftwidth=2 tabstop=2 softtabstop=2
-"set hlsearch
+set incsearch hlsearch
+
 set pastetoggle=<F12>
 "set textwidth=80
 set title
+
+set fillchars=vert:\ ,fold:\  listchars=tab:⎸\ ,nbsp:⎕
+set linebreak showbreak=↪\  breakindent breakindentopt=shift:-2
+set formatoptions+=nj
 " }}}
 
 " colorcolumn config {{{
@@ -367,11 +388,14 @@ endif
 if g:jw.has.spell
   call s:MakeDir(expand(g:jw.dirs.vim . '/spells'))
   let &spellfile = expand(g:jw.dirs.vim . '/spell/custom.en.utf-8.add')
+
   if g:jw.has.256color
     highlight SpellErrors guibg=#8700af ctermbg=91
   else
     highlight SpellErrors ctermbg=5 ctermfg=0
   endif
+
+  set spell
 endif
 " }}}
 
@@ -381,9 +405,11 @@ nnoremap <Leader>sv :source $MYVIMRC<CR>
 
 inoremap jj <Esc>
 
+nnoremap <Leader><Leader>h :setlocal hlsearch!<CR>
+
 " provide functions to other scripts
-nnoremap <Leader>N :setlocal number!<CR>
-nnoremap <Leader>$ :call <SID>TrimTrailingWhitespace()<CR>
+nnoremap <Leader><Leader>n :setlocal number!<CR>
+nnoremap <Leader><Leader>$ :call <SID>TrimTrailingWhitespace()<CR>
 " }}}
 
 " abbreviations {{{
@@ -413,6 +439,14 @@ Plug 'tpope/vim-sensible'
 
 " install more plugins if minimal is falsy {{{
 if ! g:jw.opts.minimal
+  " ack file searcher
+  if g:jw.has.ack
+    Plug 'mileszs/ack.vim'
+    if g:jw.has.ag
+      let g:ackprg = 'ag --vimgrep'
+    endif
+  endif
+
   " code in the dark (aka power mode)
   Plug 'mattn/vim-particle', { 'on': 'ParticleOn' }
 
@@ -430,6 +464,15 @@ if ! g:jw.opts.minimal
     map <Leader>r :!ctags -R --exclude=.git --exclude=logs --exclude=doc .<CR>
   endif
 
+  " editorconfig support
+  Plug 'editorconfig/editorconfig-vim'
+  " ensure plugin works with fugitive
+  let g:EditorConfig_exclude_patterns = ['fugitive://.*']
+  " do not load remote files over ssh
+  "let g:EditorConfig_exclude_patterns = ['scp://.*']
+  "let g:EditorConfig_disable_rules = ['trim_trailing_whitespace']
+  "let g:EditorConfig_exec_path = ''
+
   " ColorScheme
   Plug 'chriskempson/base16-vim'
   if g:jw.has.256color
@@ -439,6 +482,9 @@ if ! g:jw.opts.minimal
   Plug 'morhetz/gruvbox'
   Plug 'altercation/vim-colors-solarized'
   Plug 'colepeters/spacemacs-theme.vim'
+
+  " inline colors
+  Plug 'chrisbra/Colorizer'
 
   " improve? netrw
   Plug 'tpope/vim-vinegar'
@@ -534,6 +580,10 @@ if ! g:jw.opts.minimal
   " demarcate indentation
   Plug 'nathanaelkane/vim-indent-guides'
   let g:indent_guides_enable_on_vim_startup = 1
+  "Plug 'Yggdroot/indentLine'
+  "let g:indentLine_setColors = 0
+  "let g:indentLine_char = '┆'
+  "let g:indentLine_char = '│'
 
   " multiple cursors
   Plug 'terryma/vim-multiple-cursors'
@@ -543,6 +593,7 @@ if ! g:jw.opts.minimal
   " }}}
 
   " General Programming {{{
+
   " Gist creation
   Plug 'mattn/gist-vim'
   let g:gist_clip_command = 'xclip -selection clipboard'
@@ -561,54 +612,62 @@ if ! g:jw.opts.minimal
   " git wrapper
   Plug 'tpope/vim-fugitive'
 
-  " git status per line
-  Plug 'airblade/vim-gitgutter'
+  " git (other scc) status per line
+  "Plug 'airblade/vim-gitgutter'
+  Plug 'mhinz/vim-signify'
   " }}}
 
+  " Single package for languages
+  Plug 'sheerun/vim-polyglot'
+  let g:vim_markdown_conceal = 0
+
   " Clojure
-  Plug 'tpope/vim-fireplace'
-  Plug 'guns/vim-clojure-static'
-  Plug 'vim-scripts/paredit.vim'
+  "Plug 'tpope/vim-fireplace'
+  "Plug 'guns/vim-clojure-static'
+  "Plug 'vim-scripts/paredit.vim'
 
   " CSS {{{
-  let g:cssColorVimDoNotMessMyUpdatetime = 1
-  highlight VendorPrefix guifg=#00ffff gui=bold
-  match VendorPrefix /-\(moz\|webkit\|o\|ms\)-[a-zA-Z-]\+/
+  "let g:cssColorVimDoNotMessMyUpdatetime = 1
+  "highlight VendorPrefix guifg=#00ffff gui=bold
+  "match VendorPrefix /-\(moz\|webkit\|o\|ms\)-[a-zA-Z-]\+/
   " }}}
 
   " Elixir
-  Plug 'elixir-lang/vim-elixir'
-  Plug 'slashmili/alchemist.vim'
+  "Plug 'elixir-lang/vim-elixir'
+  "Plug 'slashmili/alchemist.vim'
 
-  if g:jw.has.elm
-    Plug 'lambdatoast/elm.vim'
-    nnoremap <leader>el :ElmEvalLine<CR>
-    vnoremap <leader>es :<C-u>ElmEvalSelection<CR>
-    nnoremap <leader>em :ElmMakeCurrentFile<CR>
+  "if g:jw.has.elm
+  "  Plug 'lambdatoast/elm.vim'
+  "  nnoremap <leader>el :ElmEvalLine<CR>
+  "  vnoremap <leader>es :<C-u>ElmEvalSelection<CR>
+  "  nnoremap <leader>em :ElmMakeCurrentFile<CR>
     "autocmd BufWritePost *.elm ElmMakeCurrentFile
     "autocmd BufWritePost *.elm ElmMakeFile("Main.elm")
-  endif
+  "endif
 
   " Go {{{
-  if g:jw.has.go
-    Plug 'fatih/vim-go', { 'for': 'go' }
-    augroup vimGo
-      autocmd!
+  "if g:jw.has.go
+  "  Plug 'fatih/vim-go', { 'for': 'go' }
+  "  augroup vimGo
+  "    autocmd!
 
-      autocmd FileType go nmap <Leader>s <Plug>(go-implements)
-      autocmd FileType go nmap <Leader>i <Plug>(go-info)
-      autocmd FileType go nmap <Leader>t <Plug>(go-test)
-    augroup END
-  endif
+  "    autocmd FileType go nmap <Leader>s <Plug>(go-implements)
+  "    autocmd FileType go nmap <Leader>i <Plug>(go-info)
+  "    autocmd FileType go nmap <Leader>t <Plug>(go-test)
+  "  augroup END
+  "endif
   " }}}
 
   " HTML
-  Plug 'mattn/emmet-vim', { 'for': 'html' }
-  Plug 'othree/html5.vim', { 'for': 'html' }
-  Plug 'mustache/vim-mustache-handlebars'
+  Plug 'mattn/emmet-vim'
+  "Plug 'othree/html5.vim', { 'for': 'html' }
+  "Plug 'mustache/vim-mustache-handlebars'
 
   " JavaScript {{{
-  Plug 'pangloss/vim-javascript', { 'for': ['javascript','javascript.jsx'] }
+  "Plug 'pangloss/vim-javascript', { 'for': ['javascript','javascript.jsx'] }
+  if g:jw.has.node && g:jw.has.npm
+    Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
+  endif
 
   " insert JSDoc pieces
   Plug 'heavenshell/vim-jsdoc', { 'for': ['javascript','javascript.jsx'] }
@@ -618,54 +677,62 @@ if ! g:jw.opts.minimal
   " since v0.3 there is no longer a default mapping
   nmap <silent> <leader>jd <Plug>(jsdoc)
 
-  Plug 'elzr/vim-json', { 'for': ['javascript','javascript.jsx', 'json'] }
+  "Plug 'elzr/vim-json', { 'for': ['javascript','javascript.jsx', 'json'] }
 
-  Plug 'mxw/vim-jsx', { 'for': ['javascript','javascript.jsx'] }
-  let g:jsx_ext_required = 0
+  "Plug 'mxw/vim-jsx', { 'for': ['javascript','javascript.jsx'] }
+  "let g:jsx_ext_required = 0
   " }}}
 
   " LESS
-  Plug 'groenewege/vim-less' " LESS support
-  if g:jw.has.lessc
-    nnoremap <Leader>m :w <BAR> !lessc % > %:t:r.css<CR><space>
-  endif
+  "Plug 'groenewege/vim-less' " LESS support
+  "if g:jw.has.lessc
+  "  nnoremap <Leader>m :w <BAR> !lessc % > %:t:r.css<CR><space>
+  "endif
 
   " Markdown
-  Plug 'godlygeek/tabular'
-  Plug 'plasticboy/vim-markdown'
-  let g:vim_markdown_frontmatter = 1
+  "Plug 'godlygeek/tabular'
+  "Plug 'plasticboy/vim-markdown'
+  "let g:vim_markdown_frontmatter = 1
+
+  " PHP
+  Plug 'lvht/phpcd.vim', { 'for': 'php', 'do': 'composer install' }
+  let g:PHP_outdentphpescape = 0
+  if exists('*g:deoplete#enable')
+    let g:deoplete#ignore_sources = get(g:, 'deoplete#ignore_sources', {})
+    let g:deoplete#ignore_sources.php = ['omni']
+  endif
 
   " Ruby {{{
-  if g:jw.has.ruby
-    Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
-    Plug 'tpope/vim-rails', { 'for': 'ruby' }
-    Plug 'thoughtbot/vim-rspec', { 'for': 'ruby' }
-    let g:ruby_fold = 1
-    let g:rspec_command = "Dispatch rspec {spec}"
-    map <Leader>t :call RunCurrentSpecFile()<CR>
-    map <Leader>s :call RunNearestSpec()<CR>
-    map <Leader>l :call RunLastSpec()<CR>
-    map <Leader>a :call RunAllSpecs()<CR>
+  "if g:jw.has.ruby
+  "  Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
+  "  Plug 'tpope/vim-rails', { 'for': 'ruby' }
+  "  Plug 'thoughtbot/vim-rspec', { 'for': 'ruby' }
+  "  let g:ruby_fold = 1
+  "  let g:rspec_command = "Dispatch rspec {spec}"
+  "  map <Leader>t :call RunCurrentSpecFile()<CR>
+  "  map <Leader>s :call RunNearestSpec()<CR>
+  "  map <Leader>l :call RunLastSpec()<CR>
+  "  map <Leader>a :call RunAllSpecs()<CR>
 
-    Plug 'hwartig/vim-seeing-is-believing'
-    augroup seeingIsBelievingSettings
-      autocmd!
+  "  Plug 'hwartig/vim-seeing-is-believing'
+  "  augroup seeingIsBelievingSettings
+  "    autocmd!
 
-      autocmd FileType ruby nmap <Buffer> <Enter> <Plug>(seeing-is-believing-mark-and-run)
-      autocmd FileType ruby xmap <Buffer> <Enter> <Plug>(seeing-is-believing-mark-and-run)
+  "    autocmd FileType ruby nmap <Buffer> <Enter> <Plug>(seeing-is-believing-mark-and-run)
+  "    autocmd FileType ruby xmap <Buffer> <Enter> <Plug>(seeing-is-believing-mark-and-run)
 
-      autocmd FileType ruby nmap <Buffer> <F4> <Plug>(seeing-is-believing-mark)
-      autocmd FileType ruby xmap <Buffer> <F4> <Plug>(seeing-is-believing-mark)
-      autocmd FileType ruby imap <Buffer> <F4> <Plug>(seeing-is-believing-mark)
+  "    autocmd FileType ruby nmap <Buffer> <F4> <Plug>(seeing-is-believing-mark)
+  "    autocmd FileType ruby xmap <Buffer> <F4> <Plug>(seeing-is-believing-mark)
+  "    autocmd FileType ruby imap <Buffer> <F4> <Plug>(seeing-is-believing-mark)
 
-      autocmd FileType ruby nmap <Buffer> <F5> <Plug>(seeing-is-believing-run)
-      autocmd FileType ruby imap <Buffer> <F5> <Plug>(seeing-is-believing-run)
-    augroup END
-  endif
+  "    autocmd FileType ruby nmap <Buffer> <F5> <Plug>(seeing-is-believing-run)
+  "    autocmd FileType ruby imap <Buffer> <F5> <Plug>(seeing-is-believing-run)
+  "  augroup END
+  "endif
   " }}}
 
   " TypeScript
-  Plug 'leafgarland/typescript-vim'
+  "Plug 'leafgarland/typescript-vim'
   if g:jw.has.tsserver
     Plug 'Quramy/tsuquyomi'
   endif
@@ -675,25 +742,61 @@ if ! g:jw.opts.minimal
     Plug 'mattn/webapi-vim'
   endif
 
-  " Linting and Completion {{{
-  if g:jw.has.nvim
-    " linting
-    Plug 'neomake/neomake', { 'on': 'Neomake' }
-    let g:neomake_javascript_enabled_makers = ['standard', 'eslint', 'flow']
+  " Linting {{{
+  if g:jw.has.job && g:jw.has.timers
+    "Plug 'neomake/neomake', { 'on': 'Neomake' }
+    "let g:neomake_javascript_enabled_makers =
+    "      \ ['standard', 'eslint', 'flow']
 
-    " completion
-    if g:jw.has.python3
-      Plug 'Shougo/deoplete.nvim', { 'on': ':UpdateRemotePlugins' }
-      let g:deoplete#enable_at_startup = 1
+    Plug 'w0rp/ale'
+    "let g:ale_linters = {
+    "      \ 'javascript': ['eslint'],
+    "      \}
+    let g:ale_sign_column_always = 1
+    let g:ale_sign_error = '⚑'
+    let g:ale_sign_warning = '⚐'
+    if exists('g:loaded_airline')
+      let g:airline#extensions#ale#enabled = 1
+    else
+      function! LinterStatus() abort
+        let l:counts = ale#statusline#Count(bufnr(''))
+
+        let l:all_errors = l:counts.error + l:counts.style_error
+        let l:all_non_errors = l:counts.total - l:all_errors
+
+        return l:counts.total == 0 ? 'OK' : printf(
+              \   '%dW %dE',
+              \   all_non_errors,
+              \   all_errors
+              \)
+      endfunction
+
+      set statusline=%{LinterStatus()}
     endif
   else
-    " use where neomake is not compatible for linting
-    Plug 'scrooloose/syntastic'
+    Plug 'vim-syntastic/syntastic'
     let g:syntastic_javascript_checkers = ['standard', 'eslint', 'flow']
     let g:syntastic_javascript_standard_exec = 'semistandard'
     autocmd bufwritepost *.js silent !semistandard % --format
     set autoread
+  endif
+  " }}}
 
+  " Completion {{{
+  if g:jw.has.timers && g:jw.has.python3
+    if g:jw.has.nvim
+      Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+    else
+      Plug 'Shougo/deoplete.nvim'
+      Plug 'roxma/nvim-yarp'
+      Plug 'roxma/vim-hug-neovim-rpc'
+      let g:deoplete#enable_yarp = 1
+    endif
+    let g:deoplete#enable_at_startup = 1
+    inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
+    inoremap <expr><s-tab> pumvisible() ? "\<c-p>" : "\<s-tab>"
+    autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
+  else
     " YouCompleteMe {{{
     if g:jw.has.python || g:jw.has.python3
       " handled by YCM below
@@ -703,9 +806,11 @@ if ! g:jw.opts.minimal
       let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
       let g:SuperTabDefaultCompletionType = '<C-n>'
 
-      let g:jw.ycm = { 'ft':
-            \ ['eelixer', 'elixer', 'javascript', 'javascript.jsx', 'typescript'],
-            \ 'opts': [] }
+      let g:jw.ycm = {
+            \ 'ft': ['eelixer', 'elixer',
+            \        'javascript', 'javascript.jsx', 'typescript'],
+            \ 'opts': []
+            \}
       if g:jw.has.dotnet || g:jw.has.xbuild
         call add(g:jw.ycm.ft, 'cs')
         call add(g:jw.ycm.opts, '--omnisharp-completer')
@@ -750,6 +855,17 @@ call plug#end()
 " }}}
 
 " Colors {{{
+if g:jw.has.termguicolors
+  set termguicolors
+  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+  let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+
+  " change cursor shape based on mode
+  let &t_SI = "\<Esc>[6 q"
+  let &t_SR = "\<Esc>[4 q"
+  let &t_EI = "\<Esc>[2 q"
+endif
+
 if g:jw.has.colorcolumn
   if g:jw.has.256color
     highlight ColorColumn guibg=#444444 ctermbg=238
@@ -779,5 +895,3 @@ if g:jw.has.conemu
   let &t_AF="\e[38;5;%dm"
 endif
 " }}}
-
-" vim:set ft=vim et sw=2 ts=2 sts=2 tw=78 foldmethod=marker:
