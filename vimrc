@@ -67,6 +67,8 @@ let g:jw.has = {
       \ 'node': executable('node'),
       \ 'npm': executable('npm'),
       \ 'nvim': has('nvim'),
+      \ 'pip': executable('pip'),
+      \ 'pip3': executable('pip3'),
       \ 'python': has('python'),
       \ 'python3': has('python3'),
       \ 'pythonx': has('pythonx'),
@@ -158,6 +160,34 @@ function! s:CopyFile(src, dest)
   if ret == 0
     return 1
   endif
+endfunction
+" }}}
+
+" s:ExecuteMacroOverVisualRange {{{
+function! s:ExecuteMacroOverVisualRange()
+  echo "@" . getcmdline()
+  execute ":'<,'>normal @" . nr2char(getchar())
+endfunction
+" }}}
+
+" s:HasPythonPackage {{{
+function! s:HasPythonPackage(pkg)
+  if !has('python') && !has('python3') && !has('pythonx')
+    return 0
+  endif
+
+  " naive approach to checking if python package is available
+  if has('python3') && executable('pip3')
+    let output = system('pip3 freeze')
+  else
+    let output = system('pip freeze')
+  endif
+
+  if stridx(output, a:pkg) == -1 
+    return 0
+  endif
+
+  return 1
 endfunction
 " }}}
 
@@ -348,6 +378,8 @@ if g:jw.has.nvim
   set t_8b=^[[48:2:%lu:%lu:%lum
 endif
 
+let &encoding = g:jw.opts.encoding
+
 "set cursorline
 set number
 set ignorecase smartcase
@@ -387,23 +419,24 @@ endif
 " spell config {{{
 if g:jw.has.spell
   call s:MakeDir(expand(g:jw.dirs.vim . '/spells'))
-  let &spellfile = expand(g:jw.dirs.vim . '/spell/custom.en.utf-8.add')
+  "let &spellfile = expand(g:jw.dirs.vim . '/spell/custom.en.utf-8.add')
 
   if g:jw.has.256color
     highlight SpellErrors guibg=#8700af ctermbg=91
   else
     highlight SpellErrors ctermbg=5 ctermfg=0
   endif
-
-  set spell
 endif
 " }}}
 
 " keymaps {{{
 nnoremap <Leader>ev :rightbelow vsplit $MYVIMRC<CR>
 nnoremap <Leader>sv :source $MYVIMRC<CR>
+nnoremap <Leader>ss :setlocal spell!<CR>
 
 inoremap jj <Esc>
+
+xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
 
 nnoremap <Leader><Leader>h :setlocal hlsearch!<CR>
 
@@ -585,14 +618,120 @@ if ! g:jw.opts.minimal
   "let g:indentLine_char = '┆'
   "let g:indentLine_char = '│'
 
-  " multiple cursors
-  Plug 'terryma/vim-multiple-cursors'
-  let g:multi_cursor_start_key = '<C-d>'
-  nnoremap <silent> <M-j> :MultipleCursorsFind <C-r>/<CR>
-  vnoremap <silent> <M-j> :MultipleCursorsFind <C-r>/<CR>
-  " }}}
-
   " General Programming {{{
+
+  " Linting {{{
+  if g:jw.has.job && g:jw.has.timers
+    "Plug 'neomake/neomake', { 'on': 'Neomake' }
+    "let g:neomake_javascript_enabled_makers =
+    "      \ ['standard', 'eslint', 'flow']
+
+    Plug 'w0rp/ale'
+    "let g:ale_linters = {
+    "      \ 'javascript': ['eslint'],
+    "      \}
+    let g:ale_sign_column_always = 1
+    let g:ale_sign_error = '⚑'
+    let g:ale_sign_warning = '⚐'
+    if exists('g:loaded_airline')
+      let g:airline#extensions#ale#enabled = 1
+    else
+      function! LinterStatus() abort
+        let l:counts = ale#statusline#Count(bufnr(''))
+
+        let l:all_errors = l:counts.error + l:counts.style_error
+        let l:all_non_errors = l:counts.total - l:all_errors
+
+        return l:counts.total == 0 ? 'OK' : printf(
+              \   '%dW %dE',
+              \   all_non_errors,
+              \   all_errors
+              \)
+      endfunction
+
+      set statusline=%{LinterStatus()}
+    endif
+  else
+    Plug 'vim-syntastic/syntastic'
+    let g:syntastic_javascript_checkers = ['standard', 'eslint', 'flow']
+    let g:syntastic_javascript_standard_exec = 'semistandard'
+    autocmd bufwritepost *.js silent !semistandard % --format
+    set autoread
+  endif
+  " }}}
+  
+  " Completion {{{
+  if g:jw.has.timers && g:jw.has.python3
+    if g:jw.has.nvim
+      Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+    else
+      " check if neovim client installed (req for vim-hug-neovim-rpc)
+      let hasnvimclient = s:HasPythonPackage('neovim')
+      if !hasnvimclient
+        echo "Installing neovim client..."
+        let nvimclientinstall = system('pip3 install neovim')
+      endif
+
+      Plug 'Shougo/deoplete.nvim'
+      Plug 'roxma/nvim-yarp'
+      Plug 'roxma/vim-hug-neovim-rpc'
+      let g:deoplete#enable_yarp = 1
+    endif
+    let g:deoplete#enable_at_startup = 1
+    inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
+    inoremap <expr><s-tab> pumvisible() ? "\<c-p>" : "\<s-tab>"
+    autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
+  else
+    " YouCompleteMe {{{
+    if g:jw.has.python || g:jw.has.python3
+      " handled by YCM below
+      Plug 'ervandew/supertab'
+
+      let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
+      let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
+      let g:SuperTabDefaultCompletionType = '<C-n>'
+
+      let g:jw.ycm = {
+            \ 'ft': ['eelixer', 'elixer',
+            \        'javascript', 'javascript.jsx', 'typescript'],
+            \ 'opts': []
+            \}
+      if g:jw.has.dotnet || g:jw.has.xbuild
+        call add(g:jw.ycm.ft, 'cs')
+        call add(g:jw.ycm.opts, '--omnisharp-completer')
+      endif
+      if g:jw.has.go
+        call add(g:jw.ycm.ft, 'go')
+        call add(g:jw.ycm.opts, '--gocode-completer')
+      endif
+      if g:jw.has.node && g:jw.has.npm
+        call add(g:jw.ycm.opts, '--tern-completer')
+      endif
+      if g:jw.has.ruby
+        call add(g:jw.ycm.ft, 'ruby')
+      endif
+      if g:jw.has.cargo || g:jw.has.rustc
+        call add(g:jw.ycm.ft, 'rustc')
+        call add(g:jw.ycm.opts, '--racer-completer')
+      endif
+
+      function! BuildYCM(info)
+        " info is a dictionary with 3 fields
+        " - name:   name of the plugin
+        " - status: 'installed', 'updated', or 'unchanged'
+        " - force:  set on PlugInstall! or PlugUpdate!
+        if a:info.status == 'installed' || a:info.force
+          execute './install.py ' . join(g:jw.ycm.opts, ' ')
+        endif
+      endfunction
+
+      Plug 'Valloric/YouCompleteMe',
+            \ { 'for': g:jw.ycm.ft, 'do': function('BuildYCM') }
+      autocmd! User YouCompleteMe call youcompleteme#Enable()
+    endif
+    " }}}
+  endif
+  " }}}
 
   " Gist creation
   Plug 'mattn/gist-vim'
@@ -695,11 +834,13 @@ if ! g:jw.opts.minimal
   "let g:vim_markdown_frontmatter = 1
 
   " PHP
-  Plug 'lvht/phpcd.vim', { 'for': 'php', 'do': 'composer install' }
-  let g:PHP_outdentphpescape = 0
-  if exists('*g:deoplete#enable')
-    let g:deoplete#ignore_sources = get(g:, 'deoplete#ignore_sources', {})
-    let g:deoplete#ignore_sources.php = ['omni']
+  if g:jw.has.job && g:jw.has.timers
+    Plug 'lvht/phpcd.vim', { 'for': 'php', 'do': 'composer install' }
+    let g:PHP_outdentphpescape = 0
+    if exists('*g:deoplete#enable')
+      let g:deoplete#ignore_sources = get(g:, 'deoplete#ignore_sources', {})
+      let g:deoplete#ignore_sources.php = ['omni']
+    endif
   endif
 
   " Ruby {{{
@@ -741,112 +882,6 @@ if ! g:jw.opts.minimal
   if g:jw.has.curl
     Plug 'mattn/webapi-vim'
   endif
-
-  " Linting {{{
-  if g:jw.has.job && g:jw.has.timers
-    "Plug 'neomake/neomake', { 'on': 'Neomake' }
-    "let g:neomake_javascript_enabled_makers =
-    "      \ ['standard', 'eslint', 'flow']
-
-    Plug 'w0rp/ale'
-    "let g:ale_linters = {
-    "      \ 'javascript': ['eslint'],
-    "      \}
-    let g:ale_sign_column_always = 1
-    let g:ale_sign_error = '⚑'
-    let g:ale_sign_warning = '⚐'
-    if exists('g:loaded_airline')
-      let g:airline#extensions#ale#enabled = 1
-    else
-      function! LinterStatus() abort
-        let l:counts = ale#statusline#Count(bufnr(''))
-
-        let l:all_errors = l:counts.error + l:counts.style_error
-        let l:all_non_errors = l:counts.total - l:all_errors
-
-        return l:counts.total == 0 ? 'OK' : printf(
-              \   '%dW %dE',
-              \   all_non_errors,
-              \   all_errors
-              \)
-      endfunction
-
-      set statusline=%{LinterStatus()}
-    endif
-  else
-    Plug 'vim-syntastic/syntastic'
-    let g:syntastic_javascript_checkers = ['standard', 'eslint', 'flow']
-    let g:syntastic_javascript_standard_exec = 'semistandard'
-    autocmd bufwritepost *.js silent !semistandard % --format
-    set autoread
-  endif
-  " }}}
-
-  " Completion {{{
-  if g:jw.has.timers && g:jw.has.python3
-    if g:jw.has.nvim
-      Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-    else
-      Plug 'Shougo/deoplete.nvim'
-      Plug 'roxma/nvim-yarp'
-      Plug 'roxma/vim-hug-neovim-rpc'
-      let g:deoplete#enable_yarp = 1
-    endif
-    let g:deoplete#enable_at_startup = 1
-    inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
-    inoremap <expr><s-tab> pumvisible() ? "\<c-p>" : "\<s-tab>"
-    autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
-  else
-    " YouCompleteMe {{{
-    if g:jw.has.python || g:jw.has.python3
-      " handled by YCM below
-      Plug 'ervandew/supertab'
-
-      let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
-      let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
-      let g:SuperTabDefaultCompletionType = '<C-n>'
-
-      let g:jw.ycm = {
-            \ 'ft': ['eelixer', 'elixer',
-            \        'javascript', 'javascript.jsx', 'typescript'],
-            \ 'opts': []
-            \}
-      if g:jw.has.dotnet || g:jw.has.xbuild
-        call add(g:jw.ycm.ft, 'cs')
-        call add(g:jw.ycm.opts, '--omnisharp-completer')
-      endif
-      if g:jw.has.go
-        call add(g:jw.ycm.ft, 'go')
-        call add(g:jw.ycm.opts, '--gocode-completer')
-      endif
-      if g:jw.has.node && g:jw.has.npm
-        call add(g:jw.ycm.opts, '--tern-completer')
-      endif
-      if g:jw.has.ruby
-        call add(g:jw.ycm.ft, 'ruby')
-      endif
-      if g:jw.has.cargo || g:jw.has.rustc
-        call add(g:jw.ycm.ft, 'rustc')
-        call add(g:jw.ycm.opts, '--racer-completer')
-      endif
-
-      function! BuildYCM(info)
-        " info is a dictionary with 3 fields
-        " - name:   name of the plugin
-        " - status: 'installed', 'updated', or 'unchanged'
-        " - force:  set on PlugInstall! or PlugUpdate!
-        if a:info.status == 'installed' || a:info.force
-          execute './install.py ' . join(g:jw.ycm.opts, ' ')
-        endif
-      endfunction
-
-      Plug 'Valloric/YouCompleteMe',
-            \ { 'for': g:jw.ycm.ft, 'do': function('BuildYCM') }
-      autocmd! User YouCompleteMe call youcompleteme#Enable()
-    endif
-    " }}}
-  endif
-  " }}}
 endif
 " }}}
 
