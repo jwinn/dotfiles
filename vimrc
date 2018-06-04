@@ -54,6 +54,7 @@ let g:jw.has = {
       \ 'ctags': executable('ctags'),
       \ 'dash': g:jw.sys.darwin && isdirectory('/Applications/Dash.app'),
       \ 'dotnet': executable('dotnet'),
+      \ 'editorconfig': executable('editorconfig'),
       \ 'elm': executable('elm'),
       \ 'fzf': executable('fzf'),
       \ 'go': executable('go'),
@@ -498,13 +499,25 @@ if ! g:jw.opts.minimal
   endif
 
   " editorconfig support
-  Plug 'editorconfig/editorconfig-vim'
-  " ensure plugin works with fugitive
-  let g:EditorConfig_exclude_patterns = ['fugitive://.*']
-  " do not load remote files over ssh
-  "let g:EditorConfig_exclude_patterns = ['scp://.*']
-  "let g:EditorConfig_disable_rules = ['trim_trailing_whitespace']
-  "let g:EditorConfig_exec_path = ''
+  if (g:jw.has.python || g:jw.has.python3) && g:jw.has.editorconfig
+    " only supports python 2?
+    Plug 'editorconfig/editorconfig-vim'
+    " ensure plugin works with fugitive
+    let g:EditorConfig_exclude_patterns = ['fugitive://.*']
+    " do not load remote files over ssh
+    "let g:EditorConfig_exclude_patterns = ['scp://.*']
+    "let g:EditorConfig_exclude_patterns = ['fugitive://.*', 'scp://.*']
+    "let g:EditorConfig_disable_rules = ['trim_trailing_whitespace']
+    "let g:EditorConfig_exec_path = ''
+    let g:EditorConfig_exec_path = trim(system('command -v editorconfig'))
+  else
+    Plug 'sgur/vim-editorconfig'
+    "let g:editorconfig_verbose = 1
+    "let g:editorconfig_local_vimrc = 1
+    let g:editorconfig_blacklist = {
+          \ 'filetype': ['git.*', 'fugitive'],
+          \ 'pattern': ['\.un~$']}
+  endif
 
   " ColorScheme
   Plug 'chriskempson/base16-vim'
