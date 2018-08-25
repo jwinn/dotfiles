@@ -6,3 +6,5 @@
 	name = Jon Winn
 	email = me@jonwinn.com
 
+[core]
+	editor = vim

@@ -509,7 +509,8 @@ if ! g:jw.opts.minimal
     "let g:EditorConfig_exclude_patterns = ['fugitive://.*', 'scp://.*']
     "let g:EditorConfig_disable_rules = ['trim_trailing_whitespace']
     "let g:EditorConfig_exec_path = ''
-    let g:EditorConfig_exec_path = trim(system('command -v editorconfig'))
+    silent let g:EditorConfig_exec_path = system('command -v editorconfig')
+    let g:EditorConfig_exec_path = substitute(g:EditorConfig_exec_path, "\n", "", "")
   else
     Plug 'sgur/vim-editorconfig'
     "let g:editorconfig_verbose = 1
@@ -749,10 +750,6 @@ if ! g:jw.opts.minimal
   " Gist creation
   Plug 'mattn/gist-vim'
   let g:gist_clip_command = 'xclip -selection clipboard'
-
-  " comments
-  Plug 'scrooloose/nerdcommenter'
-  let g:NERDSpaceDelims = 1
 
   " async builds
   Plug 'tpope/vim-dispatch'
