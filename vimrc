@@ -68,19 +68,24 @@ let g:jw.has = {
       \ 'node': executable('node'),
       \ 'npm': executable('npm'),
       \ 'nvim': has('nvim'),
+      \ 'packages': has('packages'),
       \ 'pip': executable('pip'),
       \ 'pip3': executable('pip3'),
       \ 'python': has('python'),
       \ 'python3': has('python3'),
       \ 'pythonx': has('pythonx'),
+      \ 'ranger': executable('ranger'),
+      \ 'rg': executable('rg'),
       \ 'ruby': has('ruby'),
       \ 'rustc': executable('rustc'),
       \ 'spell': has('spell'),
       \ 'termguicolors': has('termguicolors'),
+      \ 'terminal': has('terminal'),
       \ 'timers': has('timers'),
       \ 'tmux': executable('tmux'),
       \ 'tsserver': executable('tsserver'),
       \ 'undo': has('persistent_undo'),
+      \ 'virtualedit': has('virtualedit'),
       \ 'xbuild': executable('xbuild'),
       \ }
 
@@ -105,14 +110,14 @@ let g:jw.xdg = {
 let g:jw.opts = {
       \ 'colors': {
       \   'dark': {
-      \     'airline': 'base16',
       \     'background': 'dark',
       \     'scheme': 'base16-default-dark',
+      \     'statusline': 'default',
       \   },
       \   'light': {
-      \     'airline': 'base16',
       \     'background': 'light',
       \     'scheme': 'base16-default-light',
+      \     'statusline': 'default',
       \   },
       \   'use': 'dark',
       \ },
@@ -431,19 +436,32 @@ endif
 " }}}
 
 " keymaps {{{
-nnoremap <Leader>ev :rightbelow vsplit $MYVIMRC<CR>
-nnoremap <Leader>sv :source $MYVIMRC<CR>
-nnoremap <Leader>ss :setlocal spell!<CR>
+nnoremap <silent> <Leader>ev :rightbelow vsplit $MYVIMRC<CR>
+nnoremap <silent> <Leader>sv :source $MYVIMRC<CR>
+nnoremap <silent> <Leader>ss :setlocal spell!<CR>
 
 inoremap jj <Esc>
 
 xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
 
-nnoremap <Leader><Leader>h :setlocal hlsearch!<CR>
+nnoremap <silent> <Leader><Leader>h :setlocal hlsearch!<CR>
+nnoremap <silent> <Leader><Leader>n :setlocal number!<CR>
+
+if g:jw.has.terminal || g:jw.has.nvim
+  nnoremap <silent> <Leader>t term<CR>
+  nnoremap <silent> <Leader>tv :vertical term<CR>
+endif
 
 " provide functions to other scripts
-nnoremap <Leader><Leader>n :setlocal number!<CR>
-nnoremap <Leader><Leader>$ :call <SID>TrimTrailingWhitespace()<CR>
+nnoremap <silent> <Leader><Leader>$ :call <SID>TrimTrailingWhitespace()<CR>
+if &diff
+  set cursorline
+  map ] ]c
+  map [ [c
+  hi DiffAdd    ctermfg=233 ctermbg=LightGreen guifg=#003300 guibg=#DDFFDD gui=none cterm=none
+  hi DiffChange ctermbg=white  guibg=#ececec gui=none   cterm=none
+  hi DiffText   ctermfg=233  ctermbg=yellow  guifg=#000033 guibg=#DDDDFF gui=none cterm=none
+endif
 " }}}
 
 " abbreviations {{{
@@ -494,8 +512,8 @@ if ! g:jw.opts.minimal
   if g:jw.has.ctags
     Plug 'vim-scripts/taglist.vim'
     set tags+=./tags
-    map <Leader>c :TlistToggle<CR>
-    map <Leader>r :!ctags -R --exclude=.git --exclude=logs --exclude=doc .<CR>
+    map <silent> <Leader>c :TlistToggle<CR>
+    map <silent> <Leader>r :!ctags -R --exclude=.git --exclude=logs --exclude=doc .<CR>
   endif
 
   " editorconfig support
@@ -533,14 +551,41 @@ if ! g:jw.opts.minimal
   " inline colors
   Plug 'chrisbra/Colorizer'
 
-  " improve? netrw
+  " File Browser {{{
+  " enhance netrw
   Plug 'tpope/vim-vinegar'
+  let g:netrw_altv=1
+  " let g:netrw_banner=0
+  let g:netrw_browse_split=4
+  let g:netrw_liststyle=3
+  let g:netrw_sort_by='time'
+  let g:netrw_sort_direction='reverse'
+  let g:netrw_winsize=24
+  nnoremap <silent> <Leader>x :Lexplore<CR>
+  nnoremap <silent> <Leader>sx :Sexplore<CR>
 
-  " netrw works, but NERDTree offers some extra features
-  Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
-  nmap <Leader>n :NERDTreeToggle<CR>
-  let NERDTreeHighlightCursorline = 1
-  let NERDTreeIgnore = ['tmp[[dir]]', '.yardoc', 'pkg']
+  " icons!?
+  " Plug 'ryanoasis/vim-devicons'
+
+  " if g:jw.has.ranger
+  "   Plug 'rafaqz/ranger.vim'
+  "   map <silent> <Leader>rr :RangerEdit<CR>
+  "   map <silent> <Leader>rv :RangerVSplit<CR>
+  "   map <silent> <Leader>rs :RangerSplit<CR>
+  "   map <silent> <Leader>rt :RangerTab<CR>
+  "   map <silent> <Leader>ri :RangerInsert<CR>
+  "   map <silent> <Leader>ra :RangerAppend<CR>
+  "   map <silent> <Leader>rc :set operatorfunc=RangerChangeOperator<CR>g@
+  " else
+  "   netrw works, but NERDTree offers some extra features
+  "   Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
+  "   Plug 'Xuyuanp/nerdtree-git-plugin'
+  "   nmap <silent> <Leader>t :NERDTreeToggle<CR>
+  "   let NERDTreeHighlightCursorline = 1
+  "   let NERDTreeIgnore = ['tmp[[dir]]', '.yardoc', 'pkg']
+  " endif
+  " }}}
+
 
   " async commands
   if g:jw.has.make
@@ -548,19 +593,30 @@ if ! g:jw.opts.minimal
   endif
 
   " fuzzy file finder {{{
-  if g:jw.has.fzf
-    " TODO: may want to change to XDG dir?
-    let g:jw.fzf_dir = expand($HOME . '/.fzf')
-
-    if ! isdirectory(g:jw.fzf_dir)
-      " TODO: find the fzf home
+  if g:jw.has.python3
+    if ! g:jw.has.fzf
+      " TODO: attempt to find the fzf home
+      Plug 'junegunn/fzf', {
+            \ 'dir': g:jw.fzf_dir,
+            \ 'do': './install --all'
+            \ }
     endif
-    Plug 'junegunn/fzf', {
-          \ 'dir': g:jw.fzf_dir,
-          \ 'do': './install --all'
-          \ }
+
+    if isdirectory('/usr/local/opt/fzf')
+      let g:jw.fzf_dir = '/usr/local/opt/fzf'
+    else
+      let g:jw.fzf_dir = expand($XDG_CONFIG_HOME . '/.fzf')
+    endif
+
+    Plug g:jw.fzf_dir
     Plug 'junegunn/fzf.vim'
-    map <C-p> :Files<CR>
+    nmap <C-p> :GFiles<CR>
+    nmap <silent> <Leader>p :Files<CR>
+    nmap <silent> <Leader>pa :Ag<CR>
+    nmap <silent> <Leader>pb :Buffers<CR>
+    nmap <silent> <Leader>pg :GFiles<CR>
+    nmap <silent> <Leader>pr :Rg<CR>
+    nmap <silent> <Leader>pt :Tags<CR>
   else
     Plug 'ctrlpvim/ctrlp.vim'
     " use .gitignore
@@ -613,13 +669,17 @@ if ! g:jw.opts.minimal
   " work with variants of words
   Plug 'tpope/vim-abolish'
 
-  " status line goodness -- issue with NeoVim to remedy
-  if ! g:jw.has.nvim
-    Plug 'vim-airline/vim-airline'
-    Plug 'vim-airline/vim-airline-themes'
-    let g:airline_powerline_fonts = 1
-    let g:airline_theme = s:colors.airline
-  endif
+  " surround a block of text
+  Plug 'tpope/vim-surround'
+
+  " comment support
+  Plug 'tpope/vim-commentary'
+
+  " lightline statusline
+  Plug 'itchyny/lightline.vim'
+  let g:lightline = {}
+  " let g:lightline.colorscheme = 'default'
+  let g:lightline.colorscheme = s:colors.statusline
 
   " arbitrary alignment by symbol
   Plug 'junegunn/vim-easy-align'
@@ -644,27 +704,42 @@ if ! g:jw.opts.minimal
     "let g:ale_linters = {
     "      \ 'javascript': ['eslint'],
     "      \}
+    let g:ale_fixers = {
+          \   '*': ['remove_trailing_lines', 'trim_whitespace'],
+          \   'javascript': ['prettier', 'prettier-eslint', 'eslint'],
+          \}
+    let g:ale_lint_on_text_changed = 'never'
+    let g:ale_lint_on_enter = 0
+    " let g:ale_lint_on_save = 1
     let g:ale_sign_column_always = 1
     let g:ale_sign_error = '⚑'
     let g:ale_sign_warning = '⚐'
-    if exists('g:loaded_airline')
-      let g:airline#extensions#ale#enabled = 1
-    else
-      function! LinterStatus() abort
-        let l:counts = ale#statusline#Count(bufnr(''))
+    nmap <silent> <Leader>ld <Plug>(ale_detail)
+    nmap <silent> <Leader>lf <Plug>(ale_fix)
+    nmap <silent> <Leader>lg <Plug>(ale_go_to_definition)
+    nmap <silent> <Leader>ll <Plug>(ale_lint)
+    nmap <silent> <Leader>ln <Plug>(ale_next_wrap)
+    nmap <silent> <Leader>lo <Plug>(ale_open_list)
+    nmap <silent> <Leader>lp <Plug>(ale_previous_wrap)
+    nmap <silent> <Leader>lr <Plug>(ale_find_references)
 
-        let l:all_errors = l:counts.error + l:counts.style_error
-        let l:all_non_errors = l:counts.total - l:all_errors
-
-        return l:counts.total == 0 ? 'OK' : printf(
-              \   '%dW %dE',
-              \   all_non_errors,
-              \   all_errors
-              \)
-      endfunction
-
-      set statusline=%{LinterStatus()}
-    endif
+    Plug 'maximbaz/lightline-ale'
+    let g:lightline.component_expand = {
+          \  'linter_checking': 'lightline#ale#checking',
+          \  'linter_warnings': 'lightline#ale#warnings',
+          \  'linter_errors': 'lightline#ale#errors',
+          \  'linter_ok': 'lightline#ale#ok',
+          \}
+    let g:lightline.component_type = {
+          \  'linter_checking': 'left',
+          \  'linter_warnings': 'warning',
+          \  'linter_errors': 'error',
+          \  'linter_ok': 'left',
+          \}
+    " let g:lightline#ale#indicator_checking = "\uf110"
+    " let g:lightline#ale#indicator_warnings = "\uf071"
+    " let g:lightline#ale#indicator_errors = "\uf05e"
+    " let g:lightline#ale#indicator_ok = "\uf00c"
   else
     Plug 'vim-syntastic/syntastic'
     let g:syntastic_javascript_checkers = ['standard', 'eslint', 'flow']
@@ -672,28 +747,31 @@ if ! g:jw.opts.minimal
     autocmd bufwritepost *.js silent !semistandard % --format
     set autoread
   endif
+
+  if g:jw.has.npm
+    " post install (npm install) then load plugin only for editing supported files
+    Plug 'prettier/vim-prettier', {
+          \ 'do': 'npm install',
+          \ 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql', 'markdown', 'vue'] }
+    if g:jw.has.job
+      let g:prettier#exec_cmd_async = 1  
+    endif
+    nmap <silent> <Leader>py <Plug>(Prettier)
+  endif
   " }}}
-  
+
   " Completion {{{
   if g:jw.has.timers && g:jw.has.python3
     if g:jw.has.nvim
       Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
     else
-      " check if neovim client installed (req for vim-hug-neovim-rpc)
-      let hasnvimclient = s:HasPythonPackage('neovim')
-      if !hasnvimclient
-        echo "Installing neovim client..."
-        let nvimclientinstall = system('pip3 install neovim')
-      endif
-
       Plug 'Shougo/deoplete.nvim'
       Plug 'roxma/nvim-yarp'
       Plug 'roxma/vim-hug-neovim-rpc'
-      let g:deoplete#enable_yarp = 1
     endif
     let g:deoplete#enable_at_startup = 1
-    inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
-    inoremap <expr><s-tab> pumvisible() ? "\<c-p>" : "\<s-tab>"
+    " inoremap <expr><Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+    " inoremap <expr><S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
     autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
   else
     " YouCompleteMe {{{
@@ -818,13 +896,22 @@ if ! g:jw.opts.minimal
     Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
   endif
 
+  if g:jw.has.timers
+    Plug 'ruanyl/coverage.vim'
+    let g:coverage_json_report_path = 'coverage/coverage-final.json'
+    " let g:coverage_sign_covered = '⦿'
+    " let g:coverage_interval = 5000
+    " let g:coverage_show_covered = 1
+    " let g:coverage_show_uncovered = 0
+  endif
+
   " insert JSDoc pieces
   Plug 'heavenshell/vim-jsdoc', { 'for': ['javascript','javascript.jsx'] }
   " turn on detecting underscore starting functions as private convention
   let g:jsdoc_underscore_private = 1
   let g:jsdoc_enable_es6 = 1 " allow ES6 shorthand syntax
   " since v0.3 there is no longer a default mapping
-  nmap <silent> <leader>jd <Plug>(jsdoc)
+  nmap <silent> <Leader>jd <Plug>(jsdoc)
 
   "Plug 'elzr/vim-json', { 'for': ['javascript','javascript.jsx', 'json'] }
 

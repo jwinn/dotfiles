@@ -5,6 +5,7 @@
 [user]
 	name = Jon Winn
 	email = me@jonwinn.com
+  signingkey = 5A500C67ED348D5B
 
 [core]
 	editor = vim

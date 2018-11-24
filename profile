@@ -197,7 +197,7 @@ if [ "${has_git}" ]; then
     fi
     # git bash completion
     # shellcheck disable=SC1090
-    [ "${has_bash}" ] && [ -f "{brew_home}/etc/bash_completion" ] && \
+    [ "${has_bash}" ] && [ -f "${brew_home}/etc/bash_completion" ] && \
       . "${brew_home}/etc/bash_completion"
   fi
 fi
