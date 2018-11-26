@@ -28,3 +28,6 @@ do
     printf "linked %s -> %s\\n" "${file}" ".${filename}"
   fi
 done
+
+# add tmux plugin manager
+[ ! -d "~/.tmux/plugins/tpm" ] && git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm

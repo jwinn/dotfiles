@@ -666,6 +666,13 @@ if ! g:jw.opts.minimal
         \ }
   " }}}
 
+  " tmux
+  if g:jw.has.tmux
+    Plug 'christoomey/vim-tmux-navigator'
+    " Disable tmux navigator when zooming the Vim pane
+    let g:tmux_navigator_disable_when_zoomed = 1
+  endif
+
   " work with variants of words
   Plug 'tpope/vim-abolish'
 
