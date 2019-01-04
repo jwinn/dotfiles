@@ -112,12 +112,12 @@ let g:jw.opts = {
       \   'dark': {
       \     'background': 'dark',
       \     'scheme': 'base16-default-dark',
-      \     'statusline': 'default',
+      \     'statusline': 'base16_default',
       \   },
       \   'light': {
       \     'background': 'light',
       \     'scheme': 'base16-default-light',
-      \     'statusline': 'default',
+      \     'statusline': 'base16_default',
       \   },
       \   'use': 'dark',
       \ },
@@ -157,102 +157,6 @@ let s:colors = get(g:jw.opts.colors, g:jw.opts.colors.use, 'dark')
 " }}}
 
 " Functions {{{
-
-" s:CopyFile {{{
-function! s:CopyFile(src, dest)
-  let ret = writefile(readfile(a:src, 'b'), a:dest, 'b')
-  " writeFile returns 0 for success and -1 for failure
-  " make it truthy to vim and implicit return falsy (0)
-  if ret == 0
-    return 1
-  endif
-endfunction
-" }}}
-
-" s:ExecuteMacroOverVisualRange {{{
-function! s:ExecuteMacroOverVisualRange()
-  echo "@" . getcmdline()
-  execute ":'<,'>normal @" . nr2char(getchar())
-endfunction
-" }}}
-
-" s:HasPythonPackage {{{
-function! s:HasPythonPackage(pkg)
-  if !has('python') && !has('python3') && !has('pythonx')
-    return 0
-  endif
-
-  " naive approach to checking if python package is available
-  if has('python3') && executable('pip3')
-    let output = system('pip3 freeze')
-  else
-    let output = system('pip freeze')
-  endif
-
-  if stridx(output, a:pkg) == -1 
-    return 0
-  endif
-
-  return 1
-endfunction
-" }}}
-
-" s:InstallFont {{{
-function! s:InstallFont(src, dest)
-  let src_font_path = expand(a:src)
-  let src_font = fnamemodify(src_font_path, ':t')
-  let dest_dir = expand(a:dest)
-  let dest_font = expand(a:dest . '/' . src_font)
-
-  if filereadable(src_font_path)
-    call s:MakeDir(dest_dir)
-
-    if !filereadable(dest_font)
-      echom 'Copying font from: "' . src_font_path .
-            \ '" to: "' . dest_font . '"'
-      call CopyFile(src_font_path, dest_font)
-
-      if g:jw.sys.win
-        echom 'Attempting to install font: ' .  dest_font
-        let font_name = fnamemodify(dest_font, ':t')
-
-        call s:PowerShellCmd([
-              \ '(New-Object-ComObject Shell.Application)' .
-              \ '.Namespace(0x14).CopyHere("' . dest_font . '", 0x10)'
-              \ ])
-
-        if filereadable(expand($windir . '/fonts/' . font_name))
-          echom 'Successfully installed font: ' . font_name
-        else
-          echoerr 'Unable to install, ' .
-                \ 'please manually install the font: ' . dest_font
-        endif
-      endif
-
-      if executable('fc-cache')
-        echom 'Updating font cache'
-        system('fc-cache -f ' . dest_dir)
-      endif
-    endif
-  endif
-endfunction
-" }}}
-
-" s:InstallFonts {{{
-function! s:InstallFonts(src, dest)
-  let src_dir = expand(a:src)
-  let dest_dir = expand(a:dest)
-
-  if isdirectory(src_dir)
-    call s:MakeDir(dest_dir)
-
-    let src_fonts = split(globpath(src_dir, '**/*.[ot]tf'), '\n')
-    for src_font in src_fonts
-      call s:InstallFont(src_font, dest_dir)
-    endfor
-  endif
-endfunction
-" }}}
 
 " s:InstallPlug {{{
 function! s:InstallPlug(vhome)
@@ -318,29 +222,18 @@ function! s:PowerShellCmd(cmds)
 endfunction
 " }}}
 
-" s:TrimTrailingWhitespace {{{
-function! s:TrimTrailingWhitespace()
-  let _s=@/
-  :%s/\s\+$//e
-  let @/=_s
-  echohl Question
-  echo 'Trailing whitespace cleared'
-  echohl none
-endfunction
-" }}}
-
 " }}}
 
 " Leader {{{
-" if g:jw.opts.leader is a space, map <Space> to <Leader>
-" otherwise, change mapleader <Leader> to g:jw.opts.leader,
+" if g:jw.opts.leader is a space, map <Space> to <leader>
+" otherwise, change mapleader <leader> to g:jw.opts.leader,
 " but retain default for local buffers
 "
-" setting here causes this to be set for any <Leader> references later
+" setting here causes this to be set for any <leader> references later
 " in the initialization sequence
 if g:jw.opts.leader ==? '\<space>' || g:jw.opts.leader == ' '
-  map <Space> <Leader>
-  map <Space><Space> <Leader><Leader>
+  map <Space> <leader>
+  map <Space><Space> <leader><leader>
 else
   let &maplocalleader = &mapleader
   let mapleader = g:jw.opts.leader
@@ -436,24 +329,29 @@ endif
 " }}}
 
 " keymaps {{{
-nnoremap <silent> <Leader>ev :rightbelow vsplit $MYVIMRC<CR>
-nnoremap <silent> <Leader>sv :source $MYVIMRC<CR>
-nnoremap <silent> <Leader>ss :setlocal spell!<CR>
+nnoremap <silent> <leader>ev :rightbelow vsplit $MYVIMRC<cr>
+nnoremap <silent> <leader>sv :source $MYVIMRC<cr>
+nnoremap <silent> <leader>ss :setlocal spell!<cr>
 
 inoremap jj <Esc>
 
-xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
+xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<cr>
 
-nnoremap <silent> <Leader><Leader>h :setlocal hlsearch!<CR>
-nnoremap <silent> <Leader><Leader>n :setlocal number!<CR>
+nnoremap <silent> <leader><leader>ww :setlocal wrap<cr>
+nnoremap <silent> <leader><leader>nw :setlocal nowrap<cr>
+
+nnoremap <silent> <leader><leader>h :setlocal hlsearch!<cr>
+nnoremap <silent> <leader><leader>n :setlocal number!<cr>
 
 if g:jw.has.terminal || g:jw.has.nvim
-  nnoremap <silent> <Leader>t term<CR>
-  nnoremap <silent> <Leader>tv :vertical term<CR>
+  nnoremap <silent> <leader>t term<cr>
+  nnoremap <silent> <leader>tv :vertical term<cr>
 endif
 
+nnoremap <leader><leader>cs :colorscheme 
+
 " provide functions to other scripts
-nnoremap <silent> <Leader><Leader>$ :call <SID>TrimTrailingWhitespace()<CR>
+nnoremap <silent> <leader><leader>$ :call <SID>TrimTrailingWhitespace()<cr>
 if &diff
   set cursorline
   map ] ]c
@@ -478,6 +376,35 @@ augroup filetypes
 augroup END
 " }}}
 
+" statusline {{{
+" s:LinterStatus {{{
+" function! s:LinterStatus() abort
+"   let l:counts = ale#statusline#Count(bufnr(''))
+
+"   let l:all_errors = l:counts.error + l:counts.style_error
+"   let l:all_non_errors = l:counts.total - l:all_errors
+
+"   return l:counts.total == 0 ? 'OK' : printf(
+"   \   '%dW %dE',
+"   \   all_non_errors,
+"   \   all_errors
+"   \)
+" endfunction
+" }}}
+
+" s:HasPaste {{{
+" function! s:HasPaste()
+"   if &paste
+"     return 'PASTE MODE  '
+"   endif
+"   return ''
+" endfunction
+" }}}
+" always show
+" set laststatus=2
+" set statusline=\ %{s:HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ %{FugitiveStatusline()}\ \ Line:\ %l\ \ Column:\ %c\ \ %{s:LinterStatus()}
+" }}}
+
 " vim-plug {{{
 " make sure plugin dir exists
 call s:MakeDir(g:jw.dirs.plugin)
@@ -499,24 +426,51 @@ if ! g:jw.opts.minimal
     endif
   endif
 
-  " code in the dark (aka power mode)
-  Plug 'mattn/vim-particle', { 'on': 'ParticleOn' }
+  " ripgrep file searcher
+  if g:jw.has.rg
+    Plug 'jremmen/vim-ripgrep'
+  endif
 
-  " helpful motion keys (<Leader><Leader> to trigger)
+  " allow plugins to repeat
+  Plug 'tpope/vim-repeat'
+
+  " sensible? key bindings
+  Plug 'tpope/vim-unimpaired'
+
+  " fancy vim start screen
+  Plug 'mhinz/vim-startify'
+
+  " helpful motion keys (<leader><leader> to trigger)
   Plug 'easymotion/vim-easymotion'
 
   " allow % to match more than chars
   Plug 'adelarsq/vim-matchit'
 
+  " work with variants of words
+  Plug 'tpope/vim-abolish'
+
+  " surround a block of text
+  Plug 'tpope/vim-surround'
+
+  " comment support
+  Plug 'tpope/vim-commentary'
+
+  " arbitrary alignment by symbol
+  Plug 'junegunn/vim-easy-align'
+
+  " demarcate indentation
+  Plug 'nathanaelkane/vim-indent-guides'
+  let g:indent_guides_enable_on_vim_startup = 1
+
   " tags for source code files
   if g:jw.has.ctags
     Plug 'vim-scripts/taglist.vim'
     set tags+=./tags
-    map <silent> <Leader>c :TlistToggle<CR>
-    map <silent> <Leader>r :!ctags -R --exclude=.git --exclude=logs --exclude=doc .<CR>
+    map <silent> <leader>c :TlistToggle<cr>
+    map <silent> <leader>r :!ctags -R --exclude=.git --exclude=logs --exclude=doc .<cr>
   endif
 
-  " editorconfig support
+  " editorconfig {{{
   if (g:jw.has.python || g:jw.has.python3) && g:jw.has.editorconfig
     " only supports python 2?
     Plug 'editorconfig/editorconfig-vim'
@@ -537,19 +491,24 @@ if ! g:jw.opts.minimal
           \ 'filetype': ['git.*', 'fugitive'],
           \ 'pattern': ['\.un~$']}
   endif
+  " }}}
 
-  " ColorScheme
+  " Colors {{{
   Plug 'chriskempson/base16-vim'
   if g:jw.has.256color
     let base16colorspace = 256
   endif
-  Plug 'w0ng/vim-hybrid'
+  Plug 'dracula/vim', { 'as': 'dracula' }
   Plug 'morhetz/gruvbox'
+  Plug 'w0ng/vim-hybrid'
+  Plug 'arcticicestudio/nord-vim'
+  Plug 'NLKNguyen/papercolor-theme'
   Plug 'altercation/vim-colors-solarized'
   Plug 'colepeters/spacemacs-theme.vim'
 
   " inline colors
   Plug 'chrisbra/Colorizer'
+  " }}}
 
   " File Browser {{{
   " enhance netrw
@@ -561,36 +520,20 @@ if ! g:jw.opts.minimal
   let g:netrw_sort_by='time'
   let g:netrw_sort_direction='reverse'
   let g:netrw_winsize=24
-  nnoremap <silent> <Leader>x :Lexplore<CR>
-  nnoremap <silent> <Leader>sx :Sexplore<CR>
+  nnoremap <silent> <leader>x :Lexplore<cr>
+  nnoremap <silent> <leader>sx :Sexplore<cr>
 
-  " icons!?
-  " Plug 'ryanoasis/vim-devicons'
-
-  " if g:jw.has.ranger
-  "   Plug 'rafaqz/ranger.vim'
-  "   map <silent> <Leader>rr :RangerEdit<CR>
-  "   map <silent> <Leader>rv :RangerVSplit<CR>
-  "   map <silent> <Leader>rs :RangerSplit<CR>
-  "   map <silent> <Leader>rt :RangerTab<CR>
-  "   map <silent> <Leader>ri :RangerInsert<CR>
-  "   map <silent> <Leader>ra :RangerAppend<CR>
-  "   map <silent> <Leader>rc :set operatorfunc=RangerChangeOperator<CR>g@
-  " else
-  "   netrw works, but NERDTree offers some extra features
-  "   Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
-  "   Plug 'Xuyuanp/nerdtree-git-plugin'
-  "   nmap <silent> <Leader>t :NERDTreeToggle<CR>
-  "   let NERDTreeHighlightCursorline = 1
-  "   let NERDTreeIgnore = ['tmp[[dir]]', '.yardoc', 'pkg']
-  " endif
-  " }}}
-
-
-  " async commands
-  if g:jw.has.make
-    Plug 'Shougo/vimproc.vim', { 'do': 'make' }
+  if g:jw.has.ranger
+    Plug 'rafaqz/ranger.vim'
+    map <silent> <leader>rr :RangerEdit<cr>
+    map <silent> <leader>rv :RangerVSplit<cr>
+    map <silent> <leader>rs :RangerSplit<cr>
+    map <silent> <leader>rt :RangerTab<cr>
+    map <silent> <leader>ri :RangerInsert<cr>
+    map <silent> <leader>ra :RangerAppend<cr>
+    map <silent> <leader>rc :set operatorfunc=RangerChangeOperator<cr>g@
   endif
+  " }}}
 
   " fuzzy file finder {{{
   if g:jw.has.python3
@@ -608,15 +551,14 @@ if ! g:jw.opts.minimal
       let g:jw.fzf_dir = expand($XDG_CONFIG_HOME . '/.fzf')
     endif
 
-    Plug g:jw.fzf_dir
-    Plug 'junegunn/fzf.vim'
-    nmap <C-p> :GFiles<CR>
-    nmap <silent> <Leader>p :Files<CR>
-    nmap <silent> <Leader>pa :Ag<CR>
-    nmap <silent> <Leader>pb :Buffers<CR>
-    nmap <silent> <Leader>pg :GFiles<CR>
-    nmap <silent> <Leader>pr :Rg<CR>
-    nmap <silent> <Leader>pt :Tags<CR>
+    Plug g:jw.fzf_dir | Plug 'junegunn/fzf.vim'
+    nmap <C-p> :GFiles<cr>
+    nmap <silent> <leader>p :Files<cr>
+    nmap <silent> <leader>pa :Ag
+    nmap <silent> <leader>pb :Buffers<cr>
+    nmap <silent> <leader>pg :GFiles<cr>
+    nmap <silent> <leader>pr :Rg
+    nmap <silent> <leader>pt :Tags<cr>
   else
     Plug 'ctrlpvim/ctrlp.vim'
     " use .gitignore
@@ -627,18 +569,6 @@ if ! g:jw.opts.minimal
   endif
   " }}}
 
-  " Snippets {{{
-  if g:jw.has.python || g:jw.has.python3
-    Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
-    let g:UltiSnipsSnippetsDir = [g:jw.dirs.vim . '/UltiSnips']
-    let g:UltiSnipsExpandTrigger = "<tab>"
-    let g:UltiSnipsJumpForwardTrigger = "<tab>"
-    let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
-    let g:UltiSnipsEditSplit = "vertical"
-  endif
-  " }}}
-
-  " Text/Visual {{{
   " Rainbow {{{
   Plug 'luochen1990/rainbow'
   let g:rainbow_active = 1 " 0 if you want to enable it later via :RainbowToggle
@@ -666,47 +596,8 @@ if ! g:jw.opts.minimal
         \ }
   " }}}
 
-  " tmux
-  if g:jw.has.tmux
-    Plug 'christoomey/vim-tmux-navigator'
-    " Disable tmux navigator when zooming the Vim pane
-    let g:tmux_navigator_disable_when_zoomed = 1
-  endif
-
-  " work with variants of words
-  Plug 'tpope/vim-abolish'
-
-  " surround a block of text
-  Plug 'tpope/vim-surround'
-
-  " comment support
-  Plug 'tpope/vim-commentary'
-
-  " lightline statusline
-  Plug 'itchyny/lightline.vim'
-  let g:lightline = {}
-  " let g:lightline.colorscheme = 'default'
-  let g:lightline.colorscheme = s:colors.statusline
-
-  " arbitrary alignment by symbol
-  Plug 'junegunn/vim-easy-align'
-
-  " demarcate indentation
-  Plug 'nathanaelkane/vim-indent-guides'
-  let g:indent_guides_enable_on_vim_startup = 1
-  "Plug 'Yggdroot/indentLine'
-  "let g:indentLine_setColors = 0
-  "let g:indentLine_char = '┆'
-  "let g:indentLine_char = '│'
-
-  " General Programming {{{
-
   " Linting {{{
   if g:jw.has.job && g:jw.has.timers
-    "Plug 'neomake/neomake', { 'on': 'Neomake' }
-    "let g:neomake_javascript_enabled_makers =
-    "      \ ['standard', 'eslint', 'flow']
-
     Plug 'w0rp/ale'
     "let g:ale_linters = {
     "      \ 'javascript': ['eslint'],
@@ -715,38 +606,21 @@ if ! g:jw.opts.minimal
           \   '*': ['remove_trailing_lines', 'trim_whitespace'],
           \   'javascript': ['prettier', 'prettier-eslint', 'eslint'],
           \}
-    let g:ale_lint_on_text_changed = 'never'
-    let g:ale_lint_on_enter = 0
-    " let g:ale_lint_on_save = 1
+    " let g:ale_lint_on_text_changed = 'never'
+    " let g:ale_lint_on_enter = 0
+    " let g:ale_fix_on_save = 1
     let g:ale_sign_column_always = 1
     let g:ale_sign_error = '⚑'
     let g:ale_sign_warning = '⚐'
-    nmap <silent> <Leader>ld <Plug>(ale_detail)
-    nmap <silent> <Leader>lf <Plug>(ale_fix)
-    nmap <silent> <Leader>lg <Plug>(ale_go_to_definition)
-    nmap <silent> <Leader>ll <Plug>(ale_lint)
-    nmap <silent> <Leader>ln <Plug>(ale_next_wrap)
-    nmap <silent> <Leader>lo <Plug>(ale_open_list)
-    nmap <silent> <Leader>lp <Plug>(ale_previous_wrap)
-    nmap <silent> <Leader>lr <Plug>(ale_find_references)
-
-    Plug 'maximbaz/lightline-ale'
-    let g:lightline.component_expand = {
-          \  'linter_checking': 'lightline#ale#checking',
-          \  'linter_warnings': 'lightline#ale#warnings',
-          \  'linter_errors': 'lightline#ale#errors',
-          \  'linter_ok': 'lightline#ale#ok',
-          \}
-    let g:lightline.component_type = {
-          \  'linter_checking': 'left',
-          \  'linter_warnings': 'warning',
-          \  'linter_errors': 'error',
-          \  'linter_ok': 'left',
-          \}
-    " let g:lightline#ale#indicator_checking = "\uf110"
-    " let g:lightline#ale#indicator_warnings = "\uf071"
-    " let g:lightline#ale#indicator_errors = "\uf05e"
-    " let g:lightline#ale#indicator_ok = "\uf00c"
+    nmap <silent> <leader>ld <Plug>(ale_detail)
+    nmap <silent> <leader>lf <Plug>(ale_fix)
+    nmap <silent> <leader>lg <Plug>(ale_go_to_definition)
+    nmap <silent> <leader>ll <Plug>(ale_lint)
+    nmap <silent> <leader>ln <Plug>(ale_next_wrap)
+    nmap <silent> <leader>lo <Plug>(ale_open_list)
+    nmap <silent> <leader>lp <Plug>(ale_previous_wrap)
+    nmap <silent> <leader>lr <Plug>(ale_find_references)
+    nmap <silent> <leader>lt <Plug>(ale_toggle)
   else
     Plug 'vim-syntastic/syntastic'
     let g:syntastic_javascript_checkers = ['standard', 'eslint', 'flow']
@@ -763,7 +637,7 @@ if ! g:jw.opts.minimal
     if g:jw.has.job
       let g:prettier#exec_cmd_async = 1  
     endif
-    nmap <silent> <Leader>py <Plug>(Prettier)
+    nmap <silent> <leader>fd <Plug>(Prettier)
   endif
   " }}}
 
@@ -849,53 +723,13 @@ if ! g:jw.opts.minimal
   " git (other scc) status per line
   "Plug 'airblade/vim-gitgutter'
   Plug 'mhinz/vim-signify'
-  " }}}
 
   " Single package for languages
   Plug 'sheerun/vim-polyglot'
   let g:vim_markdown_conceal = 0
 
-  " Clojure
-  "Plug 'tpope/vim-fireplace'
-  "Plug 'guns/vim-clojure-static'
-  "Plug 'vim-scripts/paredit.vim'
-
-  " CSS {{{
-  "let g:cssColorVimDoNotMessMyUpdatetime = 1
-  "highlight VendorPrefix guifg=#00ffff gui=bold
-  "match VendorPrefix /-\(moz\|webkit\|o\|ms\)-[a-zA-Z-]\+/
-  " }}}
-
-  " Elixir
-  "Plug 'elixir-lang/vim-elixir'
-  "Plug 'slashmili/alchemist.vim'
-
-  "if g:jw.has.elm
-  "  Plug 'lambdatoast/elm.vim'
-  "  nnoremap <leader>el :ElmEvalLine<CR>
-  "  vnoremap <leader>es :<C-u>ElmEvalSelection<CR>
-  "  nnoremap <leader>em :ElmMakeCurrentFile<CR>
-    "autocmd BufWritePost *.elm ElmMakeCurrentFile
-    "autocmd BufWritePost *.elm ElmMakeFile("Main.elm")
-  "endif
-
-  " Go {{{
-  "if g:jw.has.go
-  "  Plug 'fatih/vim-go', { 'for': 'go' }
-  "  augroup vimGo
-  "    autocmd!
-
-  "    autocmd FileType go nmap <Leader>s <Plug>(go-implements)
-  "    autocmd FileType go nmap <Leader>i <Plug>(go-info)
-  "    autocmd FileType go nmap <Leader>t <Plug>(go-test)
-  "  augroup END
-  "endif
-  " }}}
-
   " HTML
   Plug 'mattn/emmet-vim'
-  "Plug 'othree/html5.vim', { 'for': 'html' }
-  "Plug 'mustache/vim-mustache-handlebars'
 
   " JavaScript {{{
   "Plug 'pangloss/vim-javascript', { 'for': ['javascript','javascript.jsx'] }
@@ -918,7 +752,7 @@ if ! g:jw.opts.minimal
   let g:jsdoc_underscore_private = 1
   let g:jsdoc_enable_es6 = 1 " allow ES6 shorthand syntax
   " since v0.3 there is no longer a default mapping
-  nmap <silent> <Leader>jd <Plug>(jsdoc)
+  nmap <silent> <leader>jd <Plug>(jsdoc)
 
   "Plug 'elzr/vim-json', { 'for': ['javascript','javascript.jsx', 'json'] }
 
@@ -926,18 +760,7 @@ if ! g:jw.opts.minimal
   "let g:jsx_ext_required = 0
   " }}}
 
-  " LESS
-  "Plug 'groenewege/vim-less' " LESS support
-  "if g:jw.has.lessc
-  "  nnoremap <Leader>m :w <BAR> !lessc % > %:t:r.css<CR><space>
-  "endif
-
-  " Markdown
-  "Plug 'godlygeek/tabular'
-  "Plug 'plasticboy/vim-markdown'
-  "let g:vim_markdown_frontmatter = 1
-
-  " PHP
+  " PHP {{{
   if g:jw.has.job && g:jw.has.timers
     Plug 'lvht/phpcd.vim', { 'for': 'php', 'do': 'composer install' }
     let g:PHP_outdentphpescape = 0
@@ -946,34 +769,25 @@ if ! g:jw.opts.minimal
       let g:deoplete#ignore_sources.php = ['omni']
     endif
   endif
+  " }}}
 
-  " Ruby {{{
-  "if g:jw.has.ruby
-  "  Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
-  "  Plug 'tpope/vim-rails', { 'for': 'ruby' }
-  "  Plug 'thoughtbot/vim-rspec', { 'for': 'ruby' }
-  "  let g:ruby_fold = 1
-  "  let g:rspec_command = "Dispatch rspec {spec}"
-  "  map <Leader>t :call RunCurrentSpecFile()<CR>
-  "  map <Leader>s :call RunNearestSpec()<CR>
-  "  map <Leader>l :call RunLastSpec()<CR>
-  "  map <Leader>a :call RunAllSpecs()<CR>
+  " statusline {{{
+  Plug 'vim-airline/vim-airline'
+  if g:jw.has.job && g:jw.has.timers
+    let g:airline#extensions#ale#enabled = 1
+  endif
+  let g:airline#extensions#tabline#enabled = 1
+  Plug 'vim-airline/vim-airline-themes'
+  let g:airline_theme = s:colors.statusline
+  nnoremap <leader><leader>as :AirlineTheme 
+  Plug 'edkolev/promptline.vim'
+  nnoremap <leader><leader>ap :PromptlineSnapshot ~/.promptline.sh airline<cr>
+  Plug 'edkolev/tmuxline.vim'
+  " }}}
 
-  "  Plug 'hwartig/vim-seeing-is-believing'
-  "  augroup seeingIsBelievingSettings
-  "    autocmd!
-
-  "    autocmd FileType ruby nmap <Buffer> <Enter> <Plug>(seeing-is-believing-mark-and-run)
-  "    autocmd FileType ruby xmap <Buffer> <Enter> <Plug>(seeing-is-believing-mark-and-run)
-
-  "    autocmd FileType ruby nmap <Buffer> <F4> <Plug>(seeing-is-believing-mark)
-  "    autocmd FileType ruby xmap <Buffer> <F4> <Plug>(seeing-is-believing-mark)
-  "    autocmd FileType ruby imap <Buffer> <F4> <Plug>(seeing-is-believing-mark)
-
-  "    autocmd FileType ruby nmap <Buffer> <F5> <Plug>(seeing-is-believing-run)
-  "    autocmd FileType ruby imap <Buffer> <F5> <Plug>(seeing-is-believing-run)
-  "  augroup END
-  "endif
+  " tmux {{{
+  " syntax for tmux.conf
+  Plug 'tmux-plugins/vim-tmux'
   " }}}
 
   " TypeScript

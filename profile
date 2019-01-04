@@ -82,6 +82,7 @@ if [ "${has_brew}" ]; then
 fi
 
 # command/executable locations/existence
+has_asdf=$(command -v asdf || true)
 has_bash=$(printf %s "${SHELL}" | grep bash)
 has_git=$(command -v git || true)
 has_gpg=$(command -v gpg2 || true)
@@ -220,6 +221,10 @@ if [ "${has_node}" ]; then
 
   path_prepend "./node_modules/.bin"
 fi
+
+#asdf
+[ "${has_asdf}" ] && [ -f "/usr/local/opt/asdf/asdf.sh" ] && \
+  source /usr/local/opt/asdf/asdf.sh
 
 # nvm
 if [ "${has_nvm}" -o \( -n "${has_brew}" -a "$(brew ls --versions nvm) > /dev/null" \) ]; then
