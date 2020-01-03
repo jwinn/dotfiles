@@ -1,0 +1,18 @@
+# shellcheck shell=bash
+
+# shellcheck source=../common/interactive
+. "${XDG_CONFIG_HOME}"/shell/common/interactive
+
+# enable zsh completions, but only dump cache every 24h or so
+() {
+  unset IFS
+  setopt extendedglob local_options
+  local zcomp_file="${ZDOTDIR}"/.zcompdump
+
+  autoload -Uz compinit
+  if [[ -n $zcomp_file(#qN.m+1) ]]; then
+    compinit -d $zcomp_file
+  else
+    compinit -C -d $zcomp_file
+  fi
+}

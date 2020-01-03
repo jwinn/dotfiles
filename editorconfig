@@ -1,34 +1,29 @@
-; .editorconfig
+# https://EditorConfig.org
 
 root = true
 
-[**.js]
-; Path to the external file format
-; The default is taken from the lib folder inside the folder extension.
-;vim:path=~/.vim/bundle/js-beautify/js/lib/beautify.js
-; Javascript interpreter to be invoked by default 'node'
-bin=node
-indent_style = space
+[*]
+charset = utf-8
+end_of_line = lf
 indent_size = 2
-max_line_length = 78
-break-chained-methods = true
-space-in-paren = true
-wrap-line-length = 78
+indent_style = space
+insert_final_newline = true
+max_line_length = 80
+#wrap-line-length = 80
 
-[**.css]
-;vim:path=~/.vim/bundle/js-beautify/js/lib/beautify-css.js
-indent_style = space
-indent_size = 2
-max_line_length = 78
-wrap-line-length = 78
+[*.{md,markdown}]
+trim_trailing_whitespace = false
 
-[**.html]
-; Using special comments
-; And such comments or apply only in global configuration
-; So it's best to avoid them
-;vim:path=~/.vim/bundle/js-beautify/js/lib/beautify-html.js
-;vim:max_line_length=78:brace_style=collapse
-indent_style = space
-indent_size = 2
-max_line_length = 78
-wrap-line-length = 78
+# no need to modified minified JS files
+[**.min.js]
+indent_style = ignore
+insert_final_newline = ignore
+max_line_length = ignore
+#wrap-line-length = ignore
+
+[*.py]
+indent_size = 4
+
+[Makefile]
+indent_size = 4
+indent_style = tab
