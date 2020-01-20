@@ -68,7 +68,7 @@ export IRCFINGER="That tickles\
 
 # Path settings
 # add local sbin to PATH, if not found
-([ -d "/usr/local/sbin" ] && path_prepend "/usr/local/sbin"
+[ -d "/usr/local/sbin" ] && path_prepend "/usr/local/sbin"
 #path_prepend ~/bin
 #path_prepend ~/lib LD_LIBRARY_PATH
 #path_prepend ~/include CPATH

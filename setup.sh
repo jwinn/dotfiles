@@ -13,6 +13,7 @@ case "$1" in
     cp -f "${cwd}"/shell/.bash_profile "${HOME}"/.bash_profile
     cp -f "${cwd}"/shell/.bashrc "${HOME}"/.bashrc
     cp -f "${cwd}"/shell/.profile "${HOME}"/.profile
+    cp -f "${cwd}"/shell/.zlogin "${ZDOTDIR}"/.zlogin
     cp -f "${cwd}"/shell/.zlogout "${ZDOTDIR}"/.zlogout
     cp -f "${cwd}"/shell/.zshenv "${HOME}"/.zshenv
     cp -f "${cwd}"/shell/.zshrc "${ZDOTDIR}"/.zshrc
@@ -44,6 +45,7 @@ case "$1" in
       rm -f "${HOME}"/.bash_profile
       rm -f "${HOME}"/.bashrc
       rm -f "${HOME}"/.profile
+      rm -f "${ZDOTDIR}"/.zlogin
       rm -f "${ZDOTDIR}"/.zlogout
       rm -f "${HOME}"/.zshenv
       rm -f "${ZDOTDIR}"/.zshrc

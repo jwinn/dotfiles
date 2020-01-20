@@ -1,4 +1,4 @@
 # shellcheck shell=bash
 
-# shellcheck source=../common/interactive
+# shellcheck source=../common/login
 . "${XDG_CONFIG_HOME}"/shell/common/login
