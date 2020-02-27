@@ -166,29 +166,20 @@ if [ "$(command -v node || true)" ]; then
 fi
 
 # nvm
-if [ "$(command -v nvm || true)" ] || [ -d "/usr/local/opt/nvm" ]; then
-  NVM_DIR=${NVM_DIR:-${XDG_CONFIG_HOME}/nvm}
-  [ ! -d "${NVM_DIR}" ] && mkdir -p "${NVM_DIR}"
+NVM_DIR=${NVM_DIR:-${XDG_CONFIG_HOME}/nvm}
+[ ! -d "${NVM_DIR}" ] && mkdir -p "${NVM_DIR}"
 
-  if [ -s "${NVM_DIR}/nvm.sh" ]; then
-    # This loads nvm
-    # shellcheck disable=SC1090
-    . "${NVM_DIR}/nvm.sh"
+if [ -s "${NVM_DIR}/nvm.sh" ]; then
+  # This loads nvm
+  # shellcheck disable=SC1090
+  . "${NVM_DIR}/nvm.sh"
 
-    # This loads nvm bash_completion
-    [ -n "${BASH_VERSION}" ] && \
-      [ -s "${NVM_DIR}/bash_completion" ] && \
-      ssource "${NVM_DIR}/bash_completion"
-  elif [ -s "/usr/local/opt/nvm/nvm.sh" ]; then
-    # This loads nvm
-    # shellcheck disable=SC1091
-    . "/usr/local/opt/nvm/nvm.sh"
+  # This loads nvm bash_completion
+  [ -n "${BASH_VERSION}" ] && \
+    [ -s "${NVM_DIR}/bash_completion" ] && \
+    ssource "${NVM_DIR}/bash_completion"
 
-    # This loads nvm bash_completion
-    [ -n "${BASH_VERSION}" ] && \
-      [ -s "/usr/local/opt/nvm/etc/bash_completion" ] && \
-      ssource "/usr/local/opt/nvm/etc/bash_completion"
-  fi
+  alias nvm_update='nvm install node --reinstall-packages-from=node'
 fi
 
 # pyenv
