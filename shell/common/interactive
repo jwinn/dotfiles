@@ -146,6 +146,8 @@ if [ "$(command -v git || true)" ]; then
   fi
 fi
 
+[ -d "${HOME}/.cargo/bin" ] && path_prepend "${HOME}/.cargo/bin"
+
 # Load RVM into a shell session *as a function*
 # shellcheck disable=SC1090
 [ -s "${HOME}/.rvm/scripts/rvm" ] && . "${HOME}/.rvm/scripts/rvm"
