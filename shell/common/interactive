@@ -33,32 +33,36 @@ fi
 
 # homebrew
 if is_macos; then
-  (
-    if [ -d "${HOME}/.brew" ]; then
-      brew_home="${HOME}/.brew"
-      [ -L "${brew_home}" ] && brew_home=$(resolve_link "${brew_home}")
-      has_brew="${brew_home}/bin/brew"
+  if [ -d "${HOME}/.brew" ]; then
+    brew_home="${HOME}/.brew"
+    [ -L "${brew_home}" ] && brew_home=$(resolve_link "${brew_home}")
+    has_brew="${brew_home}/bin/brew"
 
-      # tap the core, if it doesn't exist
-      [ ! -d "${brew_home}/Library/Taps/homebrew/homebrew-core" ] && \
-      #brew_tap=$(brew tap | awk '/homebrew/{f=1} f{print; if (/}/) exit}' || false)
-      #[ -z "${brew_tap}" ] && brew tap homebrew/core
-        brew tap homebrew/core
-    else
-      has_brew="$(command -v brew || true)"
-    fi
+    # tap the core, if it doesn't exist
+    [ ! -d "${brew_home}/Library/Taps/homebrew/homebrew-core" ] && \
+    #brew_tap=$(brew tap | awk '/homebrew/{f=1} f{print; if (/}/) exit}' || false)
+    #[ -z "${brew_tap}" ] && brew tap homebrew/core
+      brew tap homebrew/core
 
-    if [ -n "${has_brew}" ]; then
-      brew_bin=$(dirname -- "${has_brew}")
-      path_prepend "${brew_bin}"
+    unset -v brew_home
+  else
+    [ -d "/opt/homebrew/bin" ] && path_prepend "/opt/homebrew/bin"
+    has_brew="$(command -v brew || true)"
+  fi
 
-      brew_home="$(brew --prefix)"
+  if [ -n "${has_brew}" ]; then
+    brew_bin=$(dirname -- "${has_brew}")
+    path_prepend "${brew_bin}"
 
-      brew_share="${brew_home}/share"
-      str_contains "${XDG_DATA_DIRS}" "${brew_share}" || \
-        XDG_DATA_DIRS="${brew_share}/:${XDG_DATA_DIRS}"
-    fi
-  )
+    brew_home="$(brew --prefix)"
+
+    brew_share="${brew_home}/share"
+    str_contains "${XDG_DATA_DIRS}" "${brew_share}" || \
+      XDG_DATA_DIRS="${brew_share}/:${XDG_DATA_DIRS}"
+
+    unset -v brew_bin brew_home brew_share
+  fi
+  unset -v has_brew
 fi
 
 # sshfs
@@ -144,6 +148,8 @@ if [ "$(command -v git || true)" ]; then
     [ -s "$(brew --prefix)/etc/${SHELL}_completion" ] && \
       . "$(brew --prefix)/etc/${SHELL}_completion"
   fi
+
+  unset -v git_version
 fi
 
 [ -d "${HOME}/.cargo/bin" ] && path_prepend "${HOME}/.cargo/bin"
@@ -165,6 +171,8 @@ if [ "$(command -v node || true)" ]; then
   fi
 
   path_prepend "./node_modules/.bin"
+
+  unset -v node_prefix
 fi
 
 # nvm
