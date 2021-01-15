@@ -21,7 +21,7 @@
   untracked = cyan
 
 [core]
-	editor = vim
+  editor = vim
 
 [diff]
   tool = vimdiff
@@ -31,8 +31,8 @@
   guitool = opendiff
 
 [user]
-	name = Jon Winn
-	email = me@jonwinn.com
+  name = Jon Winn
+  email = me@jonwinn.com
   signingkey = 5A500C67ED348D5B
 
 [github]
@@ -55,3 +55,6 @@
   lall = log --oneline --decorate --graph --all
   ls = log --oneline --decorate --graph --stat
   lt = log --graph --decorate --pretty=format:'%C(yellow)%h%Creset%C(auto)%d%Creset %s %Cgreen(%cr) %C(bold blue)%an%Creset'
+
+[pull]
+  rebase = false

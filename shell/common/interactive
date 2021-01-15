@@ -32,6 +32,8 @@ if [ -t 0 ]; then
 fi
 
 # homebrew
+# TODO: support homebrew on linux
+# [ -z "${HOMEBREW_PREFIX}" ] && export HOMEBREW_PREFIX=$(brew --prefix)
 if is_macos; then
   if [ -d "${HOME}/.brew" ]; then
     brew_home="${HOME}/.brew"
@@ -62,6 +64,7 @@ if is_macos; then
 
     unset -v brew_bin brew_home brew_share
   fi
+
   unset -v has_brew
 fi
 
@@ -193,7 +196,24 @@ if [ -s "${NVM_DIR}/nvm.sh" ]; then
 fi
 
 # pyenv
-[ "$(command -v pyenv || true)" ] && eval "$(pyenv init -)"
+if [ "$(command -v pyenv || true)" ]; then
+  eval "$(pyenv init -)"
+  [ "$(command -v pyenv-virtualenv || true)" ] && \
+    eval "$(pyenv virtualenv-init -)"
+
+  if [ "$(command -v brew || true)" ]; then
+    # issues related to Big Sur
+
+    brew_home=$(brew --prefix)
+    # export LDFLAGS="-L${brew_home}/opt/zlip/lib -L${brew_home}/opt/bzip2/lib"
+    # export CPPFLAGS="-L${brew_home}/opt/zlip/include -L${brew_home}/opt/bzip2/include"
+    # export CFLAGS="-I$(xcrun --show-sdk-path)/usr/include"
+
+    alias pyenv_install='CFLAGS="-I${brew_home}/openssl/include -I${brew_home}/bzip2/include -I${brew_home}/readline/include -I$(xcrun --show-sdk-path)/usr/include" LDFLAGS="-L${brew_home}/openssl/lib -L${brew_home}/readline/lib -L${brew_home}/zlib/lib -L${brew_home}/bzip2/lib" pyenv install --patch $1 < <(curl -sSL https://github.com/python/cpython/commit/8ea6353.patch\?full_index\=1)'
+
+    unset -v brew_home
+  fi
+fi
 
 # fzf
 [ -n "${BASH_VERSION}" ] && \
