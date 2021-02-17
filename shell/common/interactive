@@ -62,6 +62,8 @@ if is_macos; then
     str_contains "${XDG_DATA_DIRS}" "${brew_share}" || \
       XDG_DATA_DIRS="${brew_share}/:${XDG_DATA_DIRS}"
 
+    export HOMEBREW_NO_ANALYTICS=1
+
     unset -v brew_bin brew_home brew_share
   fi
 
