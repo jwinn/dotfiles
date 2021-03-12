@@ -2,6 +2,10 @@
 # shellcheck disable=SC2039
 # shellcheck disable=SC2059
 
+# load the generic functions, if not already loaded
+# shellcheck source=./functions
+ssource "${XDG_CONFIG_HOME}"/shell/common/functions
+
 # determine env language
 if [ -n "${LANG}" ]; then
   _PS_LANG=${LANG##*.}

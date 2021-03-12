@@ -27,7 +27,7 @@ if [ -t 0 ]; then
 
   if [ -z "${_PS_LANG}" ]; then
     # shellcheck source=./prompt
-    . "${XDG_CONFIG_HOME}"/shell/common/prompt
+    ssource "${XDG_CONFIG_HOME}"/shell/common/prompt
   fi
 fi
 
@@ -114,39 +114,39 @@ if [ "$(command -v git || true)" ]; then
 
   if [ -s "/usr/doc/git-${git_version}/contrib/completion/git-prompt.sh" ]; then
     # shellcheck disable=SC1090
-    . "/usr/doc/git-${git_version}/contrib/completion/git-prompt.sh"
+    ssource "/usr/doc/git-${git_version}/contrib/completion/git-prompt.sh"
   elif [ -s "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh" ]; then
     # shellcheck disable=SC1090
-    . "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh"
+    ssource "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh"
   elif [ -s "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh" ]; then
     # shellcheck disable=SC1090
-    . "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh"
+    ssource "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh"
   elif [ -n "${IS_MACOS}" ] && [ -s "/Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh" ]; then
     # shellcheck disable=SC1091
-    . "/Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh"
+    ssource "/Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh"
   fi
 
   # git shell completion
   if [ -s "/usr/doc/git-${git_version}/contrib/completion/git-completion.${SHELL}" ]; then
     # shellcheck disable=SC1090
-    . "/usr/doc/git-${git_version}/contrib/completion/git-completion.${SHELL}"
+    ssource "/usr/doc/git-${git_version}/contrib/completion/git-completion.${SHELL}"
   elif [ -s "/usr/local/doc/git-${git_version}/contrib/completion/git-completion.${SHELL}" ]; then
     # shellcheck disable=SC1090
-    . "/usr/local/doc/git-${git_version}/contrib/completion/git-completion.${SHELL}"
+    ssource "/usr/local/doc/git-${git_version}/contrib/completion/git-completion.${SHELL}"
   elif [ -s "/usr/local/doc/git-${git_version}/contrib/completion/git-completion.${SHELL}" ]; then
     # shellcheck disable=SC1090
-    . "/usr/local/doc/git-${git_version}/contrib/completion/git-completion.${SHELL}"
+    ssource "/usr/local/doc/git-${git_version}/contrib/completion/git-completion.${SHELL}"
   fi
 
   if [ -n "$(command -v brew || true)" ]; then
     if [ -s "$(brew --prefix)/etc/${SHELL}_completion.d/git-prompt.sh" ]; then
       # shellcheck disable=SC1090
-      . "$(brew --prefix)/etc/${SHELL}_completion.d/git-prompt.sh"
+      ssource "$(brew --prefix)/etc/${SHELL}_completion.d/git-prompt.sh"
     fi
     # git bash completion
     # shellcheck disable=SC1090
     [ -s "$(brew --prefix)/etc/${SHELL}_completion" ] && \
-      . "$(brew --prefix)/etc/${SHELL}_completion"
+      ssource "$(brew --prefix)/etc/${SHELL}_completion"
   fi
 
   unset -v git_version
@@ -156,7 +156,7 @@ fi
 
 # Load RVM into a shell session *as a function*
 # shellcheck disable=SC1090
-[ -s "${HOME}/.rvm/scripts/rvm" ] && . "${HOME}/.rvm/scripts/rvm"
+[ -s "${HOME}/.rvm/scripts/rvm" ] && ssource "${HOME}/.rvm/scripts/rvm"
 
 # rbenv config
 [ "$(command -v rbenv || true)" ] && eval "$(rbenv init -)"
