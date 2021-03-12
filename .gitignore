@@ -1,1 +1,2 @@
 .*.swp
+dotfiles/shell/zsh/.[A-Za-z]*

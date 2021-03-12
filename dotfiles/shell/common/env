@@ -30,6 +30,7 @@ case ${OS_NAME:-$(uname -s)} in
     export OS_NAME="linux"
     ;;
   MINGW*)
+    export IS_WINDOWS=1
     export OS_NAME="windows"
     ;;
 esac

@@ -34,7 +34,7 @@ fi
 # homebrew
 # TODO: support homebrew on linux
 # [ -z "${HOMEBREW_PREFIX}" ] && export HOMEBREW_PREFIX=$(brew --prefix)
-if ${IS_MACOS}; then
+if [ -n "${IS_MACOS}" ]; then
   if [ -d "${HOME}/.brew" ]; then
     brew_home="${HOME}/.brew"
     [ -L "${brew_home}" ] && brew_home=$(resolve_link "${brew_home}")
@@ -121,7 +121,7 @@ if [ "$(command -v git || true)" ]; then
   elif [ -s "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh" ]; then
     # shellcheck disable=SC1090
     . "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh"
-  elif ${IS_MACOS} && [ -s "/Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh" ]; then
+  elif [ -n "${IS_MACOS}" ] && [ -s "/Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh" ]; then
     # shellcheck disable=SC1091
     . "/Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh"
   fi
@@ -219,7 +219,7 @@ fi
 
 # Android Dev env
 if [ -z "${ANDROID_HOME-}" ]; then
-  if ${IS_MACOS}; then
+  if [ -n "${IS_MACOS}" ]; then
     export ANDROID_HOME=${HOME}/Library/Android/sdk
   else
     export ANDROID_HOME=${HOME}/Android/sdk
@@ -232,7 +232,7 @@ fi
 
 # JAVA
 # OSX java
-# if ${IS_MACOS} && [ -x "$(command -v /usr/libexec/java_home || true)" ]; then
+# if [ -n "${IS_MACOS}" ] && [ -x "$(command -v /usr/libexec/java_home || true)" ]; then
 #   has_java_home=$(command -v /usr/libexec/java_home || true)
 #   no_java_runtime=$($has_java_home 2>&1 | grep -i "no java runtime")
 #   if [ -z "${JAVA_HOME-}" ] && [ -z "${no_java_runtime}" ]; then

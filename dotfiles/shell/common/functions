@@ -27,7 +27,7 @@ unlink_file() {
 # Usage: resolve_link filename
 resolve_link() {
   if [ "$(command -v readlink || true)" ]; then
-    if ${IS_MACOS}; then
+    if [ -n "${IS_MACOS}" ]; then
       resolved=$(readlink "$1")
     else
       resolved=$(readlink -f "$1")
