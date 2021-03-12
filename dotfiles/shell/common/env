@@ -15,6 +15,24 @@ export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-""}
 [ -z "${USER-}" ] && export USER=$(whoami)
 # set OSTYPE, if not set
 [ -z "${OSTYPE-}" ] && export OSTYPE="$(uname -s)$(uname -r)"
+# set OS_NAME, if not set
+case ${OS_NAME:-$(uname -s)} in
+  CYGWIN*)
+    export IS_WINDOWS=1
+    export OS_NAME="windows"
+    ;;
+  Darwin*)
+    export IS_MACOS=1
+    export OS_NAME="macos"
+    ;;
+  Linux*)
+    export IS_LINUX=1
+    export OS_NAME="linux"
+    ;;
+  MINGW*)
+    export OS_NAME="windows"
+    ;;
+esac
 
 # We need to set $ENV so that if you use shell X as your login shell,
 # and then start "sh" as a non-login interactive shell the startup scripts will
@@ -28,7 +46,8 @@ export BASH_ENV="${XDG_CONFIG_HOME}"/shell/bash/env
 # shellcheck source=./env_functions
 . "${XDG_CONFIG_HOME}"/shell/common/env_functions
 
-# unask 0027
 # umask 0077
+umask 0027
 
+# allow for local overrides
 ssource "${XDG_CONFIG_HOME}"/shell/common/env_local

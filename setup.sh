@@ -2,66 +2,79 @@
 
 #cwd=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 cwd=$(cd -- "$(dirname -- "$0")" && pwd -P)
+dotfiles="${cwd}/dotfiles"
+
+# ensure functions exist
+if [ -z "$(command -v ssource || true)" ]; then
+  . "${dotfiles}/shell/common/env_functions"
+fi
+if [ -z "$(command -v link_file || true)" ]; then
+  ssource "${dotfiles}/shell/common/functions"
+fi
+
 # set xdg config home
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"${HOME}/.config"}
 ZDOTDIR=${ZDOTDIR:-${XDG_CONFIG_HOME}/shell/zsh}
 
 case "$1" in
   i|install)
-    mkdir -p "${ZDOTDIR}"
-    cp -f "${cwd}"/shell/.bash_logout "${HOME}"/.bash_logout
-    cp -f "${cwd}"/shell/.bash_profile "${HOME}"/.bash_profile
-    cp -f "${cwd}"/shell/.bashrc "${HOME}"/.bashrc
-    cp -f "${cwd}"/shell/.profile "${HOME}"/.profile
-    cp -f "${cwd}"/shell/.zlogin "${ZDOTDIR}"/.zlogin
-    cp -f "${cwd}"/shell/.zlogout "${ZDOTDIR}"/.zlogout
-    cp -f "${cwd}"/shell/.zshenv "${HOME}"/.zshenv
-    cp -f "${cwd}"/shell/.zshrc "${ZDOTDIR}"/.zshrc
+    create_dir "${XDG_CONFIG_HOME}"/shell
+    link_file "${dotfiles}"/shell/bash "${XDG_CONFIG_HOME}"/shell/bash
+    link_file "${dotfiles}"/shell/common "${XDG_CONFIG_HOME}"/shell/common
+    link_file "${dotfiles}"/shell/sh "${XDG_CONFIG_HOME}"/shell/sh
+    link_file "${dotfiles}"/shell/zsh "${XDG_CONFIG_HOME}"/shell/zsh
+    create_dir "${XDG_CONFIG_HOME}"/emacs
+    link_file "${dotfiles}"/emacs "${XDG_CONFIG_HOME}"/emacs/init.el
+    create_dir "${XDG_CONFIG_HOME}"/nvim
+    link_file "${dotfiles}"/vimrc "${XDG_CONFIG_HOME}"/nvim/init.vim
+    create_dir "${XDG_CONFIG_HOME}"/vim
+    link_file "${dotfiles}"/vimrc "${XDG_CONFIG_HOME}"/vim/vimrc
 
-    mkdir -p "${XDG_CONFIG_HOME}"/shell
-    cp -Rf "${cwd}/"shell/bash "${XDG_CONFIG_HOME}"/shell/
-    cp -Rf "${cwd}/"shell/common "${XDG_CONFIG_HOME}"/shell/
-    cp -Rf "${cwd}/"shell/sh "${XDG_CONFIG_HOME}"/shell/
-    cp -Rf "${cwd}/"shell/zsh "${XDG_CONFIG_HOME}"/shell/
+    link_file "${dotfiles}"/shell/.bash_logout "${HOME}"/.bash_logout
+    link_file "${dotfiles}"/shell/.bash_profile "${HOME}"/.bash_profile
+    link_file "${dotfiles}"/shell/.bashrc "${HOME}"/.bashrc
+    link_file "${dotfiles}"/shell/.profile "${HOME}"/.profile
+    link_file "${dotfiles}"/shell/.zlogin "${ZDOTDIR}"/.zlogin
+    link_file "${dotfiles}"/shell/.zlogout "${ZDOTDIR}"/.zlogout
+    link_file "${dotfiles}"/shell/.zshenv "${HOME}"/.zshenv
+    link_file "${dotfiles}"/shell/.zshrc "${ZDOTDIR}"/.zshrc
 
-    cp -Rf "${cwd}"/emacs "${XDG_CONFIG_HOME}"/emacs
-
-    mkdir -p "${XDG_CONFIG_HOME}"/nvim
-    cp -f "${cwd}"/vimrc "${XDG_CONFIG_HOME}"/nvim/init.vim
-    mkdir -p "${XDG_CONFIG_HOME}"/vim
-    cp -f "${cwd}"/vimrc "${XDG_CONFIG_HOME}"/vim/vimrc
-
-    cp -f "${cwd}"/editorconfig "${HOME}"/.editorconfig
-    cp -f "${cwd}"/gitconfig "${HOME}"/.gitconfig
-    cp -f "${cwd}"/gitignore "${HOME}"/.gitignore
-    cp -f "${cwd}"/shellcheckrc "${HOME}"/.shellcheckrc
-    cp -f "${cwd}"/tmux.conf "${HOME}"/.tmux.conf
+    link_file "${dotfiles}"/editorconfig "${HOME}"/.editorconfig
+    link_file "${dotfiles}"/gitconfig "${HOME}"/.gitconfig
+    link_file "${dotfiles}"/gitignore "${HOME}"/.gitignore
+    link_file "${dotfiles}"/shellcheckrc "${HOME}"/.shellcheckrc
+    link_file "${dotfiles}"/tmux.conf "${HOME}"/.tmux.conf
     ;;
   rm|remove)
     printf "This is destructive, are you sure? (yN)"
     read -r shell_setup_answer
     if [ -z "${shell_setup_answer#[Yy]}" ]; then
-      rm -f "${HOME}"/.bash_logout
-      rm -f "${HOME}"/.bash_profile
-      rm -f "${HOME}"/.bashrc
-      rm -f "${HOME}"/.profile
-      rm -f "${ZDOTDIR}"/.zlogin
-      rm -f "${ZDOTDIR}"/.zlogout
-      rm -f "${HOME}"/.zshenv
-      rm -f "${ZDOTDIR}"/.zshrc
+      unlink_file "${HOME}"/.editorconfig
+      unlink_file "${HOME}"/.gitconfig
+      unlink_file "${HOME}"/.gitignore
+      unlink_file "${HOME}"/.shellcheckrc
+      unlink_file "${HOME}"/.tmux.conf
 
-      rm -rf "${XDG_CONFIG_HOME}"/shell
+      unlink_file "${HOME}"/.bash_logout
+      unlink_file "${HOME}"/.bash_profile
+      unlink_file "${HOME}"/.bashrc
+      unlink_file "${HOME}"/.profile
+      unlink_file "${ZDOTDIR}"/.zlogin
+      unlink_file "${ZDOTDIR}"/.zlogout
+      unlink_file "${HOME}"/.zshenv
+      unlink_file "${ZDOTDIR}"/.zshrc
 
-      rm -rf "${XDG_CONFIG_HOME}"/emacs
-
-      rm -rf "${XDG_CONFIG_HOME}"/nvim
-      rm -rf "${XDG_CONFIG_HOME}"/vim
-
-      rm -f "${HOME}"/.editorconfig
-      rm -f "${HOME}"/.gitconfig
-      rm -f "${HOME}"/.gitignore
-      rm -f "${HOME}"/.shellcheckrc
-      rm -f "${HOME}"/.tmux.conf
+      unlink_file "${XDG_CONFIG_HOME}"/shell/bash
+      unlink_file "${XDG_CONFIG_HOME}"/shell/common
+      unlink_file "${XDG_CONFIG_HOME}"/shell/sh
+      unlink_file "${XDG_CONFIG_HOME}"/shell/zsh
+      remove_dir "${XDG_CONFIG_HOME}"/shell
+      unlink_file "${XDG_CONFIG_HOME}"/emacs/init.el
+      remove_dir "${XDG_CONFIG_HOME}"/emacs
+      unlink_file "${XDG_CONFIG_HOME}"/nvim/init.vim
+      remove_dir "${XDG_CONFIG_HOME}"/nvim
+      unlink_file "${XDG_CONFIG_HOME}"/vim/vimrc
+      remove_dir "${XDG_CONFIG_HOME}"/vim
     fi
     ;;
   *)

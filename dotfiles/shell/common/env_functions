@@ -1,4 +1,5 @@
 # shellcheck shell=sh
+# originally taken from https://heptapod.host/flowblok/shell-startup/-/blob/branch/default/.shell/env_functions
 
 # Usage: indirect_expand PATH -> $PATH
 indirect_expand () {
@@ -9,10 +10,10 @@ indirect_expand () {
 # Eg, to remove ~/bin from $PATH
 #     path_remove ~/bin PATH
 path_remove () {
-  IFS=':'
-  newpath=
-  dir=
-  var=${2:-PATH}
+  local IFS=':'
+  local newpath=
+  local dir=
+  local var=${2:-PATH}
   # Bash has ${!var}, but this is not portable.
   for dir in $(indirect_expand "$var"); do
     IFS=''
@@ -31,8 +32,8 @@ path_prepend () {
   # remove it so we can move it to the front
   path_remove "$1" "$2"
   #[ -d "${1}" ] || return
-  var="${2:-PATH}"
-  value=$(indirect_expand "${var}")
+  local var="${2:-PATH}"
+  local value=$(indirect_expand "${var}")
   export "${var}=${1}${value:+:${value}}"
 }
 
@@ -42,8 +43,8 @@ path_prepend () {
 path_append () {
   path_remove "${1}" "${2}"
   #[ -d "${1}" ] || return
-  var=${2:-PATH}
-  value=$(indirect_expand "${var}")
+  local var=${2:-PATH}
+  local value=$(indirect_expand "${var}")
   export "${var}=${value:+${value}:}${1}"
 }
 

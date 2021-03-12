@@ -2,13 +2,13 @@
 # shellcheck disable=SC2181
 
 # load the generic functions, if not already loaded
-if [ -z "$(command -v path_prepend || true)" ]; then
+if [ -z "$(command -v ssource || true)" ]; then
   # shellcheck source=./functions
   . "${XDG_CONFIG_HOME}"/shell/common/env_functions
 fi
-if [ -z "$(command -v is_macos || true)" ]; then
+if [ -z "(command -v str_contains || true)" ]; then
   # shellcheck source=./functions
-  . "${XDG_CONFIG_HOME}"/shell/common/functions
+  ssource "${XDG_CONFIG_HOME}"/shell/common/functions
 fi
 
 # put your aliases here
@@ -34,7 +34,7 @@ fi
 # homebrew
 # TODO: support homebrew on linux
 # [ -z "${HOMEBREW_PREFIX}" ] && export HOMEBREW_PREFIX=$(brew --prefix)
-if is_macos; then
+if ${IS_MACOS}; then
   if [ -d "${HOME}/.brew" ]; then
     brew_home="${HOME}/.brew"
     [ -L "${brew_home}" ] && brew_home=$(resolve_link "${brew_home}")
@@ -53,16 +53,13 @@ if is_macos; then
   fi
 
   if [ -n "${has_brew}" ]; then
-    brew_bin=$(dirname -- "${has_brew}")
-    path_prepend "${brew_bin}"
+    # per updated post-install
+    echo "eval $($has_brew shellenv)"
 
-    brew_home="$(brew --prefix)"
+    path_prepend "$(dirname -- ${has_brew})"
+    HOMEBREW_PREFIX=${HOMEBREW_PREFIX:-$($has_brew --prefix)}
 
-    brew_share="${brew_home}/share"
-    str_contains "${XDG_DATA_DIRS}" "${brew_share}" || \
-      XDG_DATA_DIRS="${brew_share}/:${XDG_DATA_DIRS}"
-
-    unset -v brew_bin brew_home brew_share
+    path_prepend "${HOMEBREW_PREFIX}/share/" XDG_DATA_DIRS
   fi
 
   unset -v has_brew
@@ -124,7 +121,7 @@ if [ "$(command -v git || true)" ]; then
   elif [ -s "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh" ]; then
     # shellcheck disable=SC1090
     . "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh"
-  elif is_macos && [ -s "/Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh" ]; then
+  elif ${IS_MACOS} && [ -s "/Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh" ]; then
     # shellcheck disable=SC1091
     . "/Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh"
   fi
@@ -201,17 +198,17 @@ if [ "$(command -v pyenv || true)" ]; then
   [ "$(command -v pyenv-virtualenv || true)" ] && \
     eval "$(pyenv virtualenv-init -)"
 
-  if [ "$(command -v brew || true)" ]; then
+  if [ -n "$HOMEBREW_PREFIX" ]; then
     # issues related to Big Sur
-
-    brew_home=$(brew --prefix)
-    # export LDFLAGS="-L${brew_home}/opt/zlip/lib -L${brew_home}/opt/bzip2/lib"
-    # export CPPFLAGS="-L${brew_home}/opt/zlip/include -L${brew_home}/opt/bzip2/include"
+    # export LDFLAGS="-L${HOMEBREW_PREFIX}/opt/zlib/lib -L${HOMEBREW_PREFIX}/opt/bzip2/lib"
+    # export CPPFLAGS="-L${HOMEBREW_PREFIX}/opt/zlib/include -L${HOMEBREW_PREFIX}/opt/bzip2/include"
     # export CFLAGS="-I$(xcrun --show-sdk-path)/usr/include"
+    # LDFLAGS="-L/opt/homebrew/opt/openssl@1.1/lib -L/opt/homebrew/opt/readline/lib"
+    # CPPFLAGS="-I/opt/homebrew/opt/openssl@1.1/include -I/opt/homebrew/opt/readline/include"
+    # path_append "/opt/homebrew/opt/openssl@1.1/lib/pkgconfig" PKG_CONFIG_PATH
+    # path_append "/opt/homebrew/opt/readline/lib/pkgconfig" PKG_CONFIG_PATH
 
-    alias pyenv_install='CFLAGS="-I${brew_home}/openssl/include -I${brew_home}/bzip2/include -I${brew_home}/readline/include -I$(xcrun --show-sdk-path)/usr/include" LDFLAGS="-L${brew_home}/openssl/lib -L${brew_home}/readline/lib -L${brew_home}/zlib/lib -L${brew_home}/bzip2/lib" pyenv install --patch $1 < <(curl -sSL https://github.com/python/cpython/commit/8ea6353.patch\?full_index\=1)'
-
-    unset -v brew_home
+    alias pyenv_install='CFLAGS="-I${HOMEBREW_PREFIX}/openssl/include -I${HOMEBREW_PREFIX}/bzip2/include -I${HOMEBREW_PREFIX}/readline/include -I$(xcrun --show-sdk-path)/usr/include" LDFLAGS="-L${HOMEBREW_PREFIX}/openssl/lib -L${HOMEBREW_PREFIX}/readline/lib -L${HOMEBREW_PREFIX}/zlib/lib -L${HOMEBREW_PREFIX}/bzip2/lib" pyenv install --patch $1 < <(curl -sSL https://github.com/python/cpython/commit/8ea6353.patch\?full_index\=1)'
   fi
 fi
 
@@ -222,7 +219,7 @@ fi
 
 # Android Dev env
 if [ -z "${ANDROID_HOME-}" ]; then
-  if is_macos; then
+  if ${IS_MACOS}; then
     export ANDROID_HOME=${HOME}/Library/Android/sdk
   else
     export ANDROID_HOME=${HOME}/Android/sdk
@@ -235,7 +232,7 @@ fi
 
 # JAVA
 # OSX java
-# if is_macos && [ -x "$(command -v /usr/libexec/java_home || true)" ]; then
+# if ${IS_MACOS} && [ -x "$(command -v /usr/libexec/java_home || true)" ]; then
 #   has_java_home=$(command -v /usr/libexec/java_home || true)
 #   no_java_runtime=$($has_java_home 2>&1 | grep -i "no java runtime")
 #   if [ -z "${JAVA_HOME-}" ] && [ -z "${no_java_runtime}" ]; then

@@ -3,9 +3,13 @@
 # Put your environment variables here
 
 # load the generic functions, if not already loaded
-if [ -z "$(command -v is_macos || true)" ]; then
+if [ -z "$(command -v ssource || true)" ]; then
   # shellcheck source=./functions
-  . "${XDG_CONFIG_HOME}"/shell/common/functions
+  . "${XDG_CONFIG_HOME}"/shell/common/env_functions
+fi
+if [ -z "$(command -v str_contains || true)" ]; then
+  # shellcheck source=./functions
+  ssource "${XDG_CONFIG_HOME}"/shell/common/functions
 fi
 
 # place the shell history in XDG folder

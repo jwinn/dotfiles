@@ -1,13 +1,13 @@
 # shellcheck shell=sh
 
-# Usage: is_macos
-is_macos() {
-  OS_NAME=${OS_NAME:-$(uname -s)}
-  if [ -z "${OS_NAME#Darwin*}" ]; then
-    return 0
-  else
-    return 1
-  fi
+# Usage: create_dir dir
+create_dir() {
+  mkdir -p "$1"
+}
+
+# Usage: remove_dir dir
+remove_dir() {
+  rmdir "$1"
 }
 
 # Usage: link_file source target
@@ -18,10 +18,16 @@ link_file() {
   fi
 }
 
+# Usage: unlink_file source target
+unlink_file() {
+  rm -f "$1"
+  printf "unlinked %s\n" "$1"
+}
+
 # Usage: resolve_link filename
 resolve_link() {
   if [ "$(command -v readlink || true)" ]; then
-    if is_macos; then
+    if ${IS_MACOS}; then
       resolved=$(readlink "$1")
     else
       resolved=$(readlink -f "$1")
