@@ -1,4 +1,6 @@
 if q_prompt "Do you want to unlink files"; then
+  ZDOTDIR="${ZDOTDIR:-${XDG_CONFIG_HOME}/shell/zsh}"
+
   unlink_file "${HOME}"/.editorconfig
   unlink_file "${HOME}"/.gitconfig
   unlink_file "${HOME}"/.gitignore
@@ -9,9 +11,9 @@ if q_prompt "Do you want to unlink files"; then
   unlink_file "${HOME}"/.bash_profile
   unlink_file "${HOME}"/.bashrc
   unlink_file "${HOME}"/.profile
+  unlink_file "${HOME}"/.zshenv
   unlink_file "${ZDOTDIR}"/.zlogin
   unlink_file "${ZDOTDIR}"/.zlogout
-  unlink_file "${HOME}"/.zshenv
   unlink_file "${ZDOTDIR}"/.zshrc
 
   unlink_file "${XDG_CONFIG_HOME}"/shell/bash

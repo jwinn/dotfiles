@@ -35,8 +35,8 @@ fi
 
 # homebrew
 # TODO: support homebrew on linux
-# [ -z "${HOMEBREW_PREFIX}" ] && export HOMEBREW_PREFIX=$(brew --prefix)
-if [ -n "${IS_MACOS}" ]; then
+# [ -z "${HOMEBREW_PREFIX-}" ] && export HOMEBREW_PREFIX=$(brew --prefix)
+if [ $IS_MACOS -eq 1 ]; then
   if [ -d "${HOME}/.brew" ]; then
     brew_home="${HOME}/.brew"
     [ -L "${brew_home}" ] && brew_home=$(resolve_link "${brew_home}")
@@ -123,7 +123,7 @@ if [ "$(command -v git || true)" ]; then
   elif [ -s "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh" ]; then
     # shellcheck disable=SC1090
     ssource "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh"
-  elif [ -n "${IS_MACOS}" ] && [ -s "/Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh" ]; then
+  elif [ $IS_MACOS -eq 1 ] && [ -s "/Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh" ]; then
     # shellcheck disable=SC1091
     ssource "/Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh"
   fi
@@ -189,22 +189,20 @@ if [ -x "${PYENV_ROOT}/bin/pyenv" ]; then
   [ "$(command -v pyenv-virtualenv || true)" ] && \
     eval "$(pyenv virtualenv-init -)"
 
-  if [ -n "${HOMEBREW_PREFIX}" ]; then
-    # issues related to Big Sur
-    # export LDFLAGS="-L${HOMEBREW_PREFIX}/opt/zlib/lib -L${HOMEBREW_PREFIX}/opt/bzip2/lib"
-    # export CPPFLAGS="-L${HOMEBREW_PREFIX}/opt/zlib/include -L${HOMEBREW_PREFIX}/opt/bzip2/include"
-    # export CFLAGS="-I$(xcrun --show-sdk-path)/usr/include"
-    # LDFLAGS="-L/opt/homebrew/opt/openssl@1.1/lib -L/opt/homebrew/opt/readline/lib"
-    # CPPFLAGS="-I/opt/homebrew/opt/openssl@1.1/include -I/opt/homebrew/opt/readline/include"
-    # path_append "/opt/homebrew/opt/openssl@1.1/lib/pkgconfig" PKG_CONFIG_PATH
-    # path_append "/opt/homebrew/opt/readline/lib/pkgconfig" PKG_CONFIG_PATH
+  if [ $IS_MACOS -eq 1 ] && [ "${OS_ARCH}" = "arm64" ]; then
+    # issues related to Big Sur and M1
+    alias pyenv="LDFLAGS=\"-L${SDKROOT}/usr/lib\" CFLAGS=\"-I${SDKROOT}/usr/include\" pyenv"
+
+    alias pyenv_install="CFLAGS=\"-I${HOMEBREW_PREFIX}/openssl/include
+    -I${HOMEBREW_PREFIX}/bzip2/include -I${HOMEBREW_PREFIX}/readline/include
+    -I${SDKROOT}/usr/include\" LDFLAGS=\"-L${HOMEBREW_PREFIX}/openssl/lib
+    -L${HOMEBREW_PREFIX}/readline/lib -L${HOMEBREW_PREFIX}/zlib/lib
+    -L${HOMEBREW_PREFIX}/bzip2/lib -L${SDKROOT}/usr/lib\" pyenv install --patch $1 < <(curl -sSL https://github.com/python/cpython/commit/8ea6353.patch\?full_index\=1)"
 
     # make pyenv play nice with homebrew and nvm
     # https://github.com/pyenv/pyenv/issues/106
-    alias brew="env PATH=\"${PATH//$(pyenv root)\/shims:/}\" brew"
-    alias nvm="PATH=\"${PATH//$(pyenv root)\/shims:/}\" nvm"
-
-    alias pyenv_install='CFLAGS="-I${HOMEBREW_PREFIX}/openssl/include -I${HOMEBREW_PREFIX}/bzip2/include -I${HOMEBREW_PREFIX}/readline/include -I$(xcrun --show-sdk-path)/usr/include" LDFLAGS="-L${HOMEBREW_PREFIX}/openssl/lib -L${HOMEBREW_PREFIX}/readline/lib -L${HOMEBREW_PREFIX}/zlib/lib -L${HOMEBREW_PREFIX}/bzip2/lib" pyenv install --patch $1 < <(curl -sSL https://github.com/python/cpython/commit/8ea6353.patch\?full_index\=1)'
+    alias brew="env PATH=\"${PATH//${PYENV_ROOT}\/shims:/}\" brew"
+    alias nvm="PATH=\"${PATH//${PYENV_ROOT}\/shims:/}\" nvm"
   fi
 fi
 
@@ -228,7 +226,7 @@ fi
 
 # Android Dev env
 if [ -z "${ANDROID_HOME-}" ]; then
-  if [ -n "${IS_MACOS}" ]; then
+  if [ $IS_MACOS -eq 1 ]; then
     export ANDROID_HOME=${HOME}/Library/Android/sdk
   else
     export ANDROID_HOME=${HOME}/Android/sdk
@@ -241,7 +239,7 @@ fi
 
 # JAVA
 # OSX java
-# if [ -n "${IS_MACOS}" ] && [ -x "$(command -v /usr/libexec/java_home || true)" ]; then
+# if [ $IS_MACOS -eq 1 ] && [ -x "$(command -v /usr/libexec/java_home || true)" ]; then
 #   has_java_home=$(command -v /usr/libexec/java_home || true)
 #   no_java_runtime=$($has_java_home 2>&1 | grep -i "no java runtime")
 #   if [ -z "${JAVA_HOME-}" ] && [ -z "${no_java_runtime}" ]; then

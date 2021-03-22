@@ -19,7 +19,7 @@ is_sourced() {
     case ${0##*/} in sh|dash) sourced=1;; esac
   fi
 
-  [ $sourced == 1 ] && return 0 || return 1
+  [ $sourced -eq 1 ] && return 0 || return 1
 }
 
 # Usage: q_prompt "Are you sure" [y]
@@ -34,7 +34,7 @@ q_prompt() {
   printf "%s? [%s/%s] " "${1}" "${yes}" "${no}"
   read answer
 
-  if [ -z "${answer}" ] && [ "${yes}" == "Y" ] || [ "${answer}" != "${answer#[Yy]}" ]; then
+  if [ -z "${answer}" ] && [ "${yes}" = "Y" ] || [ "${answer}" != "${answer#[Yy]}" ]; then
     return 0
   else
     return 1
@@ -50,7 +50,7 @@ create_dir() {
 remove_dir() {
   local recurse=${2:-0}
 
-  if [ $recurse == 1 ]; then
+  if [ $recurse -eq 1 ]; then
     rm -rf "${1}"
   else
     rmdir "${1}"

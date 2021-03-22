@@ -15,8 +15,10 @@ export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-""}
 [ -z "${USER-}" ] && export USER=$(whoami)
 # set OSTYPE, if not set
 [ -z "${OSTYPE-}" ] && export OSTYPE="$(uname -s)$(uname -r)"
+# set OS_ARCH, if not set
+[ -z "${OS_ARCH-}" ] && export OS_ARCH="$(uname -m)"
 # set OS_NAME, if not set
-case ${OS_NAME:-$(uname -s)} in
+case "${OS_NAME:-$(uname -s)}" in
   CYGWIN*)
     export IS_WINDOWS=1
     export OS_NAME="windows"
@@ -24,8 +26,22 @@ case ${OS_NAME:-$(uname -s)} in
   Darwin*)
     export IS_MACOS=1
     export OS_NAME="macos"
+
+    export OS_VERSION="$(sw_vers -productVersion)"
+    os_versions=(${OS_VERSION//./ })
+    export OS_VERSION_MAJOR="${os_versions[0]}"
+    export OS_VERSION_MINOR="${os_versions[1]}"
+    export OS_VERSION_PATCH="${os_versions[2]}"
+    export OS_VERSION_BUILD="$(sw_vers -buildVersion)"
+    export OS_VERSION_FULL="${OS_VERSION}+${OS_VERSION_BUILD}"
+    unset os_versions
+
     if [ -z "${SDKROOT-}" ]; then
       export SDKROOT="$(xcrun --show-sdk-path)"
+    fi
+
+    if [ -z "${MACOSX_DEPLOYMENT_TARGET-}" ]; then
+      export MACOSX_DEPLOYMENT_TARGET="${MACOS_MAJOR_VERSION}.${MACOS_MINOR_VERSION}"
     fi
     ;;
   Linux*)
