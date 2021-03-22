@@ -5,7 +5,7 @@
 # shells.
 
 # shellcheck source=./sh/env
-. "${XDG_CONFIG_HOME:-${HOME}/.config}"/shell/sh/env
+. "${XDG_CONFIG_HOME:-${HOME}/.config}"/shell/sh/env.sh
 
 # shellcheck source=./sh/login
-. "${XDG_CONFIG_HOME}"/shell/sh/login
+. "${XDG_CONFIG_HOME}"/shell/sh/login.sh
