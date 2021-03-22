@@ -9,13 +9,13 @@ printf "Installing for MacOS...\n"
 ssource macos/brew.bash
 
 # nvm
-ssource shared/nvm.sh
+ssource shared/nvm/install.sh
 
 # pyevm
-ssource shared/pyenv.sh
+ssource shared/pyenv/install.sh
 
 # update dotfile links
-ssource macos/link-files.bash
+ssource shared/link-files.sh
 
 # configure MacOS defaults
 # should be run once or will reset future changes

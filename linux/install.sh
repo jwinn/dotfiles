@@ -7,6 +7,13 @@ fi
 
 printf "Installing for Linux...\n"
 
+# nvm
+ssource shared/nvm/install.sh
 
+# pyevm
+ssource shared/pyenv/install.sh
+
+# update dotfile links
+ssource shared/link-files.sh
 
 printf "\nDONE\n"

@@ -4,12 +4,9 @@
 cwd=$(cd -- "$(dirname -- "$0")" && pwd -P)
 
 # ensure env and functions exist
-if [ -z "$(command -v ssource || true)" ]; then
-  . "${cwd}/dotfiles/shell/common/env.sh"
-fi
-if [ -z "$(command -v link_file || true)" ]; then
-  ssource "${cwd}/dotfiles/shell/common/functions.sh"
-fi
+. "${cwd}/dotfiles/shell/common/env.sh"
+. "${cwd}/dotfiles/shell/common/env_functions.sh"
+ssource "${cwd}/dotfiles/shell/common/functions.sh"
 
 # parse command
 case "${1}" in

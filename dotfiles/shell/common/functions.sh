@@ -43,12 +43,18 @@ q_prompt() {
 
 # Usage: create_dir dir
 create_dir() {
-  mkdir -p "$1"
+  mkdir -p "${1}"
 }
 
-# Usage: remove_dir dir
+# Usage: remove_dir dir [1]
 remove_dir() {
-  rmdir "$1"
+  local recurse=${2:-0}
+
+  if [ $recurse == 1 ]; then
+    rm -rf "${1}"
+  else
+    rmdir "${1}"
+  fi
 }
 
 # Usage: link_file source target

@@ -7,6 +7,13 @@ fi
 
 printf "Uninstalling for MacOS...\n"
 
+# remove nvm
+ssource shared/nvm/uninstall.sh
 
+# remove pyenv
+ssource shared/pyenv/uninstall.sh
+
+# remove dotfile links
+ssource shared/unlink-files.sh
 
 printf "\nDONE\n"

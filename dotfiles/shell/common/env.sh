@@ -56,10 +56,14 @@ export ENV="${XDG_CONFIG_HOME}"/shell/sh/interactive.sh
 export BASH_ENV="${XDG_CONFIG_HOME}"/shell/bash/env.bash
 
 # shellcheck source=./env_functions
-. "${XDG_CONFIG_HOME}"/shell/common/env_functions.sh
+if [ -s "${XDG_CONFIG_HOME}/shell/common/env_functions.sh" ]; then
+  . "${XDG_CONFIG_HOME}"/shell/common/env_functions.sh
+fi
 
 # umask 0077
 umask 0027
 
 # allow for local overrides
-ssource "${XDG_CONFIG_HOME}"/shell/common/env_local.sh
+if [ -s "${XDG_CONFIG_HOME}/shell/common/env_local.sh" ]; then
+  ssource "${XDG_CONFIG_HOME}"/shell/common/env_local.sh
+fi
