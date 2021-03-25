@@ -14,21 +14,17 @@ case "${1}" in
   r|rm|remove|uninstall) command=uninstall ;;
   *)
     printf "Usage: $(basename -- "${0}") i|install|r|rm|remove|uninstall\n"
-    exit
+    exit 1
     ;;
 esac
 
-case "${OS_NAME}" in
-  macos)
-    ssource "${cwd}/${OS_NAME}/${command}.bash"
-    ;;
-
-  linux)
-    ssource "${cwd}/${OS_NAME}/${command}.sh"
-    ;;
-
-  *)
-    printf "Unsupported OS \"${OS_NAME}\"\n"
-    exit
-    ;;
-esac
+# run the command if exists and non-0 sized
+file="${cwd}/${OS_NAME}/${command}.sh"
+if [ -s "${file}" ]; then
+  ssource "${file}"
+  display_banner "Please run: exec \$SHELL" \
+    "- or - restart the terminal/shell"
+else
+  printf "Unsupported OS \"${OS_NAME}\"\n"
+  exit 1
+fi

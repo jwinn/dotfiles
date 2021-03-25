@@ -41,6 +41,13 @@ q_prompt() {
   fi
 }
 
+# Usage: display_banner "line 1" "line 2" ...
+display_banner() {
+  printf "\n==================================================\n"
+  for line in "$@"; do printf "%s\n" "${line}"; done
+  printf "==================================================\n"
+}
+
 # Usage: create_dir dir
 create_dir() {
   mkdir -p "${1}"
@@ -152,6 +159,43 @@ to_hex (){
     gray=$(( (dec-232)*10+8 ))
     printf 'dec= %3s  gray= #%02x%02x%02x\n' "$dec" "$gray" "$gray" "$gray"
   fi
+}
+
+# Usage: run_per_line "file" "brew install"
+run_per_line() {
+  if [ -z "${1}" ] || [ -z "${2}" ]; then
+    printf "Usage: run_per_line <file> <command>\n"
+    exit 1
+  fi
+
+  if [ ! -s "${1}" ]; then
+    printf "\"${1}\" does not exist or is empty\n"
+    exit 1
+  fi
+
+  while read line; do
+    # trim head|tail whitespace
+    line="${line## }"
+    line="${line%% }"
+
+    case "${line}" in
+      \#*) continue ;;
+
+      \$\(*\)|\(*\))
+        eval "output=\"${line}\""
+
+        # trim head|tail whitespace
+        output="${output## }"
+        output="${output%% }"
+
+        [ -n "${output}" ] && $2 $output
+        ;;
+
+      *)
+        [ -n "${line}" ] && $2 $line
+        ;;
+    esac
+  done < "${1}"
 }
 
 # Usage: get_github_latest_release "nvm-sh/nvm"

@@ -28,10 +28,17 @@ case "${OS_NAME:-$(uname -s)}" in
     export OS_NAME="macos"
 
     export OS_VERSION="$(sw_vers -productVersion)"
-    os_versions=(${OS_VERSION//./ })
-    export OS_VERSION_MAJOR="${os_versions[0]}"
-    export OS_VERSION_MINOR="${os_versions[1]}"
-    export OS_VERSION_PATCH="${os_versions[2]}"
+    os_versions=( $(echo $OS_VERSION | tr '.' ' ') )
+    # os_versions=( ${OS_VERSION//./ } )
+    # as bash array are 0-based and zsh are 1-based, normalize
+    i=0
+    for v in "${os_versions[@]}"; do
+      [ $i -eq 0 ] && export OS_VERSION_MAJOR=${v}
+      [ $i -eq 1 ] && export OS_VERSION_MINOR=${v}
+      [ $i -eq 2 ] && export OS_VERSION_PATCH=${v}
+      i=$((i + 1))
+    done
+    unset i
     export OS_VERSION_BUILD="$(sw_vers -buildVersion)"
     export OS_VERSION_FULL="${OS_VERSION}+${OS_VERSION_BUILD}"
     unset os_versions
@@ -41,7 +48,7 @@ case "${OS_NAME:-$(uname -s)}" in
     fi
 
     if [ -z "${MACOSX_DEPLOYMENT_TARGET-}" ]; then
-      export MACOSX_DEPLOYMENT_TARGET="${MACOS_MAJOR_VERSION}.${MACOS_MINOR_VERSION}"
+      export MACOSX_DEPLOYMENT_TARGET="${OS_VERSION_MAJOR}.${OS_VERSION_MINOR}"
     fi
     ;;
   Linux*)

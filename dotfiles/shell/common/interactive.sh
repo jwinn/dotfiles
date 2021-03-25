@@ -67,6 +67,9 @@ if [ $IS_MACOS -eq 1 ]; then
   unset -v has_brew
 fi
 
+# rust(up)
+[ -d "${HOME}/.cargo/bin" ] && path_prepend "${HOME}/.cargo/bin"
+
 # sshfs
 if [ -n "$(command -v sshfs || true)" ]; then
   # Remote Mount (sshfs)
@@ -193,11 +196,7 @@ if [ -x "${PYENV_ROOT}/bin/pyenv" ]; then
     # issues related to Big Sur and M1
     alias pyenv="LDFLAGS=\"-L${SDKROOT}/usr/lib\" CFLAGS=\"-I${SDKROOT}/usr/include\" pyenv"
 
-    alias pyenv_install="CFLAGS=\"-I${HOMEBREW_PREFIX}/openssl/include
-    -I${HOMEBREW_PREFIX}/bzip2/include -I${HOMEBREW_PREFIX}/readline/include
-    -I${SDKROOT}/usr/include\" LDFLAGS=\"-L${HOMEBREW_PREFIX}/openssl/lib
-    -L${HOMEBREW_PREFIX}/readline/lib -L${HOMEBREW_PREFIX}/zlib/lib
-    -L${HOMEBREW_PREFIX}/bzip2/lib -L${SDKROOT}/usr/lib\" pyenv install --patch $1 < <(curl -sSL https://github.com/python/cpython/commit/8ea6353.patch\?full_index\=1)"
+    alias pyenv_install="CFLAGS=\"-I$(brew --prefix openssl)/include -I$(brew --prefix bzip2)/include -I$(brew --prefix readline)/include -I${SDKROOT}/usr/include\" LDFLAGS=\"-L$(brew --prefix openssl)/lib -L$(brew --prefix readline)/lib -L$(brew --prefix zlib)/lib -L$(brew --prefix bzip2)/lib -L${SDKROOT}/usr/lib\" pyenv install --patch $1 < <(curl -sSL https://github.com/python/cpython/commit/8ea6353.patch\?full_index\=1)"
 
     # make pyenv play nice with homebrew and nvm
     # https://github.com/pyenv/pyenv/issues/106

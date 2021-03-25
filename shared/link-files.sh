@@ -11,9 +11,9 @@ if q_prompt "Do you want to link files" "y"; then
   create_dir "${XDG_CONFIG_HOME}"/emacs
   link_file "${dotfiles}"/emacs/init.el "${XDG_CONFIG_HOME}"/emacs/init.el
   create_dir "${XDG_CONFIG_HOME}"/nvim
-  link_file "${dotfiles}"/vimrc "${XDG_CONFIG_HOME}"/nvim/init.vim
+  link_file "${dotfiles}"/nvim/init.vim "${XDG_CONFIG_HOME}"/nvim/init.vim
   create_dir "${XDG_CONFIG_HOME}"/vim
-  link_file "${dotfiles}"/vimrc "${XDG_CONFIG_HOME}"/vim/vimrc
+  link_file "${dotfiles}"/vim/init.vim "${XDG_CONFIG_HOME}"/vim/vimrc
 
   link_file "${dotfiles}"/shell/.bash_logout "${HOME}"/.bash_logout
   link_file "${dotfiles}"/shell/.bash_profile "${HOME}"/.bash_profile
