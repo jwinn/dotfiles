@@ -2,15 +2,15 @@
 
 " Functions {{{
 
-" g:JW_SourceRelative {{{
-function! g:JW_SourceRelative(path)
-  let l:cwd = expand("%:p:h")
-  exec "source " . l:cwd . "/" . a:path
+" JW_SourceRelative {{{
+function! JW_SourceRelative(path, cwd) abort
+  let cwd = exists('a:cwd') ? a:cwd : expand('%:p:h')
+  exec 'source ' . resolve(cwd . '/' . a:path)
 endfunction
 " }}}
 
-" g:JW_InstallPlug {{{2
-function! g:JW_InstallPlug(vhome)
+" JW_InstallPlug {{{2
+function! JW_InstallPlug(vhome) abort
   let autoload_dir = expand(a:vhome . '/autoload')
   let plug_file = expand(autoload_dir . '/plug.vim')
 
@@ -19,8 +19,8 @@ function! g:JW_InstallPlug(vhome)
           \ 'junegunn/vim-plug/master/plug.vim'
 
     if g:jw.sys.win
-      call g:JW_MakeDir(autoload_dir)
-      call g:JW_PowerShellCmd([
+      call JW_MakeDir(autoload_dir)
+      call JW_PowerShellCmd([
             \ "(New-Object System.Net.WebClient)" .
             \ ".DownloadFile('" . plug_uri . "', " .
             \ "$ExecutionContext.SessionState.Path" .
@@ -39,16 +39,16 @@ function! g:JW_InstallPlug(vhome)
 endfunction
 " }}}
 
-" g:JW_MakeDir {{{
-function! g:JW_MakeDir(path)
+" JW_MakeDir {{{
+function! JW_MakeDir(path) abort
   if !isdirectory(expand(a:path))
     silent call mkdir(expand(a:path), 'p')
   endif
 endfunction
 " }}}
 
-" g:JW_PowerShellCmd {{{
-function! g:JW_PowerShellCmd(cmds)
+" JW_PowerShellCmd {{{
+function! JW_PowerShellCmd(cmds) abort
   let tmp = {
         \ 'shell': &shell,
         \ 'shellcmdflag': &shellcmdflag,
@@ -73,28 +73,28 @@ function! g:JW_PowerShellCmd(cmds)
 endfunction
 " }}}
 
-" g:JW_LinterStatus {{{
-" function! g:JW_LinterStatus() abort
-"   let l:counts = ale#statusline#Count(bufnr(''))
+" JW_LinterStatus {{{
+function! JW_LinterStatus() abort
+  let l:counts = ale#statusline#Count(bufnr(''))
 
-"   let l:all_errors = l:counts.error + l:counts.style_error
-"   let l:all_non_errors = l:counts.total - l:all_errors
+  let l:all_errors = l:counts.error + l:counts.style_error
+  let l:all_non_errors = l:counts.total - l:all_errors
 
-"   return l:counts.total == 0 ? 'OK' : printf(
-"   \   '%dW %dE',
-"   \   all_non_errors,
-"   \   all_errors
-"   \)
-" endfunction
+  return l:counts.total == 0 ? 'OK' : printf(
+  \   '%dW %dE',
+  \   all_non_errors,
+  \   all_errors
+  \)
+endfunction
 " }}}
 
-" g:JW_HasPaste {{{
-" function! g:JW_HasPaste()
-"   if &paste
-"     return 'PASTE MODE  '
-"   endif
-"   return ''
-" endfunction
+" JW_HasPaste {{{
+function! JW_HasPaste() abort
+  if &paste
+    return 'PASTE MODE  '
+  endif
+  return ''
+endfunction
 " }}}
 
 " }}}

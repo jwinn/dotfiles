@@ -16,9 +16,9 @@ fi
 # put your aliases here
 alias ls="ls -G"
 alias ll="ls -la"
-# use vim for vi, if available
-#[ "$(command -v vim || true)" ] && alias vi=vim
-#[ "$(command -v nvim || true)" ] && alias vi=nvim
+if [ -d "${XDG_CONFIG_HOME}/nvim" ]; then
+  alias nvim='MYRVIMRC= VIMINIT= VIM= nvim'
+fi
 [ -x "/usr/local/sbin/mtr" ] && \
   alias mtr='PATH=/usr/local/sbin:${PATH} sudo mtr'
 
@@ -132,26 +132,26 @@ if [ "$(command -v git || true)" ]; then
   fi
 
   # git shell completion
-  if [ -s "/usr/doc/git-${git_version}/contrib/completion/git-completion.${SHELL}" ]; then
+  if [ -s "/usr/doc/git-${git_version}/contrib/completion/git-completion.${SHELL_NAME}" ]; then
     # shellcheck disable=SC1090
-    ssource "/usr/doc/git-${git_version}/contrib/completion/git-completion.${SHELL}"
-  elif [ -s "/usr/local/doc/git-${git_version}/contrib/completion/git-completion.${SHELL}" ]; then
+    ssource "/usr/doc/git-${git_version}/contrib/completion/git-completion.${SHELL_NAME}"
+  elif [ -s "/usr/local/doc/git-${git_version}/contrib/completion/git-completion.${SHELL_NAME}" ]; then
     # shellcheck disable=SC1090
-    ssource "/usr/local/doc/git-${git_version}/contrib/completion/git-completion.${SHELL}"
-  elif [ -s "/usr/local/doc/git-${git_version}/contrib/completion/git-completion.${SHELL}" ]; then
+    ssource "/usr/local/doc/git-${git_version}/contrib/completion/git-completion.${SHELL_NAME}"
+  elif [ -s "/usr/local/doc/git-${git_version}/contrib/completion/git-completion.${SHELL_NAME}" ]; then
     # shellcheck disable=SC1090
-    ssource "/usr/local/doc/git-${git_version}/contrib/completion/git-completion.${SHELL}"
+    ssource "/usr/local/doc/git-${git_version}/contrib/completion/git-completion.${SHELL_NAME}"
   fi
 
   if [ -n "$(command -v brew || true)" ]; then
-    if [ -s "$(brew --prefix)/etc/${SHELL}_completion.d/git-prompt.sh" ]; then
+    if [ -s "$(brew --prefix)/etc/${SHELL_NAME}_completion.d/git-prompt.sh" ]; then
       # shellcheck disable=SC1090
-      ssource "$(brew --prefix)/etc/${SHELL}_completion.d/git-prompt.sh"
+      ssource "$(brew --prefix)/etc/${SHELL_NAME}_completion.d/git-prompt.sh"
     fi
     # git bash completion
     # shellcheck disable=SC1090
-    [ -s "$(brew --prefix)/etc/${SHELL}_completion" ] && \
-      ssource "$(brew --prefix)/etc/${SHELL}_completion"
+    [ -s "$(brew --prefix)/etc/${SHELL_NAME}_completion" ] && \
+      ssource "$(brew --prefix)/etc/${SHELL_NAME}_completion"
   fi
 
   unset -v git_version
@@ -166,6 +166,19 @@ fi
 [ "$(command -v rbenv || true)" ] && eval "$(rbenv init -)"
 [ -d "${HOME}/.sm" ] && \
   PATH="${PATH}:${HOME}/.sm/bin:${HOME}/.sm/pkg/active/bin:${HOME}/.sm/pkg/active/sbin"
+
+# fzf
+[ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.${SHELL_NAME} ] && \
+  source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.${SHELL_NAME}
+
+# jenv
+JENV_ROOT=${JENV_ROOT:-${XDG_CONFIG_HOME}/pyenv}
+if [ -x "${JENV_ROOT}/bin/jenv" ]; then
+  [ -z "$(command -v jenv || true)" ] && \
+    path_prepend "${JENV_ROOT}/bin"
+
+  eval "$(jenv init -)"
+fi
 
 # nvm
 NVM_DIR=${NVM_DIR:-${XDG_CONFIG_HOME}/nvm}
@@ -196,7 +209,8 @@ if [ -x "${PYENV_ROOT}/bin/pyenv" ]; then
     # issues related to Big Sur and M1
     alias pyenv="LDFLAGS=\"-L${SDKROOT}/usr/lib\" CFLAGS=\"-I${SDKROOT}/usr/include\" pyenv"
 
-    alias pyenv_install="CFLAGS=\"-I$(brew --prefix openssl)/include -I$(brew --prefix bzip2)/include -I$(brew --prefix readline)/include -I${SDKROOT}/usr/include\" LDFLAGS=\"-L$(brew --prefix openssl)/lib -L$(brew --prefix readline)/lib -L$(brew --prefix zlib)/lib -L$(brew --prefix bzip2)/lib -L${SDKROOT}/usr/lib\" pyenv install --patch $1 < <(curl -sSL https://github.com/python/cpython/commit/8ea6353.patch\?full_index\=1)"
+    alias pyenv_install="pyenv install --patch $1 < <(curl -sSL https://github.com/python/cpython/commit/8ea6353.patch)"
+    alias pyenv_install_x86="arch -x86_64 pyenv install --patch $1 < <(curl -sSL https://github.com/python/cpython/commit/8ea6353.patch)"
 
     # make pyenv play nice with homebrew and nvm
     # https://github.com/pyenv/pyenv/issues/106

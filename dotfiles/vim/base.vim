@@ -14,7 +14,7 @@ set ignorecase smartcase
 set expandtab shiftwidth=2 tabstop=2 softtabstop=2
 set incsearch hlsearch
 
-set pastetoggle=<F12>
+set pastetoggle=<F2>
 "set textwidth=80
 set title
 

@@ -11,6 +11,12 @@ ssource shared/pyenv/uninstall.sh
 # remove nvm
 ssource shared/nvm/uninstall.sh
 
+# remove jenv
+ssource shared/jenv/uninstall.sh
+
+# remove fzf
+ssource shared/fzf/uninstall.sh
+
 # remove rust(up)
 ssource shared/rust/uninstall.sh
 

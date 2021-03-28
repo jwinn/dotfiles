@@ -14,49 +14,43 @@ fi
 
 # place the shell history in XDG folder
 if [ -n "${HISTFILE-}" ]; then
-  hf=$(basename -- "${HISTFILE}")
+  hf="${HISTFILE}"
 else
-  hf=$(basename -- "${SHELL}")_history
+  hf="${SHELL##*/}"_history
 fi
 export HISTFILE=${XDG_CONFIG_HOME}/${hf#\.}
-# keep the actual saved history file small, but in-memory large
-export SAVEHIST=30
 export HISTSIZE=2000
+export HISTFILESIZE=2000
+export SAVEHIST=2000
 
 # try to have certain programs respect/use XDG, instead of dot files/folders
-[ -n "$(command -v gpg2 || true)" ] && \
-  export GNUPHOME="${XDG_CONFIG_HOME}/gnupg"
-if [ -n "$(command -v less || true)" ]; then
-  export LESSHISTFILE="${XDG_CONFIG_HOME}/less/history"
-  export LESSKEY="${XDG_CONFIG_HOME}/less/keys"
-fi
-[ -n "$(command -v svn || true)" ] && \
-  export SUBVERSION_HOME="${XDG_CONFIG_HOME}/subversion"
-if [ "$(command -v vim || true)" ]; then
-  export MYVIMRC="${XDG_CONFIG_HOME}/vim/vimrc"
-  export VIMDOTDIR="${XDG_CONFIG_HOME}/vim"
-  export VIMINIT=":source ${MYVIMRC}"
-  #export VIMINIT="let $MYVIMRC=\"${XDG_CONFIG_HOME}/vim/vimrc\" | :source ${MYVIMRC}"
-fi
-
-# Personal information
-#export NAME='Jon Winn'
-#export EMAIL='jwinn@devnull'
+# gnupg
+export GNUPHOME="${XDG_CONFIG_HOME}/gnupg"
+# less
+export LESSHISTFILE="${XDG_CONFIG_HOME}/less/history"
+export LESSKEY="${XDG_CONFIG_HOME}/less/keys"
+# subversion
+export SUBVERSION_HOME="${XDG_CONFIG_HOME}/subversion"
+# vim
+export MYVIMRC="${XDG_CONFIG_HOME}/vim/vimrc"
+export VIMDOTDIR="${XDG_CONFIG_HOME}/vim"
+export VIMINIT=":source ${MYVIMRC}"
+#export VIMINIT="let $MYVIMRC=\"${XDG_CONFIG_HOME}/vim/vimrc\" | :source ${MYVIMRC}"
 
 # Preferred programs
-#export PAGER=less
-#export EDITOR=vim
-#export VISUAL=$EDITOR
+export PAGER=less
+export EDITOR=vi
+export VISUAL=$EDITOR
 
 # Language
-#export LANG='en_US.UTF-8'
-#export LC_ALL=$LANG
-#export LC_COLLATE=$LANG
-#export LC_CTYPE=$LANG
-#export LC_MESSAGES=$LANG
-#export LC_MONETARY=$LANG
-#export LC_NUMERIC=$LANG
-#export LC_TIME=$LANG
+export LANG='en_US.UTF-8'
+export LC_ALL=$LANG
+export LC_COLLATE=$LANG
+export LC_CTYPE=$LANG
+export LC_MESSAGES=$LANG
+export LC_MONETARY=$LANG
+export LC_NUMERIC=$LANG
+export LC_TIME=$LANG
 
 # IRC Config
 export IRCNICK=leviticus

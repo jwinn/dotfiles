@@ -2,9 +2,9 @@
 
 " vim-plug {{{
 " make sure plugin dir exists
-call s:MakeDir(g:jw.dirs.plugin)
+call JW_MakeDir(g:jw.dirs.plugin)
 
-call s:InstallPlug(g:jw.dirs.vim)
+call JW_InstallPlug(g:jw.dirs.vim)
 call plug#begin(g:jw.dirs.plugin)
 
 " start with sensible defaults
@@ -93,13 +93,18 @@ if ! g:jw.opts.minimal
   if g:jw.has.256color
     let base16colorspace = 256
   endif
+  Plug 'lifepillar/vim-colortemplate'
   Plug 'dracula/vim', { 'as': 'dracula' }
   Plug 'morhetz/gruvbox'
+  Plug 'lifepillar/vim-gruvbox8'
   Plug 'w0ng/vim-hybrid'
+  Plug 'haishanh/night-owl.vim'
   Plug 'arcticicestudio/nord-vim'
+  Plug 'rakr/vim-one'
+  if g:jw.has.italics
+    let g:one_allow_italics = 1
+  endif
   Plug 'NLKNguyen/papercolor-theme'
-  Plug 'altercation/vim-colors-solarized'
-  Plug 'colepeters/spacemacs-theme.vim'
 
   " inline colors
   Plug 'chrisbra/Colorizer'
@@ -131,37 +136,37 @@ if ! g:jw.opts.minimal
   " }}}
 
   " fuzzy file finder {{{
-  if g:jw.has.python3
-    if ! g:jw.has.fzf
-      " TODO: attempt to find the fzf home
-      Plug 'junegunn/fzf', {
-            \ 'dir': g:jw.fzf_dir,
-            \ 'do': './install --all'
-            \ }
-    endif
-
-    if isdirectory('/usr/local/opt/fzf')
-      let g:jw.fzf_dir = '/usr/local/opt/fzf'
-    else
-      let g:jw.fzf_dir = expand($XDG_CONFIG_HOME . '/.fzf')
-    endif
-
-    Plug g:jw.fzf_dir | Plug 'junegunn/fzf.vim'
-    nmap <C-p> :GFiles<cr>
-    nmap <silent> <leader>p :Files<cr>
-    nmap <silent> <leader>pa :Ag
-    nmap <silent> <leader>pb :Buffers<cr>
-    nmap <silent> <leader>pg :GFiles<cr>
-    nmap <silent> <leader>pr :Rg
-    nmap <silent> <leader>pt :Tags<cr>
-  else
+"  if g:jw.has.python3
+"    if ! g:jw.has.fzf
+"      " TODO: attempt to find the fzf home
+"      Plug 'junegunn/fzf', {
+"            \ 'dir': g:jw.fzf_dir,
+"            \ 'do': './install --all'
+"            \ }
+"    endif
+"
+"    if isdirectory('/usr/local/opt/fzf')
+"      let g:jw.fzf_dir = '/usr/local/opt/fzf'
+"    else
+"      let g:jw.fzf_dir = expand($XDG_CONFIG_HOME . '/.fzf')
+"    endif
+"
+"    Plug g:jw.fzf_dir | Plug 'junegunn/fzf.vim'
+"    nmap <C-p> :GFiles<cr>
+"    nmap <silent> <leader>p :Files<cr>
+"    nmap <silent> <leader>pa :Ag
+"    nmap <silent> <leader>pb :Buffers<cr>
+"    nmap <silent> <leader>pg :GFiles<cr>
+"    nmap <silent> <leader>pr :Rg
+"    nmap <silent> <leader>pt :Tags<cr>
+"  else
     Plug 'ctrlpvim/ctrlp.vim'
     " use .gitignore
     let g:ctrlp_user_command = [
           \ '.git',
           \ 'cd %s && git ls-files -co --exclude-standard'
           \ ]
-  endif
+"  endif
   " }}}
 
   " Rainbow {{{
@@ -237,68 +242,68 @@ if ! g:jw.opts.minimal
   " }}}
 
   " Completion {{{
-  if g:jw.has.timers && g:jw.has.python3
-    if g:jw.has.nvim
-      Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-    else
-      Plug 'Shougo/deoplete.nvim'
-      Plug 'roxma/nvim-yarp'
-      Plug 'roxma/vim-hug-neovim-rpc'
-    endif
-    let g:deoplete#enable_at_startup = 1
-    " inoremap <expr><Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-    " inoremap <expr><S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-    autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
-  else
-    " YouCompleteMe {{{
-    if g:jw.has.python || g:jw.has.python3
-      " handled by YCM below
-      Plug 'ervandew/supertab'
-
-      let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
-      let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
-      let g:SuperTabDefaultCompletionType = '<C-n>'
-
-      let g:jw.ycm = {
-            \ 'ft': ['eelixer', 'elixer',
-            \        'javascript', 'javascript.jsx', 'typescript'],
-            \ 'opts': []
-            \}
-      if g:jw.has.dotnet || g:jw.has.xbuild
-        call add(g:jw.ycm.ft, 'cs')
-        call add(g:jw.ycm.opts, '--omnisharp-completer')
-      endif
-      if g:jw.has.go
-        call add(g:jw.ycm.ft, 'go')
-        call add(g:jw.ycm.opts, '--gocode-completer')
-      endif
-      if g:jw.has.node && g:jw.has.npm
-        call add(g:jw.ycm.opts, '--tern-completer')
-      endif
-      if g:jw.has.ruby
-        call add(g:jw.ycm.ft, 'ruby')
-      endif
-      if g:jw.has.cargo || g:jw.has.rustc
-        call add(g:jw.ycm.ft, 'rustc')
-        call add(g:jw.ycm.opts, '--racer-completer')
-      endif
-
-      function! BuildYCM(info)
-        " info is a dictionary with 3 fields
-        " - name:   name of the plugin
-        " - status: 'installed', 'updated', or 'unchanged'
-        " - force:  set on PlugInstall! or PlugUpdate!
-        if a:info.status == 'installed' || a:info.force
-          execute './install.py ' . join(g:jw.ycm.opts, ' ')
-        endif
-      endfunction
-
-      Plug 'Valloric/YouCompleteMe',
-            \ { 'for': g:jw.ycm.ft, 'do': function('BuildYCM') }
-      autocmd! User YouCompleteMe call youcompleteme#Enable()
-    endif
-    " }}}
-  endif
+"  if g:jw.has.timers && g:jw.has.python3
+"    if g:jw.has.nvim
+"      Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+"    else
+"      Plug 'Shougo/deoplete.nvim'
+"      Plug 'roxma/nvim-yarp'
+"      Plug 'roxma/vim-hug-neovim-rpc'
+"    endif
+"    let g:deoplete#enable_at_startup = 1
+"    " inoremap <expr><Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+"    " inoremap <expr><S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+"    autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
+"  else
+"    " YouCompleteMe {{{
+"    if g:jw.has.python || g:jw.has.python3
+"      " handled by YCM below
+"      Plug 'ervandew/supertab'
+"
+"      let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
+"      let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
+"      let g:SuperTabDefaultCompletionType = '<C-n>'
+"
+"      let g:jw.ycm = {
+"            \ 'ft': ['eelixer', 'elixer',
+"            \        'javascript', 'javascript.jsx', 'typescript'],
+"            \ 'opts': []
+"            \}
+"      if g:jw.has.dotnet || g:jw.has.xbuild
+"        call add(g:jw.ycm.ft, 'cs')
+"        call add(g:jw.ycm.opts, '--omnisharp-completer')
+"      endif
+"      if g:jw.has.go
+"        call add(g:jw.ycm.ft, 'go')
+"        call add(g:jw.ycm.opts, '--gocode-completer')
+"      endif
+"      if g:jw.has.node && g:jw.has.npm
+"        call add(g:jw.ycm.opts, '--tern-completer')
+"      endif
+"      if g:jw.has.ruby
+"        call add(g:jw.ycm.ft, 'ruby')
+"      endif
+"      if g:jw.has.cargo || g:jw.has.rustc
+"        call add(g:jw.ycm.ft, 'rustc')
+"        call add(g:jw.ycm.opts, '--racer-completer')
+"      endif
+"
+"      function! BuildYCM(info)
+"        " info is a dictionary with 3 fields
+"        " - name:   name of the plugin
+"        " - status: 'installed', 'updated', or 'unchanged'
+"        " - force:  set on PlugInstall! or PlugUpdate!
+"        if a:info.status == 'installed' || a:info.force
+"          execute './install.py ' . join(g:jw.ycm.opts, ' ')
+"        endif
+"      endfunction
+"
+"      Plug 'Valloric/YouCompleteMe',
+"            \ { 'for': g:jw.ycm.ft, 'do': function('BuildYCM') }
+"      autocmd! User YouCompleteMe call youcompleteme#Enable()
+"    endif
+"    " }}}
+"  endif
   " }}}
 
   " Gist creation
@@ -373,7 +378,7 @@ if ! g:jw.opts.minimal
   endif
   let g:airline#extensions#tabline#enabled = 1
   Plug 'vim-airline/vim-airline-themes'
-  let g:airline_theme = s:colors.statusline
+  let g:airline_theme = g:jw.opts.colorscheme.statusline
   nnoremap <leader><leader>as :AirlineTheme 
   Plug 'edkolev/promptline.vim'
   nnoremap <leader><leader>ap :PromptlineSnapshot ~/.promptline.sh airline<cr>

@@ -14,6 +14,12 @@ ssource macos/brew/install.bash
 # rust(up)
 ssource shared/rust/install.sh
 
+# fzf
+ssource shared/fzf/install.sh
+
+# jenv
+ssource shared/jenv/install.sh
+
 # nvm
 ssource shared/nvm/install.sh
 

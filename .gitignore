@@ -1,3 +1,4 @@
 .*.swp
 .*.un~
+*_local.sh
 dotfiles/shell/zsh/.[A-Za-z]*

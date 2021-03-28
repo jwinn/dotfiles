@@ -26,10 +26,8 @@ else
 endif
 
 " used for color determinations
-let s:colors = get(g:jw.opts.colors, g:jw.opts.colors.use, 'dark')
-
-let &background = s:colors.background
-silent! execute 'colorscheme ' . s:colors.scheme
+let &background = g:jw.opts.colorscheme.background
+silent! execute 'colorscheme ' . g:jw.opts.colorscheme.scheme
 
 if g:jw.has.iterm
   " csapprox can look silly on iterm, do not load it

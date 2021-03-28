@@ -38,10 +38,10 @@ case "${OS_NAME:-$(uname -s)}" in
       [ $i -eq 2 ] && export OS_VERSION_PATCH=${v}
       i=$((i + 1))
     done
-    unset i
+    unset -v i
+    unset -v os_versions
     export OS_VERSION_BUILD="$(sw_vers -buildVersion)"
     export OS_VERSION_FULL="${OS_VERSION}+${OS_VERSION_BUILD}"
-    unset os_versions
 
     if [ -z "${SDKROOT-}" ]; then
       export SDKROOT="$(xcrun --show-sdk-path)"
@@ -61,6 +61,18 @@ case "${OS_NAME:-$(uname -s)}" in
     ;;
 esac
 
+export SHELL_NAME="${SHELL##*/}"
+
+export FZF_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && \
+  printf %s "${HOME}/.fzf" || \
+  printf %s "${XDG_CONFIG_HOME}/fzf")"
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
+
+export JENV_ROOT="$([ -z "${XDG_CONFIG_HOME-}" ] && \
+  printf %s "${HOME}/.jenv" || \
+  printf %s "${XDG_CONFIG_HOME}/jenv")"
+
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && \
   printf %s "${HOME}/.nvm" || \
   printf %s "${XDG_CONFIG_HOME}/nvm")"
@@ -70,11 +82,11 @@ export PYENV_ROOT="$([ -z "${XDG_CONFIG_HOME-}" ] && \
   printf %s "${XDG_CONFIG_HOME}/pyenv")"
 
 # We need to set $ENV so that if you use shell X as your login shell,
-# and then start "sh" as a non-login interactive shell the startup scripts will
-# correctly run.
+# and then start "sh" as a non-login interactive shell the startup scripts
+# will correctly run
 export ENV="${XDG_CONFIG_HOME}"/shell/sh/interactive.sh
 
-# We also need to set BASH_ENV, which is run for *non-interactive* shells.
+# We also need to set BASH_ENV, which is run for *non-interactive* shells
 # (unlike $ENV, which is for interactive shells)
 export BASH_ENV="${XDG_CONFIG_HOME}"/shell/bash/env.bash
 
@@ -84,7 +96,7 @@ if [ -s "${XDG_CONFIG_HOME}/shell/common/env_functions.sh" ]; then
 fi
 
 # umask 0077
-umask 0027
+# umask 0027
 
 # allow for local overrides
 if [ -s "${XDG_CONFIG_HOME}/shell/common/env_local.sh" ]; then

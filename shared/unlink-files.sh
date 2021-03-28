@@ -23,6 +23,7 @@ if q_prompt "Do you want to unlink files"; then
   remove_dir "${XDG_CONFIG_HOME}"/shell 1
   unlink_file "${XDG_CONFIG_HOME}"/emacs/init.el
   remove_dir "${XDG_CONFIG_HOME}"/emacs 1
+  unlink_file "${XDG_CONFIG_HOME}"/nvim/lua
   unlink_file "${XDG_CONFIG_HOME}"/nvim/init.vim
   remove_dir "${XDG_CONFIG_HOME}"/nvim 1
   unlink_file "${XDG_CONFIG_HOME}"/vim/vimrc

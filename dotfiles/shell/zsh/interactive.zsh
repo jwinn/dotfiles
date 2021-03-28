@@ -3,16 +3,14 @@
 # shellcheck source=../common/interactive
 . "${XDG_CONFIG_HOME}"/shell/common/interactive.sh
 
-# enable zsh completions, but only dump cache every 24h or so
-() {
-  unset IFS
-  setopt extendedglob local_options
-  local zcomp_file="${ZDOTDIR}"/.zcompdump
-
-  autoload -Uz compinit
-  if [[ -n $zcomp_file(#qN.m+1) ]]; then
-    compinit -d $zcomp_file
-  else
-    compinit -C -d $zcomp_file
-  fi
-}
+# Load and initialize the completion system ignoring insecure directories with a
+# cache time of 20 hours, so it should almost always regenerate the first time a
+# shell is opened each day.
+autoload -Uz compinit
+_comp_files=(${ZDOTDIR:-$HOME}/.zcompdump(Nm-20))
+if (( $#_comp_files )); then
+  compinit -i -C
+else
+  compinit -i
+fi
+unset _comp_files

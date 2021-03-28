@@ -19,18 +19,11 @@ let g:jw.sys = {
       \ }
 
 if executable('uname')
-  " store current ignorecase and set to on (will be reset later)
-  let s:tmp_ignorecase = &ignorecase
-  let &ignorecase = 1
   let s:system_uname = system('uname -s')
 
-  let g:jw.sys.darwin = (s:system_uname =~ 'darwin')
-  let g:jw.sys.linux = g:jw.sys.unix && (s:system_uname =~ 'linux')
+  let g:jw.sys.darwin = (s:system_uname =~? 'darwin')
+  let g:jw.sys.linux = g:jw.sys.unix && (s:system_uname =~? 'linux')
   let g:jw.sys.arch = system('uname -m')
-
-  " reset changes and clean up
-  let &ignorecase = s:tmp_ignorecase
-  unlet s:tmp_ignorecase
 endif
 
 let g:jw.sys.mac = g:jw.sys.darwin || has('macunix')
@@ -53,9 +46,12 @@ let g:jw.has = {
       \ 'editorconfig': executable('editorconfig'),
       \ 'elm': executable('elm'),
       \ 'fzf': executable('fzf'),
+      \ 'fzy': executable('fzy'),
       \ 'go': executable('go'),
       \ 'gui': has('gui_running'),
-      \ 'iterm': !empty($ITERM_PROFILE),
+      \ 'italics': !empty($ITERM_PROFILE),
+      \ 'iterm': $TERM =~? 'italic',
+      \ 'java': has('java'),
       \ 'job': has('job'),
       \ 'lessc': executable('lessc'),
       \ 'lua': has('lua'),
@@ -107,13 +103,13 @@ let g:jw.opts = {
       \ 'colors': {
       \   'dark': {
       \     'background': 'dark',
-      \     'scheme': 'base16-default-dark',
-      \     'statusline': 'base16_default',
+      \     'scheme': 'PaperColor',
+      \     'statusline': 'papercolor',
       \   },
       \   'light': {
       \     'background': 'light',
-      \     'scheme': 'base16-default-light',
-      \     'statusline': 'base16_default',
+      \     'scheme': 'PaperColor',
+      \     'statusline': 'papercolor',
       \   },
       \   'use': 'dark',
       \ },
@@ -123,6 +119,8 @@ let g:jw.opts = {
       \ 'minimal': 0,
       \ 'path': fnamemodify(resolve(expand('<sfile>:p')), ':h'),
       \ }
+let g:jw.opts.colorscheme =
+      \ get(g:jw.opts.colors, g:jw.opts.colors.use, 'dark')
 " }}}
 
 " g:jw.dirs {{{
