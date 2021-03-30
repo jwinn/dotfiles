@@ -10,27 +10,24 @@ else
   endif
 endif
 
-" Use a trick to break out when the +eval feature is missing
-silent! while 0
-  finish
-silent! endwhile
+if has("eval")
+  " s:SourceRelative {{{
+  let s:cwd = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+  function! s:SourceRelative(path)
+    exec 'source ' . resolve(s:cwd . '/' . a:path)
+  endfunction
+  " }}}
 
-" s:SourceRelative {{{
-let s:cwd = fnamemodify(resolve(expand('<sfile>:p')), ':h')
-function! s:SourceRelative(path)
-  exec 'source ' . resolve(s:cwd . '/' . a:path)
-endfunction
-" }}}
-
-call s:SourceRelative('variables.vim')
-call s:SourceRelative('functions.vim')
-call s:SourceRelative('base.vim')
-call s:SourceRelative('dirs.vim')
-call s:SourceRelative('leader.vim')
-call s:SourceRelative('colorcolumn.vim')
-call s:SourceRelative('spell.vim')
-call s:SourceRelative('keymap.vim')
-call s:SourceRelative('abbreviations.vim')
-"call s:SourceRelative('statusline.vim')
-call s:SourceRelative('plugins.vim')
-call s:SourceRelative('colors.vim')
+  call s:SourceRelative('variables.vim')
+  call s:SourceRelative('functions.vim')
+  call s:SourceRelative('base.vim')
+  call s:SourceRelative('dirs.vim')
+  call s:SourceRelative('leader.vim')
+  call s:SourceRelative('colorcolumn.vim')
+  call s:SourceRelative('spell.vim')
+  call s:SourceRelative('keymap.vim')
+  call s:SourceRelative('abbreviations.vim')
+  "call s:SourceRelative('statusline.vim')
+  call s:SourceRelative('plugins.vim')
+  call s:SourceRelative('colors.vim')
+endif
