@@ -25,9 +25,9 @@ node
 # nvm # handle with nvm install
 
 python3
-# pyenv pyenv-virtualenv # handle with pyenv installer
+# pyenv # handle with pyenv installer
 $(brew deps --1 --for-each pyenv | cut -d":" -f2)
-bzip2 zlib
+# bzip2 zlib
 
 ranger
 rg
