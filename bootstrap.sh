@@ -1,7 +1,6 @@
 #!/bin/sh -e
 
-#cwd=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
-cwd=$(cd -- "$(dirname -- "$0")" && pwd -P)
+cwd=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 
 # ensure env and functions exist
 . "${cwd}/dotfiles/shell/common/env.sh"
@@ -21,7 +20,7 @@ esac
 # run the command if exists and non-0 sized
 file="${cwd}/${OS_NAME}/${command}.sh"
 if [ -s "${file}" ]; then
-  ssource "${file}"
+  ssource "${file}" "${cwd}"
   display_banner "Please run: exec \$SHELL" \
     "- or - restart the terminal/shell"
 else

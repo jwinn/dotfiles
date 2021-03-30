@@ -135,6 +135,34 @@ if ! g:jw.opts.minimal
   endif
   " }}}
 
+  " fzy file finder {{{
+  if g:jw.has.fzy
+    function! FzyCommand(choice_command, vim_command)
+      try
+        let output = system(a:choice_command . " | fzy ")
+      catch /Vim:Interrupt/
+        " Swallow errors from ^C, allow redraw! below
+      endtry
+      redraw!
+      if v:shell_error == 0 && !empty(output)
+        exec a:vim_command . " " . output
+      endif
+    endfunction
+
+    if g:jw.has.fd
+      let fzy_cmd = "fd . --type file --follow --hidden --exclude .git"
+    elseif g:jw.has.ag
+      let fzy_cmd = "ag . --silent -l -g ''"
+    else
+      let fzy_cmd = "find . -type f"
+    end
+
+    nnoremap <leader>e :call FzyCommand(fzy_cmd, ":e")<cr>
+    nnoremap <leader>v :call FzyCommand(fzy_cmd, ":vs")<cr>
+    nnoremap <leader>s :call FzyCommand(fzy_cmd, ":sp")<cr>
+  endif
+  " }}}
+
   " fuzzy file finder {{{
 "  if g:jw.has.python3
 "    if ! g:jw.has.fzf

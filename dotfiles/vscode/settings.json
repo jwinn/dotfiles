@@ -1,10 +1,4 @@
 {
     "telemetry.enableTelemetry": false,
-    "telemetry.enableCrashReporter": false,
-    "workbench.editorAssociations": [
-        {
-            "viewType": "jupyter.notebook.ipynb",
-            "filenamePattern": "*.ipynb"
-        }
-    ]
+    "telemetry.enableCrashReporter": false
 }

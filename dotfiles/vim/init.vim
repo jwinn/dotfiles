@@ -1,7 +1,7 @@
 " vim:set ft=vim et sw=2 ts=2 sts=2 tw=78 foldmethod=marker:
 
 " load defaults, if available, otherwise set nocompatible
-if has('patch-7.4-2111')
+if has("patch-7.4-2111")
   unlet! skip_defaults_vim
   source $VIMRUNTIME/defaults.vim
 else

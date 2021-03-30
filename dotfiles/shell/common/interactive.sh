@@ -34,37 +34,35 @@ if [ -t 0 ]; then
 fi
 
 # homebrew
-# TODO: support homebrew on linux
-# [ -z "${HOMEBREW_PREFIX-}" ] && export HOMEBREW_PREFIX=$(brew --prefix)
 if [ $IS_MACOS -eq 1 ]; then
-  if [ -d "${HOME}/.brew" ]; then
-    brew_home="${HOME}/.brew"
-    [ -L "${brew_home}" ] && brew_home=$(resolve_link "${brew_home}")
-    has_brew="${brew_home}/bin/brew"
+  [ "${OS_ARCH}" = "arm64" ] && \
+    export HOMEBREW_PREFIX="/opt/homebrew" || \
+    export HOMEBREW_PREFIX="/usr/local"
+elif [ -d "~linuxbrew/.linuxbrew" ]; then
+  export HOMEBREW_PREFIX="~linuxbrew/.linuxbrew"
+elif [ -d "${HOME}/.linuxbrew" ]; then
+  export HOMEBREW_PREFIX="${HOME}/.linuxbrew"
+elif [ -d "${HOME}/.brew" ]; then
+  export HOMEBREW_PREFIX="${HOME}/.brew"
+  # tap the core, if it doesn't exist
+  [ ! -d "${HOMEBREW_PREFIX}/Library/Taps/homebrew/homebrew-core" ] && \
+    brew tap homebrew/core
+fi
 
-    # tap the core, if it doesn't exist
-    [ ! -d "${brew_home}/Library/Taps/homebrew/homebrew-core" ] && \
-    #brew_tap=$(brew tap | awk '/homebrew/{f=1} f{print; if (/}/) exit}' || false)
-    #[ -z "${brew_tap}" ] && brew tap homebrew/core
-      brew tap homebrew/core
-
-    unset -v brew_home
+if [ -n "${HOMEBREW_PREFIX-}" ] && [ -x "${HOMEBREW_PREFIX}/bin/brew" ]; then
+  # per updated post-install
+  if [ "${OS_ARCH}" = "arm64" ] || [ "${OS_NAME}" = "linux" ]; then
+    eval $(${HOMEBREW_PREFIX}/bin/brew shellenv)
   else
-    [ -d "/opt/homebrew/bin" ] && path_prepend "/opt/homebrew/bin"
-    has_brew="$(command -v brew || true)"
+    export HOMEBREW_CELLAR="${HOMEBREW_PREFIX}/Cellar"
+    export HOMEBREW_REPOSITORY="${HOMEBREW_PREFIX}"
+    path_prepend "${HOMEBREW_PREFIX}/sbin"
+    path_prepend "${HOMEBREW_PREFIX}/bin"
+    path_prepend "${HOMEBREW_PREFIX}/share/man" MANPATH
+    path_prepend "${HOMEBREW_PREFIX}/share/info" INFOPATH
   fi
 
-  if [ -n "${has_brew}" ]; then
-    # per updated post-install
-    echo "eval $($has_brew shellenv)"
-
-    path_prepend "$(dirname -- ${has_brew})"
-    HOMEBREW_PREFIX=${HOMEBREW_PREFIX:-$($has_brew --prefix)}
-
-    path_prepend "${HOMEBREW_PREFIX}/share/" XDG_DATA_DIRS
-  fi
-
-  unset -v has_brew
+  path_prepend "${HOMEBREW_PREFIX}/share/" XDG_DATA_DIRS
 fi
 
 # rust(up)
@@ -172,7 +170,7 @@ fi
   source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.${SHELL_NAME}
 
 # jenv
-JENV_ROOT=${JENV_ROOT:-${XDG_CONFIG_HOME}/pyenv}
+JENV_ROOT=${JENV_ROOT:-${XDG_CONFIG_HOME}/jenv}
 if [ -x "${JENV_ROOT}/bin/jenv" ]; then
   [ -z "$(command -v jenv || true)" ] && \
     path_prepend "${JENV_ROOT}/bin"
@@ -202,7 +200,7 @@ if [ -x "${PYENV_ROOT}/bin/pyenv" ]; then
     path_prepend "${PYENV_ROOT}/bin"
 
   eval "$(pyenv init -)"
-  [ "$(command -v pyenv-virtualenv || true)" ] && \
+  [ "$(command -v pyenv-virtualenv-init || true)" ] && \
     eval "$(pyenv virtualenv-init -)"
 
   if [ $IS_MACOS -eq 1 ] && [ "${OS_ARCH}" = "arm64" ]; then

@@ -45,12 +45,13 @@ let g:jw.has = {
       \ 'dotnet': executable('dotnet'),
       \ 'editorconfig': executable('editorconfig'),
       \ 'elm': executable('elm'),
+      \ 'fd': executable('fd'),
       \ 'fzf': executable('fzf'),
       \ 'fzy': executable('fzy'),
       \ 'go': executable('go'),
       \ 'gui': has('gui_running'),
-      \ 'italics': !empty($ITERM_PROFILE),
-      \ 'iterm': $TERM =~? 'italic',
+      \ 'italics': $TERM =~? 'italic',
+      \ 'iterm': !empty($ITERM_PROFILE),
       \ 'java': has('java'),
       \ 'job': has('job'),
       \ 'lessc': executable('lessc'),
@@ -103,8 +104,8 @@ let g:jw.opts = {
       \ 'colors': {
       \   'dark': {
       \     'background': 'dark',
-      \     'scheme': 'PaperColor',
-      \     'statusline': 'papercolor',
+      \     'scheme': 'hybrid',
+      \     'statusline': 'hybrid',
       \   },
       \   'light': {
       \     'background': 'light',

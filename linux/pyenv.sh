@@ -1,4 +1,4 @@
-#!/bin/sh -e
+cwd=${2:-$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)}
 
 if [ -z "$(command -v pyenv || true)" ]; then
   printf "Installing pyenv and dependencies..."

@@ -1,6 +1,7 @@
 ag
 alacritty
 fd
+fff
 # fzf # handle manually
 fzy
 git
@@ -9,7 +10,9 @@ go
 # iperf
 iperf3
 iterm2
+# jenv # handle with jenv install
 kitty
+mosh
 mtr
 
 # neovim dev version
@@ -17,19 +20,24 @@ mtr
 --HEAD neovim
 
 nmap
+nnn
 node
-# nvm # handle with nvm's preferred install
+# nvm # handle with nvm install
 
 python3
-# brew install pyenv # handle with pyenv installer
+# pyenv pyenv-virtualenv # handle with pyenv installer
 $(brew deps --1 --for-each pyenv | cut -d":" -f2)
 bzip2 zlib
 
 ranger
 rg
 # shellcheck
+tmux
 vim
 
+# casks
+--cask adobe-creative-cloud
+--cask alfred
 --cask battle-net
 --cask brave-browser
 --cask expressvpn
@@ -43,3 +51,16 @@ vim
 --cask steam
 --cask visual-studio-code
 --cask zoom
+
+# fonts
+font-cascadia-code
+font-fira-code
+font-fira-code-nerd-font
+font-hack
+font-hack-nerd-font
+font-input
+font-iosevka
+font-iosevka-nerd-font
+font-jetbrains-mono
+font-jetbrains-mono-nerd-font
+font-source-code-pro

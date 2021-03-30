@@ -3,16 +3,18 @@ if [ -z "$(command -v is_sourced || true)" ] || ! is_sourced; then
   exit 1
 fi
 
+cwd=${2:-$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)}
+
 display_banner "Installing for Linux..."
 
 # rust(up)
-ssource shared/rust/install.sh
+ssource ${cwd}/shared/rust/install.sh
 
 # nvm
-ssource shared/nvm/install.sh
+ssource ${cwd}/shared/nvm/install.sh
 
 # pyevm
-ssource shared/pyenv/install.sh
+ssource ${cwd}/shared/pyenv/install.sh
 
 # update dotfile links
-ssource shared/link-files.sh
+ssource ${cwd}/shared/link-files.sh

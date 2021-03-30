@@ -3,16 +3,18 @@ if [ -z "$(command -v is_sourced || true)" ] || ! is_sourced; then
   exit 1
 fi
 
+cwd=${2:-$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)}
+
 display_banner "Uninstalling for Linux..."
 
 # remove rust(up)
-ssource shared/rust/uninstall.sh
+ssource ${cwd}/shared/rust/uninstall.sh
 
 # remove nvm
-ssource shared/nvm/uninstall.sh
+ssource ${cwd}/shared/nvm/uninstall.sh
 
 # remove pyenv
-ssource shared/pyenv/uninstall.sh
+ssource ${cwd}/shared/pyenv/uninstall.sh
 
 # remove dotfile links
-ssource shared/unlink-files.sh
+ssource ${cwd}/shared/unlink-files.sh
