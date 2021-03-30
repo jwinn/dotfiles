@@ -27,28 +27,30 @@ case "${OS_NAME:-$(uname -s)}" in
     export IS_MACOS=1
     export OS_NAME="macos"
 
-    export OS_VERSION="$(sw_vers -productVersion)"
-    os_versions=( $(echo $OS_VERSION | tr '.' ' ') )
-    # os_versions=( ${OS_VERSION//./ } )
-    # as bash array are 0-based and zsh are 1-based, normalize
-    i=0
-    for v in "${os_versions[@]}"; do
-      [ $i -eq 0 ] && export OS_VERSION_MAJOR=${v}
-      [ $i -eq 1 ] && export OS_VERSION_MINOR=${v}
-      [ $i -eq 2 ] && export OS_VERSION_PATCH=${v}
-      i=$((i + 1))
-    done
-    unset -v i
-    unset -v os_versions
-    export OS_VERSION_BUILD="$(sw_vers -buildVersion)"
-    export OS_VERSION_FULL="${OS_VERSION}+${OS_VERSION_BUILD}"
+    if [ -n "${BASH_VERSION}" ]; then
+      export OS_VERSION="$(sw_vers -productVersion)"
+      os_versions=( $(echo $OS_VERSION | tr '.' ' ') )
+      # os_versions=( ${OS_VERSION//./ } )
+      # as bash array are 0-based and zsh are 1-based, normalize
+      i=0
+      for v in "${os_versions[@]}"; do
+        [ $i -eq 0 ] && export OS_VERSION_MAJOR=${v}
+        [ $i -eq 1 ] && export OS_VERSION_MINOR=${v}
+        [ $i -eq 2 ] && export OS_VERSION_PATCH=${v}
+        i=$((i + 1))
+      done
+      unset -v i
+      unset -v os_versions
+      export OS_VERSION_BUILD="$(sw_vers -buildVersion)"
+      export OS_VERSION_FULL="${OS_VERSION}+${OS_VERSION_BUILD}"
 
-    if [ -z "${SDKROOT-}" ]; then
-      export SDKROOT="$(xcrun --show-sdk-path)"
-    fi
+      if [ -z "${SDKROOT-}" ]; then
+        export SDKROOT="$(xcrun --show-sdk-path)"
+      fi
 
-    if [ -z "${MACOSX_DEPLOYMENT_TARGET-}" ]; then
-      export MACOSX_DEPLOYMENT_TARGET="${OS_VERSION_MAJOR}.${OS_VERSION_MINOR}"
+      if [ -z "${MACOSX_DEPLOYMENT_TARGET-}" ]; then
+        export MACOSX_DEPLOYMENT_TARGET="${OS_VERSION_MAJOR}.${OS_VERSION_MINOR}"
+      fi
     fi
     ;;
   Linux*)
