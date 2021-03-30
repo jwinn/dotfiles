@@ -32,9 +32,9 @@ case "${OS_NAME:-$(uname -s)}" in
     # as bash array are 0-based and zsh are 1-based, normalize
     i=0
     echo "${OS_VERSION}" | tr '.' '\n' | while read v; do
-      [ $i -eq 0 ] && export OS_VERSION_MAJOR=${v}
-      [ $i -eq 1 ] && export OS_VERSION_MINOR=${v}
-      [ $i -eq 2 ] && export OS_VERSION_PATCH=${v}
+      [ "${i}" -eq 0 ] && export OS_VERSION_MAJOR=${v}
+      [ "${i}" -eq 1 ] && export OS_VERSION_MINOR=${v}
+      [ "${i}" -eq 2 ] && export OS_VERSION_PATCH=${v}
       i=$((i + 1))
     done
     unset -v i
