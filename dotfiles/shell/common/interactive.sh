@@ -15,9 +15,9 @@ fi
 
 # put your aliases here
 [ "${IS_MACOS}" -eq 1 ] && alias ls="ls -G"
-[ "${IS_LINKUX}" -eq 1 ] && alias ls="ls --color=auto"
+[ "${IS_LINUX}" -eq 1 ] && alias ls="ls --color=auto"
 alias ll="ls -la"
-[ "${IS_MACOS}" -eq 1 ] || [ "${IS_LINKUX}" -eq 1 ] \
+[ "${IS_MACOS}" -eq 1 ] || [ "${IS_LINUX}" -eq 1 ] \
   && alias grep="grep --color=auto"
 if [ -d "${XDG_CONFIG_HOME}/nvim" ]; then
   alias nvim='MYRVIMRC= VIMINIT= VIM= nvim'
