@@ -10,6 +10,11 @@ else
   endif
 endif
 
+" Use a trick to break out when the +eval feature is missing
+silent! while 0
+  finish
+silent! endwhile
+
 " s:SourceRelative {{{
 let s:cwd = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 function! s:SourceRelative(path)
