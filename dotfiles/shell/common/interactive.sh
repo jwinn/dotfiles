@@ -203,8 +203,7 @@ if [ -x "${PYENV_ROOT}/bin/pyenv" ]; then
     && path_prepend "${PYENV_ROOT}/bin"
 
   eval "$(pyenv init -)"
-  [ "$(command -v pyenv-virtualenv-init || true)" ] \
-    && eval "$(pyenv virtualenv-init -)"
+  eval "$(pyenv virtualenv-init -)"
 
   if [ "${IS_MACOS}" -eq 1 ] && [ "${OS_ARCH}" = "arm64" ]; then
     # issues related to Big Sur and M1
