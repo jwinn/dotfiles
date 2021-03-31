@@ -198,7 +198,7 @@ fi
 
 # pyenv
 PYENV_ROOT=${PYENV_ROOT:-${XDG_CONFIG_HOME}/pyenv}
-if [ -x "${PYENV_ROOT}/bin/pyenv" ]; then
+if [ -x "${PYENV_ROOT}/bin/pyenv" ] || [ -x "${HOMEBREW_PREFIX}/bin/pyenv" ]; then
   [ -z "$(command -v pyenv || true)" ] \
     && path_prepend "${PYENV_ROOT}/bin"
 
