@@ -1,6 +1,7 @@
 # TODO: verify required are installed (bash, curl, etc)
 # TODO: support homebrew on linux, including installing deps
 
+# check known homebrew paths
 if [ -z "$(command -v brew || true)" ]; then
   # check if homebrew installed, but not in PATH
   if [ -x "/opt/homebrew/bin/brew" ]; then

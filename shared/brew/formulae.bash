@@ -1,5 +1,7 @@
 ag
 alacritty
+asdf
+dotenv
 fd
 fff
 # fzf # handle manually
@@ -27,8 +29,8 @@ node
 python3
 # comment out pyenv* formulae and uncomment brew deps,
 # if using pyenv-installer
-pyenv pyenv-virtualenv pyenv-which-ext
-# $(brew deps --1 --for-each pyenv | cut -d":" -f2)
+# pyenv pyenv-virtualenv pyenv-which-ext
+$(brew deps --1 --for-each pyenv | cut -d":" -f2)
 
 ranger
 rg
@@ -43,7 +45,6 @@ vim
 --cask brave-browser
 --cask expressvpn
 --cask firefox
---cask fork
 --cask gog-galaxy
 --cask google-chrome
 # --cask intellij-idea
