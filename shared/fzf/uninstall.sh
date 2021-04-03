@@ -1,3 +1,6 @@
+cwd=$(CDPATH= cd -- "$(dirname -- "${0}")" && pwd -P)
+script="$(basename -- "${0}")"
+
 if [ -d "${FZF_DIR}" ] || [ -n "$(command -v fzf || true)" ]; then
   if q_prompt "Do you want to remove fzf" "y"; then
     if [ ! -d "${FZF_DIR}" ]; then
@@ -5,6 +8,6 @@ if [ -d "${FZF_DIR}" ] || [ -n "$(command -v fzf || true)" ]; then
     fi
 
     "${FZF_DIR}/uninstall" --xdg
-    rm -rf $FZF_DIR
+    rm -rf "${FZF_DIR}"
   fi
 fi

@@ -1,17 +1,14 @@
 ag
 alacritty
 
-# if using git install,,
-# comment out asdf* formulae and uncomment brew deps
+# if not using the installer, uncomment next line
 # asdf
-$(brew deps --1 --for-each asdf | cut -d":" -f2)
 
 dotenv
 fd
 fff
 
-# if using the jenv installer,
-# comment out the nvm formula
+# if not using the installer, uncomment next line
 # fzf # handle manually
 
 fzy
@@ -22,9 +19,8 @@ go
 iperf3
 iterm2
 
-# if using the jenv installer,
-# comment out the nvm formula
-# jenv # handle with jenv install
+# if not using the installer, uncomment next line
+# jenv
 
 kitty
 mosh
@@ -38,14 +34,11 @@ nmap
 nnn
 node
 
-# if using the nvm installer,
-# comment out the nvm formula
-# nvm # handle with nvm install
+# if not using the installer, uncomment next line
+# nvm
 
-# if using pyenv-installer,
-# comment out pyenv* formulae and uncomment brew deps
+# if not using the installer, uncomment next line
 # pyenv pyenv-virtualenv pyenv-which-ext
-$(brew deps --1 --for-each pyenv | cut -d":" -f2)
 
 python3
 

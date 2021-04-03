@@ -1,34 +1,32 @@
-# TODO: verify required are installed (bash, curl, etc)
-# TODO: support homebrew on linux, including installing deps
-
-cwd=${2:-$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)}
+cwd=$(CDPATH= cd -- "$(dirname -- "${0}")" && pwd -P)
+script="$(basename -- "${0}")"
 
 # check known homebrew paths
 if [ -z "$(command -v brew || true)" ]; then
   # check if homebrew installed, but not in PATH
-  if [ -x "/opt/homebrew/bin/brew" ]; then
+  if [ -x "${HOMEBREW_PREFIX}/bin/brew" ]; then
+    path_prepend "${HOMEBREW_PREFIX}/bin"
+  elif [ -x "/opt/homebrew/bin/brew" ]; then
     path_prepend "/opt/homebrew/bin"
   elif [ -x "${XDG_CONFIG_HOME}/brew/bin/brew" ]; then
     path_prepend "${XDG_CONFIG_HOME}/brew/bin"
-  elif [ -x "${HOME}/.linuxbrew/bin/brew" ]; then
-    path_prepend "${HOME}/.linuxbrew/bin"
   elif [ -x "${HOME}/.brew/bin/brew" ]; then
     path_prepend "${HOME}/.brew/bin"
   fi
 fi
 
 if [ -z "$(command -v brew || true)" ]; then
+  # check for required bash and curl
   bash="$(command -v bash || true)"
-  if [ -z "${bash}" ];
-    printf "bash is required to run Homebrew\n"
-  elif q_prompt "Do you want to install Homebrew" "y"; then
-    # Homebrew on Linux _may_ have pre-requisites
-    if [ "${IS_LINUX}" -eq 1 ]; then
-      ssource "${cwd}/shared/brew/linux/install.sh"
-    fi
+  curl="$(command -v curl || true)"
 
+  if [ -z "${bash}" ]; then
+    printf "bash is required to run Homebrew\n"
+  elif [ -z "${curl}" ]; then
+    printf "curl is required to install Homebrew\n"
+  elif q_prompt "Do you want to install Homebrew" "y"; then
     display_banner "Installing Homebrew..."
-    ${bash} -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    ${bash} -c "$(${curl} -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
     # run doctor for new install
     brew doctor
@@ -39,10 +37,6 @@ if [ -n "$(command -v brew || true)" ]; then
   if ! str_contains "$(brew tap)" "homebrew/cask-fonts" \
     && q_prompt "Do you want brew cask fonts" "y"; then
     brew tap homebrew/cask-fonts
-  fi
-
-  if q_prompt "Do you want to update homebrew" "y"; then
-    brew update && brew upgrade
   fi
 
   # install formulae

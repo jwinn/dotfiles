@@ -4,11 +4,11 @@
 # load the generic functions, if not already loaded
 if [ -z "$(command -v ssource || true)" ]; then
   # shellcheck source=./functions
-  . "${XDG_CONFIG_HOME}"/shell/common/env_functions.sh
+  . "${XDG_CONFIG_HOME}/shell/common/env_functions.sh"
 fi
 if [ -z "(command -v str_contains || true)" ]; then
   # shellcheck source=./functions
-  ssource "${XDG_CONFIG_HOME}"/shell/common/functions.sh
+  ssource "${XDG_CONFIG_HOME}/shell/common/functions.sh"
 fi
 
 # TODO: normalize using XDG dirs, instead of HOME
@@ -19,6 +19,8 @@ fi
 alias ll="ls -la"
 [ "${IS_MACOS}" -eq 1 ] || [ "${IS_LINUX}" -eq 1 ] \
   && alias grep="grep --color=auto"
+# in order to support a system with vim XDG-config'd and neovim
+# env vars need reset for neovim
 if [ -d "${XDG_CONFIG_HOME}/nvim" ]; then
   alias nvim='MYRVIMRC= VIMINIT= VIM= nvim'
 fi
@@ -32,7 +34,7 @@ if [ -t 0 ]; then
 
   if [ -z "${_PS_LANG-}" ]; then
     # shellcheck source=./prompt
-    ssource "${XDG_CONFIG_HOME}"/shell/common/prompt.sh
+    ssource "${XDG_CONFIG_HOME}/shell/common/prompt.sh"
   fi
 fi
 
@@ -41,21 +43,16 @@ if [ "${IS_MACOS}" -eq 1 ]; then
   [ "${OS_ARCH}" = "arm64" ] \
     && export HOMEBREW_PREFIX="/opt/homebrew" \
     || export HOMEBREW_PREFIX="/usr/local"
-elif [ -d "~linuxbrew/.linuxbrew" ]; then
-  export HOMEBREW_PREFIX="~linuxbrew/.linuxbrew"
-elif [ -d "${HOME}/.linuxbrew" ]; then
-  export HOMEBREW_PREFIX="${HOME}/.linuxbrew"
+elif [ -d "${XDG_CONFIG_HOME}/.brew" ]; then
+  export HOMEBREW_PREFIX="${XDG_CONFIG_HOME}/.brew"
 elif [ -d "${HOME}/.brew" ]; then
   export HOMEBREW_PREFIX="${HOME}/.brew"
-  # tap the core, if it doesn't exist
-  [ ! -d "${HOMEBREW_PREFIX}/Library/Taps/homebrew/homebrew-core" ] \
-    && brew tap homebrew/core
 fi
 
 if [ -n "${HOMEBREW_PREFIX-}" ] && [ -x "${HOMEBREW_PREFIX}/bin/brew" ]; then
   # per updated post-install
-  if [ "${OS_ARCH}" = "arm64" ] || [ "${OS_NAME}" = "linux" ]; then
-    eval $(${HOMEBREW_PREFIX}/bin/brew shellenv)
+  if [ "${OS_ARCH}" = "arm64" ]; then
+    eval $("${HOMEBREW_PREFIX}/bin/brew" shellenv)
   else
     export HOMEBREW_CELLAR="${HOMEBREW_PREFIX}/Cellar"
     export HOMEBREW_REPOSITORY="${HOMEBREW_PREFIX}"
@@ -68,53 +65,8 @@ if [ -n "${HOMEBREW_PREFIX-}" ] && [ -x "${HOMEBREW_PREFIX}/bin/brew" ]; then
   path_prepend "${HOMEBREW_PREFIX}/share/" XDG_DATA_DIRS
 fi
 
-# rust(up)
-[ -d "${HOME}/.cargo/bin" ] && path_prepend "${HOME}/.cargo/bin"
-
-# sshfs
-if [ -n "$(command -v sshfs || true)" ]; then
-  # Remote Mount (sshfs)
-  # creates mount folder and mounts the remote filesystem
-  rmount() {
-    host="${1%%:*}:"
-    [ "${1%:}" = "${host%%:*}" ] && folder="" || folder="${1##*:}"
-    if [ "$2" ]; then
-      mname="$2"
-    else
-      mname="${folder##*/}"
-      [ "${mname}" = "" ] && mname="${host%%:*}"
-    fi
-    if grep -q -i "host ${host%%:*}" "${HOME}/.ssh/config"; then
-      mkdir -p "${HOME}/_mounts/g/${mname}" > /dev/null
-      sshfs "${host}${folder}" "${HOME}/_mounts/g/${mname}" \
-        -oauto_cache,reconnect,defer_permissions,negative_vncache,volname="${mname}",noappledouble \
-          && printf "mounted %s/_mounts/g/%s" "${HOME}" "${mname}"
-    else
-      printf "No entry found for %s" "${host%%:*}"
-      return 1
-    fi
-  }
-
-  # Remote Umount, unmounts and deletes local folder
-  # (experimental, watch your step)
-  rumount() {
-    if [ "$1" = "-a" ]; then
-      find . -maxdepth 1 -name "${HOME}/_mounts/g" | \
-        while read -r dir;
-        do
-          mount | grep -q "_mounts/g/${dir}" \
-            && umount "${HOME}/_mounts/g/${dir}"
-          [ "$(ls "${HOME}/_mounts/g/${dir}")" ] \
-            || rm -rf "${HOME}/_mounts/g/${dir}"
-        done
-    else
-      mount | grep -q "_mounts/g/$1" && umount "${HOME}/_mounts/g/$1"
-      [ "$(ls "${HOME}/_mounts/g/$1")" ] || rm -rf "${HOME}/_mounts/g/$1"
-    fi
-  }
-fi
-
 # git prompt/completion
+# TODO: improve this to reduce subshells
 if [ "$(command -v git || true)" ]; then
   git_version=$(git --version | sed -e 's/git version \([0-9]*\.[0-9]*\.[0-9]*\).*/\1/')
 
@@ -144,21 +96,42 @@ if [ "$(command -v git || true)" ]; then
     ssource "/usr/local/doc/git-${git_version}/contrib/completion/git-completion.${SHELL_NAME}"
   fi
 
-  if [ -n "$(command -v brew || true)" ]; then
-    if [ -s "$(brew --prefix)/etc/${SHELL_NAME}_completion.d/git-prompt.sh" ]; then
+  if [ -n "${HOMEBREW_PREFIX}" ]; then
+    if [ -s "${HOMEBREW_PREFIX}/etc/${SHELL_NAME}_completion.d/git-prompt.sh" ]; then
       # shellcheck disable=SC1090
-      ssource "$(brew --prefix)/etc/${SHELL_NAME}_completion.d/git-prompt.sh"
+      ssource "${HOMEBREW_PREFIX}/etc/${SHELL_NAME}_completion.d/git-prompt.sh"
     fi
     # git bash completion
     # shellcheck disable=SC1090
-    [ -s "$(brew --prefix)/etc/${SHELL_NAME}_completion" ] \
-      && ssource "$(brew --prefix)/etc/${SHELL_NAME}_completion"
+    [ -s "${HOMEBREW_PREFIX}/etc/${SHELL_NAME}_completion" ] \
+      && ssource "${HOMEBREW_PREFIX}/etc/${SHELL_NAME}_completion"
   fi
 
   unset -v git_version
 fi
 
+# rust(up)
 [ -d "${HOME}/.cargo/bin" ] && path_prepend "${HOME}/.cargo/bin"
+
+# fzf
+[ -f "${XDG_CONFIG_HOME}/fzf/fzf.${SHELL_NAME}" ] \
+  && source "${XDG_CONFIG_HOME}/fzf/fzf.${SHELL_NAME}"
+# TODO: move to bash-specific interactive script
+[ -n "${BASH_VERSION}" ] \
+  && [ -s "${XDG_CONFIG_HOME}/fzf/fzf.bash" ] \
+  && ssource "${XDG_CONFIG_HOME}/fzf/fzf.bash"
+
+# asdf
+# TODO: change all folders to XDG-related ones
+ASDF_CONFIG_FILE="${ASDF_CONFIG_FILE:-${XDG_CONFIG_HOME}/.asdfrc}"
+ASDF_DEFAULT_TOOL_VERSIONS_FILENAME="${ASDF_DEFAULT_TOOL_VERSIONS_FILENAME:-".tool-versions"}"
+ASDF_DIR="${ASDF_DIR:-${XDG_DATA_HOME}/asdf}"
+ASDF_DATA_DIR="${ASDF_DATA_DIR:-${ASDF_DIR}}"
+[ -f "${ASDF_DIR}/asdf.sh" ] && source "${ASDF_DIR}/asdf.sh"
+# TODO: move to bash-specific interactive script
+[ -n "${BASH_VERSION}" ] \
+  && [ -s "${XDG_CONFIG_HOME}/asdf/asdf.bash" ] \
+  && ssource "${XDG_CONFIG_HOME}/asdf/asdf.bash"
 
 # Load RVM into a shell session *as a function*
 # shellcheck disable=SC1090
@@ -168,16 +141,10 @@ fi
 [ -d "${HOME}/.sm" ] \
   && PATH="${PATH}:${HOME}/.sm/bin:${HOME}/.sm/pkg/active/bin:${HOME}/.sm/pkg/active/sbin"
 
-# fzf
-[ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.${SHELL_NAME} ] \
-  && source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.${SHELL_NAME}
-
 # jenv
 JENV_ROOT=${JENV_ROOT:-${XDG_CONFIG_HOME}/jenv}
 if [ -x "${JENV_ROOT}/bin/jenv" ]; then
-  [ -z "$(command -v jenv || true)" ] \
-    && path_prepend "${JENV_ROOT}/bin"
-
+  path_prepend "${JENV_ROOT}/bin"
   eval "$(jenv init -)"
 fi
 
@@ -189,6 +156,7 @@ if [ -s "${NVM_DIR}/nvm.sh" ]; then
   ssource "${NVM_DIR}/nvm.sh"
 
   # This loads nvm bash_completion
+  # TODO: move to bash-specific interactive script
   [ -n "${BASH_VERSION}" ] \
     && [ -s "${NVM_DIR}/bash_completion" ] \
     && ssource "${NVM_DIR}/bash_completion"
@@ -232,22 +200,17 @@ if [ "$(command -v node || true)" ]; then
   unset -v node_prefix
 fi
 
-# fzf
-[ -n "${BASH_VERSION}" ] \
-  && [ -s "${HOME}/.fzf.bash" ] \
-  && ssource "${HOME}/.fzf.bash"
-
 # Android Dev env
 if [ -z "${ANDROID_HOME-}" ]; then
   if [ "${IS_MACOS}" -eq 1 ]; then
-    export ANDROID_HOME=${HOME}/Library/Android/sdk
+    export ANDROID_HOME="${HOME}/Library/Android/sdk"
   else
-    export ANDROID_HOME=${HOME}/Android/sdk
+    export ANDROID_HOME="${HOME}/Android/sdk"
   fi
-  path_append ${ANDROID_HOME}/emulator
-  path_append ${ANDROID_HOME}/tools
-  path_append ${ANDROID_HOME}/tools/bin
-  path_append ${ANDROID_HOME}/platform-tools
+  path_append "${ANDROID_HOME}/emulator"
+  path_append "${ANDROID_HOME}/tools"
+  path_append "${ANDROID_HOME}/tools/bin"
+  path_append "${ANDROID_HOME}/platform-tools"
 fi
 
 # JAVA
@@ -271,3 +234,46 @@ fi
 #     done
 #   fi
 # fi
+
+# sshfs
+if [ -n "$(command -v sshfs || true)" ]; then
+  # Remote Mount (sshfs)
+  # creates mount folder and mounts the remote filesystem
+  rmount() {
+    host="${1%%:*}:"
+    [ "${1%:}" = "${host%%:*}" ] && folder="" || folder="${1##*:}"
+    if [ "$2" ]; then
+      mname="$2"
+    else
+      mname="${folder##*/}"
+      [ "${mname}" = "" ] && mname="${host%%:*}"
+    fi
+    if grep -q -i "host ${host%%:*}" "${HOME}/.ssh/config"; then
+      mkdir -p "${HOME}/_mounts/g/${mname}" > /dev/null
+      sshfs "${host}${folder}" "${HOME}/_mounts/g/${mname}" \
+        -oauto_cache,reconnect,defer_permissions,negative_vncache,volname="${mname}",noappledouble \
+          && printf "mounted %s/_mounts/g/%s" "${HOME}" "${mname}"
+    else
+      printf "No entry found for %s" "${host%%:*}"
+      return 1
+    fi
+  }
+
+  # Remote Umount, unmounts and deletes local folder
+  # (experimental, watch your step)
+  rumount() {
+    if [ "$1" = "-a" ]; then
+      find . -maxdepth 1 -name "${HOME}/_mounts/g" | \
+        while read -r dir;
+        do
+          mount | grep -q "_mounts/g/${dir}" \
+            && umount "${HOME}/_mounts/g/${dir}"
+          [ "$(ls "${HOME}/_mounts/g/${dir}")" ] \
+            || rm -rf "${HOME}/_mounts/g/${dir}"
+        done
+    else
+      mount | grep -q "_mounts/g/$1" && umount "${HOME}/_mounts/g/$1"
+      [ "$(ls "${HOME}/_mounts/g/$1")" ] || rm -rf "${HOME}/_mounts/g/$1"
+    fi
+  }
+fi
