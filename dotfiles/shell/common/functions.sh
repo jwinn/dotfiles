@@ -57,7 +57,7 @@ create_dir() {
 remove_dir() {
   local recurse=${2:-0}
 
-  if [ $recurse -eq 1 ]; then
+  if [ "${recurse}" -eq 1 ]; then
     rm -rf "${1}"
   else
     rmdir "${1}"

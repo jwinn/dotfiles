@@ -19,10 +19,12 @@ if q_prompt "Do you want to unlink files"; then
   unlink_file "${ZDOTDIR}/.zlogout"
   unlink_file "${ZDOTDIR}/.zshrc"
 
+  remove_dir "${ZDOTDIR}/.[a-zA-Z]*" 1
+
   unlink_file "${XDG_CONFIG_HOME}/shell/bash"
   unlink_file "${XDG_CONFIG_HOME}/shell/common"
   unlink_file "${XDG_CONFIG_HOME}/shell/sh"
-  unlink_file "${XDG_CONFIG_HOME}/shell/zsh"
+  # unlink_file "${XDG_CONFIG_HOME}/shell/zsh"
   remove_dir "${XDG_CONFIG_HOME}/shell" 1
   unlink_file "${XDG_CONFIG_HOME}/emacs/init.el"
   remove_dir "${XDG_CONFIG_HOME}/emacs" 1

@@ -39,6 +39,9 @@ if [ -n "$(command -v brew || true)" ]; then
     brew tap homebrew/cask-fonts
   fi
 
+  q_prompt "Do you want to update ${PKG_NAME}" "y" && ${PKG_CMD} ${PKG_UPDATE}
+  q_prompt "Do you want to upgrade ${PKG_NAME}" && ${PKG_CMD} ${PKG_UPGRADE}
+
   # install formulae
   if q_prompt "Do you want to install forumlae" "y"; then
     printf "Installing Homebrew formulae...\n"

@@ -52,16 +52,10 @@ if [ -s "${file}" ]; then
     fi
   fi
 
-  if [ -z "$(command -v ${PKG_CMD} || true)" ]; then
+  if [ "${IS_LINUX}" -eq 1 ] && [ -z "$(command -v ${PKG_CMD} || true)" ]; then
     printf "%s not found in %s" "${PKG_CMD}" "${PATH}"
     exit 1
   fi
-
-  display_banner "${PKG_NAME}"
-  q_prompt "Do you want to update ${PKG_NAME}" "y" \
-    && ${PKG_CMD} ${PKG_UPDATE}
-  q_prompt "Do you want to upgrade ${PKG_NAME}" \
-    && ${PKG_CMD} ${PKG_UPGRADE}
 
   ssource "${file}"
   display_banner "Please run: exec \$SHELL" \

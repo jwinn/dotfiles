@@ -123,10 +123,6 @@ fi
 
 # asdf
 # TODO: change all folders to XDG-related ones
-ASDF_CONFIG_FILE="${ASDF_CONFIG_FILE:-${XDG_CONFIG_HOME}/.asdfrc}"
-ASDF_DEFAULT_TOOL_VERSIONS_FILENAME="${ASDF_DEFAULT_TOOL_VERSIONS_FILENAME:-".tool-versions"}"
-ASDF_DIR="${ASDF_DIR:-${XDG_DATA_HOME}/asdf}"
-ASDF_DATA_DIR="${ASDF_DATA_DIR:-${ASDF_DIR}}"
 [ -f "${ASDF_DIR}/asdf.sh" ] && source "${ASDF_DIR}/asdf.sh"
 # TODO: move to bash-specific interactive script
 [ -n "${BASH_VERSION}" ] \
@@ -142,14 +138,12 @@ ASDF_DATA_DIR="${ASDF_DATA_DIR:-${ASDF_DIR}}"
   && PATH="${PATH}:${HOME}/.sm/bin:${HOME}/.sm/pkg/active/bin:${HOME}/.sm/pkg/active/sbin"
 
 # jenv
-JENV_ROOT=${JENV_ROOT:-${XDG_CONFIG_HOME}/jenv}
 if [ -x "${JENV_ROOT}/bin/jenv" ]; then
   path_prepend "${JENV_ROOT}/bin"
   eval "$(jenv init -)"
 fi
 
 # nvm
-NVM_DIR=${NVM_DIR:-${XDG_CONFIG_HOME}/nvm}
 if [ -s "${NVM_DIR}/nvm.sh" ]; then
   # This loads nvm
   # shellcheck disable=SC1090
@@ -165,7 +159,6 @@ if [ -s "${NVM_DIR}/nvm.sh" ]; then
 fi
 
 # pyenv
-PYENV_ROOT=${PYENV_ROOT:-${XDG_CONFIG_HOME}/pyenv}
 if [ -x "${PYENV_ROOT}/bin/pyenv" ] || [ -x "${HOMEBREW_PREFIX}/bin/pyenv" ]; then
   [ -z "$(command -v pyenv || true)" ] \
     && path_prepend "${PYENV_ROOT}/bin"

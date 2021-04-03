@@ -6,6 +6,11 @@ if [ -z "$(command -v is_sourced || true)" ] && ! is_sourced; then
   exit 1
 fi
 
+display_banner "${PKG_NAME}"
+
+q_prompt "Do you want to update ${PKG_NAME}" "y" && ${PKG_CMD} ${PKG_UPDATE}
+q_prompt "Do you want to upgrade ${PKG_NAME}" && ${PKG_CMD} ${PKG_UPGRADE}
+
 display_banner "Installing for Linux..."
 
 # update dotfile links

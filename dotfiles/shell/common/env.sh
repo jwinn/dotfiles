@@ -62,6 +62,11 @@ esac
 
 export SHELL_NAME="${SHELL##*/}"
 
+export ASDF_CONFIG_FILE="${ASDF_CONFIG_FILE:-${XDG_CONFIG_HOME}/.asdfrc}"
+export ASDF_DEFAULT_TOOL_VERSIONS_FILENAME="${ASDF_DEFAULT_TOOL_VERSIONS_FILENAME:-".tool-versions"}"
+export ASDF_DIR="${ASDF_DIR:-${XDG_DATA_HOME}/asdf}"
+export ASDF_DATA_DIR="${ASDF_DATA_DIR:-${ASDF_DIR}}"
+
 export FZF_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && \
   printf %s "${HOME}/.fzf" || \
   printf %s "${XDG_CONFIG_HOME}/fzf")"
