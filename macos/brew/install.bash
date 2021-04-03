@@ -42,6 +42,6 @@ if [ -n "$(command -v brew || true)" ]; then
   # install formulae
   if q_prompt "Do you want to install forumlae" "y"; then
     printf "Installing Homebrew formulae...\n"
-    run_per_line "${cwd}/shared/brew/formulae.bash" "brew install"
+    run_per_line "${cwd}/macos/brew/formulae.bash" "brew install"
   fi
 fi

@@ -1,7 +1,10 @@
 cwd=$(CDPATH= cd -- "$(dirname -- "${0}")" && pwd -P)
 script="$(basename -- "${0}")"
 
-if q_prompt "Do you want to uninstall ${1} requirements: ${2}"; then
-  printf "Uninstalling %s...\n" "${2}"
-  ${PKG_CMD} ${PKG_UNINSTALL} ${2}
+pkg="${2}"
+deps="${3}"
+
+if q_prompt "Do you want to uninstall ${pkg} requirements: ${deps}"; then
+  printf "Uninstalling %s...\n" "${deps}"
+  ${PKG_CMD} ${PKG_UNINSTALL} ${deps}
 fi

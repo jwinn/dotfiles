@@ -4,7 +4,7 @@ alacritty
 # if not using the installer, uncomment next line
 # asdf
 
-dotenv
+direnv
 fd
 fff
 
