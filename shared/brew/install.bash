@@ -1,6 +1,8 @@
 # TODO: verify required are installed (bash, curl, etc)
 # TODO: support homebrew on linux, including installing deps
 
+cwd=${2:-$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)}
+
 # check known homebrew paths
 if [ -z "$(command -v brew || true)" ]; then
   # check if homebrew installed, but not in PATH
@@ -16,9 +18,17 @@ if [ -z "$(command -v brew || true)" ]; then
 fi
 
 if [ -z "$(command -v brew || true)" ]; then
-  if q_prompt "Do you want to install Homebrew" "y"; then
+  bash="$(command -v bash || true)"
+  if [ -z "${bash}" ];
+    printf "bash is required to run Homebrew\n"
+  elif q_prompt "Do you want to install Homebrew" "y"; then
+    # Homebrew on Linux _may_ have pre-requisites
+    if [ "${IS_LINUX}" -eq 1 ]; then
+      ssource "${cwd}/shared/brew/linux/install.sh"
+    fi
+
     display_banner "Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    ${bash} -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
     # run doctor for new install
     brew doctor
@@ -26,12 +36,9 @@ if [ -z "$(command -v brew || true)" ]; then
 fi
 
 if [ -n "$(command -v brew || true)" ]; then
-  cwd=${2:-$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)}
-
-  if ! str_contains "$(brew tap)" "homebrew/cask-fonts"; then
-    if q_prompt "Do you want brew cask fonts" "y"; then
-      brew tap homebrew/cask-fonts
-    fi
+  if ! str_contains "$(brew tap)" "homebrew/cask-fonts" \
+    && q_prompt "Do you want brew cask fonts" "y"; then
+    brew tap homebrew/cask-fonts
   fi
 
   if q_prompt "Do you want to update homebrew" "y"; then
