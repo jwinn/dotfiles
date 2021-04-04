@@ -16,10 +16,10 @@ elif [ -z "${curl}" ]; then
 elif q_prompt "Do you want to install pyenv"; then
   # set requirements
   if [ "${OS_NAME}" = "macos" ]; then
-    deps="$(${PKG_CMD} deps --1 --for-each pyenv | cut -d":" -f2)"
+    deps="openssl readline sqlite3 xz zlib$(${PKG_CMD} deps --1 --for-each asdf | cut -d":" -f2)"
   elif [ "${OS_NAME}" = "linux" ]; then
     # libedit-dev is an alternative to libreadline-dev
-    deps="build-essential curl git libbz2-dev libffi-dev liblzma-dev libncurses5-dev libncursesw5-dev libreadline-dev libsqlite3-dev libssl-dev llvm python-openssl tk-dev wget xz-utils zlib1g-dev"
+    deps="build-essential curl git libbz2-dev libffi-dev liblzma-dev libncurses5-dev libncursesw5-dev libreadline-dev libsqlite3-dev libssl-dev libxml2-dev libxmlsec1-dev llvm make python-openssl tk-dev wget xz-utils zlib1g-dev"
   fi
 
   # install requirements

@@ -65,6 +65,9 @@ vim
 --cask visual-studio-code
 --cask zoom
 
+# drivers
+logitech-options
+
 # fonts
 font-cascadia-code
 font-fira-code

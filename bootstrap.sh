@@ -29,28 +29,7 @@ fi
 # run the command if exists and non-0 sized
 file="${cwd}/${OS_NAME}/${command}.sh"
 if [ -s "${file}" ]; then
-  # set package vars
-  PKG_INSTALL="install"
-  PKG_UNINSTALL="uninstall"
-  PKG_UPDATE="update"
-  PKG_UPGRADE="upgrade"
-
-  if [ "${IS_MACOS}" -eq 1 ]; then
-    PKG_NAME="Homebrew"
-    PKG_CMD="brew"
-  elif [ "${IS_LINUX}" -eq 1]; then
-    # TODO: add more linux package managers
-    if [ "$(command -v apt || true)" ]; then
-      PKG_NAME="Aptitude"
-      PKG_CMD="apt"
-    elif [ "$(command -v apt-get || true)" ]; then
-      PKG_NAME="Aptitude"
-      PKG_CMD="apt-get"
-    elif [ "$(command -v pacman || true)" ]; then
-      PKG_NAME="Pacman"
-      PKG_CMD="pacman -S"
-    fi
-  fi
+  ssource "${cwd}/shared/pkg-managers.sh"
 
   if [ "${IS_LINUX}" -eq 1 ] && [ -z "$(command -v ${PKG_CMD} || true)" ]; then
     printf "%s not found in %s" "${PKG_CMD}" "${PATH}"

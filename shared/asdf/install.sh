@@ -4,15 +4,17 @@ script="$(basename -- "${0}")"
 if [ -d "${ASDF_DIR}" ] || [ -n "$(command -v asdf || true)" ]; then
   printf "Asdf already installed [%s]\n" "${ASDF_DIR}"
 elif q_prompt "Do you want to install asdf" "y"; then
-  # set requirements
-  if [ "${OS_NAME}" = "macos" ]; then
-    deps="$(${PKG_CMD} deps --1 --for-each asdf | cut -d":" -f2)"
-  elif [ "${OS_NAME}" = "linux" ]; then
-    deps="curl git"
-  fi
+  # get requirements
+  ssource "${cwd}/shared/asdf/reqs.sh"
 
   # install requirements
-  ssource "${cwd}/shared/pkg-install.sh" "asdf" "${deps}"
+  [ -n "${asdf_reqs}" ] \
+    && ssource "${cwd}/shared/pkg-install.sh" "asdf" "${asdf_reqs}"
+
+  if [ -n "{pyenv_reqs}" ] \
+    && q_prompt "Do you want to install pyenv requirements" "y"; then
+    ssource "${cwd}/shared/pkg-install.sh" "pyenv" "${pyenv_reqs}"
+  fi
 
   # try to get latest release from API,
   # otherwise fallback to known version, since this file was last written

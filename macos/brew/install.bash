@@ -34,6 +34,11 @@ if [ -z "$(command -v brew || true)" ]; then
 fi
 
 if [ -n "$(command -v brew || true)" ]; then
+  if ! str_contains "$(brew tap)" "homebrew/cask-drivers" \
+    && q_prompt "Do you want brew cask drivers" "y"; then
+    brew tap homebrew/cask-drivers
+  fi
+
   if ! str_contains "$(brew tap)" "homebrew/cask-fonts" \
     && q_prompt "Do you want brew cask fonts" "y"; then
     brew tap homebrew/cask-fonts
