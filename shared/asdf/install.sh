@@ -11,18 +11,25 @@ elif q_prompt "Do you want to install asdf" "y"; then
   [ -n "${asdf_reqs}" ] \
     && ssource "${cwd}/shared/pkg-install.sh" "asdf" "${asdf_reqs}"
 
+  if [ -n "{golang_reqs}" ] \
+    && q_prompt "Do you want to install golang requirements" "y"; then
+    ssource "${cwd}/shared/pkg-install.sh" "golang" "${golang_reqs}"
+  fi
+
   if [ -n "{pyenv_reqs}" ] \
     && q_prompt "Do you want to install pyenv requirements" "y"; then
     ssource "${cwd}/shared/pkg-install.sh" "pyenv" "${pyenv_reqs}"
   fi
 
-  # try to get latest release from API,
-  # otherwise fallback to known version, since this file was last written
-  version=$(get_github_latest_release "asdf-vm/asdf")
-  if [ -z "${version}" ]; then
-    version="v0.8.0"
-  fi
-
-  # retrieve from github
-  git clone https://github.com/asdf-vm/asdf "${ASDF_DIR}" --branch ${version}
+  # retrieve from github and checkout latest branch
+  git clone https://github.com/asdf-vm/asdf.git "${ASDF_DIR}" \
+    && cd "${ASDF_DIR}" \
+    && git switch -c "$(git describe --abbrev=0 --tags)" \
+    && cd - \
+    && [ -s "${ASDF_DIR}/asdf.sh" ] && source "${ASDF_DIR}/asdf.sh" \
+    && asdf plugin-add golang https://github.com/kennyp/asdf-golang.git \
+    && asdf plugin-add java https://github.com/halcyon/asdf-java.git \
+    && asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git \
+    && asdf plugin-add python \
+    && asdf plugin-add ruby https://github.com/asdf-vm/asdf-ruby.git
 fi

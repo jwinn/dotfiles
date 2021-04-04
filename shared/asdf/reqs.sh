@@ -1,6 +1,8 @@
 if [ "${OS_NAME}" = "macos" ]; then
   asdf_reqs="$(${PKG_CMD} deps --1 --for-each asdf | cut -d":" -f2)"
 
+  golang_reqs="coreutils"
+
   pyenv_reqs="openssl readline sqlite3 xz zlib"
   pyenv_reqs="${pyenv_reqs}$(${PKG_CMD} deps --1 --for-each asdf | cut -d":" -f2)"
 elif [ "${OS_NAME}" = "linux" ]; then
@@ -8,6 +10,8 @@ elif [ "${OS_NAME}" = "linux" ]; then
   asdf_reqs="curl git"
 
   if [ "${PKG_NAME}" = "Apptitude" ]; then
+    golang_reqs="coreutils"
+
     # Note: libedit-dev is an alternative to libreadline-dev
     pyenv_reqs="--no-install-recommends build-essential curl git libbz2-dev libffi-dev liblzma-dev libncurses5-dev libncursesw5-dev libreadline-dev libsqlite3-dev libssl-dev libxml2-dev libxmlsec1-dev llvm make python-openssl tk-dev wget xz-utils zlib1g-dev"
   elif [ "${PKG_CMD}" = "dnf" ]; then

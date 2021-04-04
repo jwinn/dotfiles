@@ -32,6 +32,7 @@ if q_prompt "Do you want to link files" "y"; then
   link_file "${dotfiles}/shell/.zlogout" "${ZDOTDIR}/.zlogout"
   link_file "${dotfiles}/shell/.zshrc" "${ZDOTDIR}/.zshrc"
 
+  link_file "${dotfiles}/asdfrc" "${ASDF_CONFIG_FILE}"
   link_file "${dotfiles}/editorconfig" "${HOME}/.editorconfig"
   link_file "${dotfiles}/gitconfig" "${HOME}/.gitconfig"
   link_file "${dotfiles}/gitignore" "${HOME}/.gitignore"

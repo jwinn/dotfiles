@@ -111,6 +111,7 @@ if [ "$(command -v git || true)" ]; then
 fi
 
 # rust(up)
+# TODO: use asdf to manage?
 [ -d "${HOME}/.cargo/bin" ] && path_prepend "${HOME}/.cargo/bin"
 
 # fzf

@@ -5,6 +5,7 @@ script="$(basename -- "${0}")"
 if q_prompt "Do you want to unlink files"; then
   ZDOTDIR="${ZDOTDIR:-${XDG_CONFIG_HOME}/zsh}"
 
+  unlink_file "${ASDF_CONFIG_FILE}"
   unlink_file "${HOME}/.editorconfig"
   unlink_file "${HOME}/.gitconfig"
   unlink_file "${HOME}/.gitignore"
