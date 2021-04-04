@@ -10,16 +10,10 @@ elif q_prompt "Do you want to install asdf" "y"; then
   # install requirements
   [ -n "${asdf_reqs}" ] \
     && ssource "${cwd}/shared/pkg-install.sh" "asdf" "${asdf_reqs}"
-
-  if [ -n "{golang_reqs}" ] \
-    && q_prompt "Do you want to install golang requirements" "y"; then
-    ssource "${cwd}/shared/pkg-install.sh" "golang" "${golang_reqs}"
-  fi
-
-  if [ -n "{pyenv_reqs}" ] \
-    && q_prompt "Do you want to install pyenv requirements" "y"; then
-    ssource "${cwd}/shared/pkg-install.sh" "pyenv" "${pyenv_reqs}"
-  fi
+  [ -n "{golang_reqs}" ] \
+    && ssource "${cwd}/shared/pkg-install.sh" "golang" "${golang_reqs}"
+  [ -n "{pyenv_reqs}" ] \
+    && ssource "${cwd}/shared/pkg-install.sh" "pyenv" "${pyenv_reqs}"
 
   # retrieve from github and checkout latest branch
   git clone https://github.com/asdf-vm/asdf.git "${ASDF_DIR}" \
