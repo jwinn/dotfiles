@@ -13,7 +13,7 @@ elif [ -z "${bash}" ]; then
   printf "bash is required to install pyenv\n"
 elif [ -z "${curl}" ]; then
   printf "curl is required to install pyenv\n"
-elif q_prompt "Do you want to install pyenv" "y"; then
+elif q_prompt "Do you want to install pyenv"; then
   # set requirements
   if [ "${OS_NAME}" = "macos" ]; then
     deps="$(${PKG_CMD} deps --1 --for-each pyenv | cut -d":" -f2)"

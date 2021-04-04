@@ -1,20 +1,25 @@
 cwd=$(CDPATH= cd -- "$(dirname -- "${0}")" && pwd -P)
 script="$(basename -- "${0}")"
 
+# TODO: make backups of existing files
 if q_prompt "Do you want to link files" "y"; then
   dotfiles="${cwd}/dotfiles"
-  ZDOTDIR="${ZDOTDIR:-${XDG_CONFIG_HOME}/shell/zsh}"
+  ZDOTDIR="${ZDOTDIR:-${XDG_CONFIG_HOME}/zsh}"
+  create_dir "${ZDOTDIR}"
 
   create_dir "${XDG_CONFIG_HOME}/shell"
   link_file "${dotfiles}/shell/bash" "${XDG_CONFIG_HOME}/shell/bash"
   link_file "${dotfiles}/shell/common" "${XDG_CONFIG_HOME}/shell/common"
   link_file "${dotfiles}/shell/sh" "${XDG_CONFIG_HOME}/shell/sh"
-  link_file "${dotfiles}/shell/zsh" "${ZDOTDIR}"
+  link_file "${dotfiles}/shell/zsh" "${XDG_CONFIG_HOME}/shell/zsh"
+
   create_dir "${XDG_CONFIG_HOME}/emacs"
   link_file "${dotfiles}/emacs/init.el" "${XDG_CONFIG_HOME}/emacs/init.el"
+
   create_dir "${XDG_CONFIG_HOME}/nvim"
   link_file "${dotfiles}/nvim/lua" "${XDG_CONFIG_HOME}/nvim/lua"
   link_file "${dotfiles}/nvim/init.vim" "${XDG_CONFIG_HOME}/nvim/init.vim"
+
   create_dir "${XDG_CONFIG_HOME}/vim"
   link_file "${dotfiles}/vim/init.vim" "${XDG_CONFIG_HOME}/vim/vimrc"
 

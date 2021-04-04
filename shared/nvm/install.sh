@@ -11,7 +11,7 @@ elif [ -z "${bash}" ]; then
   printf "bash is required to install nvm\n"
 elif [ -z "${curl}" ]; then
   printf "curl is required to install nvm\n"
-elif q_prompt "Do you want to install nvm" "y"; then
+elif q_prompt "Do you want to install nvm"; then
   version=$(get_github_latest_release "nvm-sh/nvm")
   ${curl} -o- https://raw.githubusercontent.com/nvm-sh/nvm/${version}/install.sh | ${bash}
 fi
