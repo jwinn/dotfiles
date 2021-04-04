@@ -23,15 +23,6 @@ ssource "${cwd}/shared/fzf/install.sh"
 # asdf
 ssource "${cwd}/shared/asdf/install.sh"
 
-# jenv
-ssource "${cwd}/shared/jenv/install.sh"
-
-# nvm
-ssource "${cwd}/shared/nvm/install.sh"
-
-# pyenv
-ssource "${cwd}/shared/pyenv/install.sh"
-
 # configure MacOS defaults
 # should be run once or will reset future changes
 if q_prompt "Do you want to overwrite Mac settings"; then

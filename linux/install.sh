@@ -24,12 +24,3 @@ ssource "${cwd}/shared/fzf/install.sh"
 
 # asdf
 ssource "${cwd}/shared/asdf/install.sh"
-
-# jenv
-ssource "${cwd}/shared/jenv/install.sh"
-
-# nvm
-ssource "${cwd}/shared/nvm/install.sh"
-
-# pyevm
-ssource "${cwd}/shared/pyenv/install.sh"

@@ -8,15 +8,6 @@ fi
 
 display_banner "Uninstalling for Linux..."
 
-# remove pyenv
-ssource "${cwd}/shared/pyenv/uninstall.sh"
-
-# remove nvm
-ssource "${cwd}/shared/nvm/uninstall.sh"
-
-# remove jenv
-ssource "${cwd}/shared/jenv/uninstall.sh"
-
 # remove asdf
 ssource "${cwd}/shared/asdf/uninstall.sh"
 
