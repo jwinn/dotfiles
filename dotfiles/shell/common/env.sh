@@ -1,12 +1,15 @@
 # shellcheck shell=sh
 
 # https://www.freedesktop.org XDG ENV variable declarations
-export XDG_CACHE_HOME=${XDG_CACHE_HOME:-"${HOME}/.cache"}
-export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"${HOME}/.config"}
+# https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+# by precedence
 export XDG_DATA_HOME=${XDG_DATA_HOME:-"${HOME}/.local/share"}
-export XDG_CONFIG_DIRS=${XDG_CONFIG_DIRS:-"/etc/xdg"}
+export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"${HOME}/.config"}
 export XDG_DATA_DIRS=${XDG_DATA_DIRS:-"/usr/local/share/:/usr/share/"}
-export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-""}
+export XDG_CONFIG_DIRS=${XDG_CONFIG_DIRS:-"/etc/xdg"}
+export XDG_CACHE_HOME=${XDG_CACHE_HOME:-"${HOME}/.cache"}
+# there are numerous requirements for the runtime dir, allow OS to determine
+#export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-""}
 
 # System env "normalization"
 # set HOSTNAME, if not set
@@ -61,6 +64,7 @@ case "${OS_NAME:-$(uname -s)}" in
 esac
 
 export SHELL_NAME="${SHELL##*/}"
+export DOTFILES_BACKUP_DIR="${XDG_DATA_HOME}/backup/dotfiles"
 
 export ASDF_CONFIG_FILE="${ASDF_CONFIG_FILE:-${XDG_CONFIG_HOME}/.asdfrc}"
 export ASDF_DEFAULT_TOOL_VERSIONS_FILENAME="${ASDF_DEFAULT_TOOL_VERSIONS_FILENAME:-".tool-versions"}"

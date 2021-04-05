@@ -84,6 +84,30 @@ remove_dir() {
   fi
 }
 
+# Usage: copy_file source destination
+copy_file() {
+  if [ -s "${1}" ] && [ -e "${2}" ]; then
+    cp -pf "${1}" "${2}"
+  fi
+}
+
+# Usage: move_file source destination
+move_file() {
+  if [ -e "${1}" ]; then
+    mv "${1}" "${2}"
+  fi
+}
+
+# Usage: backup_file "${HOME}/.profile" [basedir="${XDG_DATA_HOME}/backup"]
+# basedir is prepended to the file path
+backup_file() {
+  local backup_dir="${2:-"${XDG_DATA_HOME}/backup"}"
+  local file="$(basename -- "${1}")"
+
+  create_dir "${backup_dir}"
+  move_file "${1}" "${backup_dir}/${file}"
+}
+
 # Usage: link_file source target
 link_file() {
   if [ ! -h "$2" ]; then

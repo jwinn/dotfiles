@@ -7,6 +7,7 @@ if [ -d "${FZF_DIR}" ] || [ -n "$(command -v fzf || true)" ]; then
       read -r "Cannot find ${FZF_DIR:-\$FZF_DIR}, path: " FZF_DIR
     fi
 
+    # TODO: this keep[s failing--fix or remove
     "${FZF_DIR}/uninstall" --xdg
     rm -rf "${FZF_DIR}"
   fi
