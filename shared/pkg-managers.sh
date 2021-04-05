@@ -7,7 +7,7 @@ PKG_UPGRADE="upgrade"
 if [ -n "${IS_MACOS}" ]; then
   PKG_NAME="Homebrew"
   PKG_CMD="brew"
-elif [ -n "${IS_BSD}"]; then
+elif [ -n "${IS_BSD}" ]; then
   if [ -n "$(command -v pkg_add || true)" ]; then
     PKG_NAME="OpenBSD pkg"
     PKG_CMD=""
@@ -20,12 +20,12 @@ elif [ -n "${IS_BSD}"]; then
     PKG_CMD="pkg"
   fi
 elif [ -n "${IS_LINUX}"]; then
-  if [ -n "$(command -v apt-get || true)" ]; then
-    PKG_NAME="Aptitude"
-    PKG_CMD="apt-get"
-  elif [ -n "$(command -v apt || true)" ]; then
+  if [ -n "$(command -v apt || true)" ]; then
     PKG_NAME="Aptitude"
     PKG_CMD="apt"
+  elif [ -n "$(command -v apt-get || true)" ]; then
+    PKG_NAME="Aptitude"
+    PKG_CMD="apt-get"
   elif [ -n "$(command -v dnf || true)" ]; then
     PKG_NAME="Dandified YUM"
     PKG_CMD="dnf"
