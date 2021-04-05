@@ -13,4 +13,4 @@ if (( $#_comp_files )); then
 else
   compinit -i
 fi
-unset _comp_files
+unset -v _comp_files

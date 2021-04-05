@@ -8,8 +8,12 @@ fi
 
 display_banner "${PKG_NAME}"
 
-q_prompt "Do you want to update ${PKG_NAME}" "y" && ${PKG_CMD} ${PKG_UPDATE}
-q_prompt "Do you want to upgrade ${PKG_NAME}" && ${PKG_CMD} ${PKG_UPGRADE}
+if q_prompt "Do you want to update ${PKG_NAME}" "y"; then
+  elevate_cmd ${PKG_CMD} ${PKG_UPDATE}
+fi
+if q_prompt "Do you want to upgrade ${PKG_NAME}"; then
+  elevate_cmd ${PKG_CMD} ${PKG_UPGRADE}
+fi
 
 display_banner "Installing for Linux..."
 

@@ -22,7 +22,27 @@ is_sourced() {
   [ $sourced -eq 1 ] && return 0 || return 1
 }
 
-# Usage: q_prompt "Are you sure" [y]
+# Usage: elevate_cmd "command"
+# TODO: very rudimentary/naive, needs improvement
+elevate_cmd() {
+  EUID="${EUID:-$(id -u)}"
+  sudo="${sudo:-$(command -v sudo || true)}"
+
+  if [ "${EUID}" -gt 0 ] && [ -z "$(command -v sudo || true)" ]; then 
+    printf "Non-root user and no sudo-like program\n"
+    return 1
+  elif [ "${EUID}" -gt 0 ]; then
+    args="${@}"
+    printf "%s %s\n" "${sudo}" "${args}"
+    unset -v args
+
+    ${sudo} ${@}
+  else
+    ${@}
+  fi
+}
+
+# Usage: q_prompt "Are you sure" ["y"]
 q_prompt() {
   local yes="y"
   local no="N"

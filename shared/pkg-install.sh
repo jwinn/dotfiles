@@ -6,5 +6,5 @@ deps="${3}"
 
 if q_prompt "Do you want to install ${pkg} requirements: ${deps}" "y"; then
   printf "Installing %s...\n" "${deps}"
-  ${PKG_CMD} ${PKG_INSTALL} ${deps}
+  elevate_cmd ${PKG_CMD} ${PKG_INSTALL} ${deps}
 fi

@@ -6,5 +6,5 @@ deps="${3}"
 
 if q_prompt "Do you want to uninstall ${pkg} requirements: ${deps}"; then
   printf "Uninstalling %s...\n" "${deps}"
-  ${PKG_CMD} ${PKG_UNINSTALL} ${deps}
+  elevate_cmd ${PKG_CMD} ${PKG_UNINSTALL} ${deps}
 fi

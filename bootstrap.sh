@@ -31,8 +31,16 @@ file="${cwd}/${OS_NAME}/${command}.sh"
 if [ -s "${file}" ]; then
   ssource "${cwd}/shared/pkg-managers.sh"
 
+  EUID="${EUID:-$(id -u)}"
+  sudo="$(command -v sudo || true)"
+
   if [ -n "${IS_LINUX}" ] && [ -z "$(command -v ${PKG_CMD} || true)" ]; then
     printf "%s not found in %s" "${PKG_CMD}" "${PATH}"
+    exit 1
+  elif [ -z "${IS_MACOS}" ] \
+    && [ "${EUID}" -gt 0 ] \
+    && [ -z "${sudo}" ] \
+    && ! q_prompt "Not running as root, and sudo not found, continue?"; then
     exit 1
   fi
 

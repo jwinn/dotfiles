@@ -9,9 +9,9 @@ if [ -d "${ASDF_DIR}" ] || [ -n "$(command -v asdf || true)" ]; then
     # uninstall requirements
     [ -n "${asdf_reqs}" ] \
       && ssource "${cwd}/shared/pkg-uninstall.sh" "asdf" "${asdf_reqs}"
-    [ -n "{golang_reqs}" ] \
+    [ -n "${golang_reqs}" ] \
       && ssource "${cwd}/shared/pkg-uninstall.sh" "golang" "${golang_reqs}"
-    [ -n "{pyenv_reqs}" ] \
+    [ -n "${pyenv_reqs}" ] \
       && ssource "${cwd}/shared/pkg-uninstall.sh" "pyenv" "${pyenv_reqs}"
 
     if [ ! -d "${ASDF_DIR}" ]; then
