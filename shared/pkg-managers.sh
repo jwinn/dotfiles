@@ -19,7 +19,7 @@ elif [ -n "${IS_BSD}" ]; then
     PKG_NAME="FreeBSD pkg"
     PKG_CMD="pkg"
   fi
-elif [ -n "${IS_LINUX}"]; then
+elif [ -n "${IS_LINUX}" ]; then
   if [ -n "$(command -v apt || true)" ]; then
     PKG_NAME="Aptitude"
     PKG_CMD="apt"

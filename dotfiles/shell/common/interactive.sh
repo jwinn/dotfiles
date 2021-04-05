@@ -14,10 +14,10 @@ fi
 # TODO: normalize using XDG dirs, instead of HOME
 
 # put your aliases here
-[ "${IS_MACOS}" -eq 1 ] && alias ls="ls -G"
-[ "${IS_LINUX}" -eq 1 ] && alias ls="ls --color=auto"
+[ -n "${IS_MACOS}" ] && alias ls="ls -G"
+[ -n "${IS_LINUX}" ] && alias ls="ls --color=auto"
 alias ll="ls -la"
-[ "${IS_MACOS}" -eq 1 ] || [ "${IS_LINUX}" -eq 1 ] \
+[ -n "${IS_MACOS}" ] || [ -n "${IS_LINUX}" ] \
   && alias grep="grep --color=auto"
 # in order to support a system with vim XDG-config'd and neovim
 # env vars need reset for neovim
@@ -39,7 +39,7 @@ if [ -t 0 ]; then
 fi
 
 # homebrew
-if [ "${IS_MACOS}" -eq 1 ]; then
+if [ -n "${IS_MACOS}" ]; then
   [ "${OS_ARCH}" = "arm64" ] \
     && export HOMEBREW_PREFIX="/opt/homebrew" \
     || export HOMEBREW_PREFIX="/usr/local"
@@ -79,7 +79,7 @@ if [ "$(command -v git || true)" ]; then
   elif [ -s "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh" ]; then
     # shellcheck disable=SC1090
     ssource "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh"
-  elif [ "${IS_MACOS}" -eq 1 ] && [ -s "/Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh" ]; then
+  elif [ -n "${IS_MACOS}" ] && [ -s "/Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh" ]; then
     # shellcheck disable=SC1091
     ssource "/Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh"
   fi
@@ -167,7 +167,7 @@ if [ -x "${PYENV_ROOT}/bin/pyenv" ] || [ -x "${HOMEBREW_PREFIX}/bin/pyenv" ]; th
   eval "$(pyenv init -)"
   eval "$(pyenv virtualenv-init -)"
 
-  if [ "${IS_MACOS}" -eq 1 ] && [ "${OS_ARCH}" = "arm64" ]; then
+  if [ -n "${IS_MACOS}" ] && [ "${OS_ARCH}" = "arm64" ]; then
     # issues related to Big Sur and M1
     alias pyenv="LDFLAGS=\"-L${SDKROOT}/usr/lib\" CFLAGS=\"-I${SDKROOT}/usr/include\" pyenv"
 
@@ -196,7 +196,7 @@ fi
 
 # Android Dev env
 if [ -z "${ANDROID_HOME-}" ]; then
-  if [ "${IS_MACOS}" -eq 1 ]; then
+  if [ -n "${IS_MACOS}" ]; then
     export ANDROID_HOME="${HOME}/Library/Android/sdk"
   else
     export ANDROID_HOME="${HOME}/Android/sdk"
@@ -209,7 +209,7 @@ fi
 
 # JAVA
 # OSX java
-# if [ "${IS_MACOS}" -eq 1 ] && [ -x "$(command -v /usr/libexec/java_home || true)" ]; then
+# if [ -n "${IS_MACOS}" ] && [ -x "$(command -v /usr/libexec/java_home || true)" ]; then
 #   has_java_home=$(command -v /usr/libexec/java_home || true)
 #   no_java_runtime=$($has_java_home 2>&1 | grep -i "no java runtime")
 #   if [ -z "${JAVA_HOME-}" ] && [ -z "${no_java_runtime}" ]; then
