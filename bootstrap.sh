@@ -19,10 +19,10 @@ case "${1}" in
 esac
 
 # check potential--based on choice--requirements
-if [ -z "$(command -v git)" ]; then
+if [ -z "$(command -v git || true)" ]; then
   q_prompt "Git is missing, do you want to continue" || exit 1
 fi
-if [ -z "$(command -v curl)" ]; then
+if [ -z "$(command -v curl || true)" ]; then
   q_prompt "Curl is missing, do you want to continue" || exit 1
 fi
 
@@ -31,7 +31,7 @@ file="${cwd}/${OS_NAME}/${command}.sh"
 if [ -s "${file}" ]; then
   ssource "${cwd}/shared/pkg-managers.sh"
 
-  if [ "${IS_LINUX}" -eq 1 ] && [ -z "$(command -v ${PKG_CMD} || true)" ]; then
+  if [ -n "${IS_LINUX}" ] && [ -z "$(command -v ${PKG_CMD} || true)" ]; then
     printf "%s not found in %s" "${PKG_CMD}" "${PATH}"
     exit 1
   fi
