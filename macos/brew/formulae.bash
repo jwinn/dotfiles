@@ -53,6 +53,7 @@ vim
 --cask alfred
 --cask battle-net
 --cask brave-browser
+--cask dash
 --cask expressvpn
 --cask firefox
 --cask gog-galaxy
