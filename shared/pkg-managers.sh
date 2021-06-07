@@ -20,10 +20,7 @@ elif [ -n "${IS_BSD}" ]; then
     PKG_CMD="pkg"
   fi
 elif [ -n "${IS_LINUX}" ]; then
-  if [ -n "$(command -v apt || true)" ]; then
-    PKG_NAME="Aptitude"
-    PKG_CMD="apt"
-  elif [ -n "$(command -v apt-get || true)" ]; then
+  if [ -n "$(command -v apt-get || true)" ]; then
     PKG_NAME="Aptitude"
     PKG_CMD="apt-get"
   elif [ -n "$(command -v dnf || true)" ]; then
