@@ -25,7 +25,9 @@ is_sourced() {
 # Usage: elevate_cmd "command"
 # TODO: very rudimentary/naive, needs improvement
 elevate_cmd() {
-  EUID="${EUID:-$(id -u)}"
+  if [ -z "${EUID}" ]; then
+    EUID="${EUID:-$(id -u)}"
+  fi
   sudo="${sudo:-$(command -v sudo || true)}"
 
   if [ "${EUID}" -gt 0 ] && [ -z "$(command -v sudo || true)" ]; then 
@@ -206,6 +208,10 @@ to_hex (){
 }
 
 # Usage: run_per_line "file" "brew install"
+# runs the command for each line of the provided file
+# Note: empty lines, or lines starting with "#" are ignored
+# TODO: this is a very brittle/naive implementation,
+# i.e. what if one line's command errors?
 run_per_line() {
   if [ -z "${1}" ] || [ -z "${2}" ]; then
     printf "Usage: run_per_line <file> <command>\n"
@@ -217,29 +223,36 @@ run_per_line() {
     exit 1
   fi
 
-  while read line; do
+  while IFS= read -r line <&3 || [ -n "${line}" ]; do
+  {
     # trim head|tail whitespace
     line="${line## }"
     line="${line%% }"
 
     case "${line}" in
-      \#*) continue ;;
-
-      \$\(*\)|\(*\))
-        eval "output=\"${line}\""
-
-        # trim head|tail whitespace
-        output="${output## }"
-        output="${output%% }"
-
-        [ -n "${output}" ] && $2 $output
+      # ignore lines starting with "#"
+      \#*)
+        continue
         ;;
+
+#      # allow for "$()" to be evaluated first,
+#      # with the evaluated output used as the command's arguments
+#      \$\(*\)|\(*\))
+#        eval "output=\"${line}\""
+#
+#        # trim head|tail whitespace
+#        output="${output## }"
+#        output="${output%% }"
+#
+#        [ -n "${output}" ] && $2 "${output}"
+#        ;;
 
       *)
-        [ -n "${line}" ] && $2 $line
+        [ -n "${line}" ] && $2 "${line}"
         ;;
     esac
-  done < "${1}"
+  } 3<&-
+  done 3< "${1}"
 }
 
 # Usage: get_github_latest_release "nvm-sh/nvm"

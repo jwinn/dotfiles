@@ -31,7 +31,9 @@ file="${cwd}/${OS_NAME}/${command}.sh"
 if [ -s "${file}" ]; then
   ssource "${cwd}/shared/pkg-managers.sh"
 
-  EUID="${EUID:-$(id -u)}"
+  if [ -z "${EUID}" ]; then
+    EUID="${EUID:-$(id -u)}"
+  fi
   sudo="$(command -v sudo || true)"
 
   if [ -n "${IS_LINUX}" ] && [ -z "$(command -v ${PKG_CMD} || true)" ]; then

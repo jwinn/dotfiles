@@ -27,20 +27,28 @@ if q_prompt "Do you want to link files" "y"; then
   link_file "${dotfiles}/vim/init.vim" "${XDG_CONFIG_HOME}/vim/vimrc"
 
   for dfile in bash_logout bash_profile bashrc profile zshenv; do
-    backup_file "${HOME}/.${dfile}" "${DOTFILES_BACKUP_DIR}"
+    if [ ! -L "${HOME}/.${dfile}" ]; then
+      backup_file "${HOME}/.${dfile}" "${DOTFILES_BACKUP_DIR}"
+    fi
     link_file "${dotfiles}/shell/.${dfile}" "${HOME}/.${dfile}"
   done
 
   for dfile in zlogin zlogout zshrc; do
-    backup_file "${ZDOTDIR}/.${dfile}" "${DOTFILES_BACKUP_DIR}"
+    if [ ! -L "${ZDOTDIR}/.${dfile}" ]; then
+      backup_file "${ZDOTDIR}/.${dfile}" "${DOTFILES_BACKUP_DIR}"
+    fi
     link_file "${dotfiles}/shell/.${dfile}" "${ZDOTDIR}/.${dfile}"
   done
 
-  backup_file "${ASDF_CONFIG_FILE}" "${DOTFILES_BACKUP_DIR}"
+  if [ ! -L "${ASDF_CONFIG_FILE}" ]; then
+    backup_file "${ASDF_CONFIG_FILE}" "${DOTFILES_BACKUP_DIR}"
+  fi
   link_file "${dotfiles}/asdfrc" "${ASDF_CONFIG_FILE}"
 
   for dfile in editorconfig gitconfig gitignore shellcheckrc tmux.conf; do
-    backup_file "${HOME}/.${dfile}" "${DOTFILES_BACKUP_DIR}"
+    if [ ! -L "${HOME}/.${dfile}" ]; then
+      backup_file "${HOME}/.${dfile}" "${DOTFILES_BACKUP_DIR}"
+    fi
     link_file "${dotfiles}/${dfile}" "${HOME}/.${dfile}"
   done
 

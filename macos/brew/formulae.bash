@@ -25,11 +25,7 @@ iterm2
 kitty
 mosh
 mtr
-
-# neovim dev version
---HEAD luajit
---HEAD neovim
-
+neovim
 nmap
 nnn
 node
@@ -44,27 +40,28 @@ python3
 
 ranger
 rg
-# shellcheck
+shellcheck
+svn
 tmux
 vim
 
 # casks
---cask adobe-creative-cloud
---cask alfred
---cask battle-net
---cask brave-browser
---cask dash
---cask expressvpn
---cask firefox
---cask gog-galaxy
---cask google-chrome
-# --cask intellij-idea
---cask little-snitch
---cask postman
---cask slack
---cask steam
---cask visual-studio-code
---cask zoom
+adobe-creative-cloud
+alfred
+battle-net
+brave-browser
+dash
+expressvpn
+firefox
+gog-galaxy
+google-chrome
+# intellij-idea
+little-snitch
+postman
+slack
+steam
+visual-studio-code
+zoom
 
 # drivers
 logitech-options

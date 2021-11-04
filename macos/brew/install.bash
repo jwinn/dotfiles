@@ -28,6 +28,12 @@ if [ -z "$(command -v brew || true)" ]; then
     display_banner "Installing Homebrew..."
     ${bash} -c "$(${curl} -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
+    if [ -d "/opt/homebrew" ]; then
+      path_prepend "/opt/homebrew/bin"
+    else
+      path_prepend "/usr/local/bin"
+    fi
+
     # run doctor for new install
     brew doctor
   fi
