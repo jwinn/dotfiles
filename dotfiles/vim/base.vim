@@ -8,11 +8,22 @@ endif
 
 let &encoding = g:jw.opts.encoding
 
+"set backspace=indent,eol,start
+
 "set cursorline
 set number
-set ignorecase smartcase
-set expandtab shiftwidth=2 tabstop=2 softtabstop=2
-set incsearch hlsearch
+
+set ignorecase
+set smartcase
+
+"set autoindent
+set expandtab
+set shiftwidth=2
+set tabstop=2
+set softtabstop=2
+
+"set incsearch
+set hlsearch
 
 set pastetoggle=<F2>
 "set textwidth=80

@@ -88,6 +88,8 @@ let g:jw.has.256color = g:jw.has.gui || (&term =~ '256color')
 " g:jw.xdg {{{
 " try to use XDG folder structure where possible or use defaults
 " TODO: there's a potential problem with windows env here
+"       if there's no unix like env on Win,
+"       then %USERPROFILE% and %USERDATA% should be used
 
 let g:jw.xdg = {
       \ 'cache_home': exists('$XDG_CACHE_HOME')
