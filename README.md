@@ -10,14 +10,14 @@ Use either the [Bootstrap](#bootstrap) or [Git Clone and Install](#git-clone-and
 
 `curl`
 ```sh
-sh -c "$(curl -fsSL https://codeberg.org/jwinn/dotfiles/raw/branch/main/bootstrap.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/jwinn/dotfiles/main/bootstrap.sh)"
 ```
 
 *- or -*
 
 `wget`
 ```sh
-sh -c "$(wget -qO- https://codeberg.org/jwinn/dotfiles/raw/branch/main/bootstrap.sh)"
+sh -c "$(wget -qO- https://raw.githubusercontent.com/jwinn/dotfiles/main/bootstrap.sh)"
 ```
 
 ### Git Clone and Install
@@ -28,14 +28,14 @@ sh -c "$(wget -qO- https://codeberg.org/jwinn/dotfiles/raw/branch/main/bootstrap
 
 `HTTPS`
 ```sh
-git clone https://codeberg.org/jwinn/dotfiles.git
+git clone https://github.com/jwinn/dotfiles.git
 ```
 
 *- or -*
 
 `SSH`
 ```sh
-git clone git@codeberg.org:jwinn/dotfiles.git
+git clone git@github.com:jwinn/dotfiles.git
 ```
 
 #### Install
