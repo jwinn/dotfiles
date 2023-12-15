@@ -1,0 +1,179 @@
+{{- /* determine if running interactively, i.e. has tty */ -}}
+{{- $interactive := stdinIsATTY -}}
+{{- $codespaces := env "CODESPACES" | not | not -}}
+
+{{- $cpuCores := 1 -}}
+{{- $cpuThreads := 1 -}}
+{{- $chassisType := "desktop" }}
+{{- $osId := .chezmoi.os -}}
+{{- $osName := .chezmoi.os -}}
+{{- $osSemversion := "" -}}
+{{- $hostName := .chezmoi.hostname -}}
+{{- $sdkRoot := "" -}}
+
+{{- if eq .chezmoi.os "darwin" -}}
+  {{- $cpuCores = (output "sysctl" "-n" "hw.physicalcpu_max") | trim | atoi -}}
+  {{- $cpuThreads = (output "sysctl" "-n" "hw.logicalcpu_max") | trim | atoi -}}
+
+  {{- if contains "MacBook" (output "sysctl" "-n" "hw.model") }}
+    {{- $chassisType = "laptop" -}}
+  {{- else -}}
+    {{- /* TODO: determine if macOS vm */ -}}
+  {{- end -}}
+
+  {{- $osName = (output "sw_vers" "-productName") | trim -}}
+  {{- $osSemversion = (output "sw_vers" "-productVersion") | trim | semver -}}
+
+  {{- /* use scutil to more accurately determine hostname on macOS */ -}}
+  {{- $hostName = (output "scutil" "--get" "ComputerName") | trim -}}
+
+  {{- $sdkRoot = (output "xcrun" "--show-sdk-path") | trim -}}
+
+{{- else if eq .chezmoi.os "linux" -}}
+  {{- $cpuCores = (output "sh" "-c" "lscpu --online --parse | grep --invert-match '^#' | sort --field-separator=',' --key='2,4' --unique | wc --lines") | trim | atoi -}}
+  {{- $cpuThreads = (output "sh" "-c" "lscpu --online --parse | grep --invert-match '^#' | wc --lines") | trim | atoi -}}
+  {{- $chassisType = (output "hostnamectl" "--json=short" | mustFromJson).Chassis -}}
+
+  {{- if hasKey .chezmoi.osRelease "id" -}}
+    {{- $osName = .chezmoi.osRelease.id -}}
+    {{- $osId = printf "%s-%s" $osName .chezmoi.osRelease.versionCodename -}}
+  {{- end -}}
+
+  {{- if hasKey .chezmoi.osRelease "versionID" -}}
+    {{- $osSemversion = .chezmoi.osRelease.versionID | trim | semver -}}
+  {{- end -}}
+
+{{- else if eq .chezmoi.os "windows" -}}
+  {{- /* TODO: determine if windows vm */ -}}
+  {{- $cpuCores = (output "powershell.exe" "-NoProfile" "-NonInteractive" "-Command" "(Get-CimInstance -ClassName 'Win32_Processor').NumberOfCores") | trim | atoi -}}
+  {{- $cpuThreads = (output "powershell.exe" "-NoProfile" "-NonInteractive" "-Command" "(Get-CimInstance -ClassName 'Win32_Processor').NumberOfLogicalProcessors") | trim | atoi -}}
+  {{- $chassisType = (output "powershell.exe" "-NoProfile" "-NonInteractive" "-Command" "if ((Get-CimInstance -Class Win32_Battery | Measure-Object).Count -gt 0) { Write-Output 'laptop' } else { Write-Output 'desktop' }") | trim -}}
+
+  {{- /* TODO: determine windows id? */ -}}
+  {{- $osId = "windows" -}}
+  {{- $osName = "windows" -}}
+  {{- $osSemversion = .chezmoi.windowsVersion | trim | semver -}}
+{{- end -}}
+
+
+{{- $profile := "" -}}
+{{- $name := "" -}}
+{{- $email := "" -}}
+{{- $gpgKey := "" -}}
+{{- $githubUser := "" -}}
+
+{{- if eq .chezmoi.os "linux" -}}
+  {{- $name = output "id" "-u" "-n" | trim -}}
+{{- else if eq .chezmoi.os "darwin" -}}
+  {{- $name = output "id" "-F" | trim -}}
+{{- end -}}
+
+{{- if $codespaces -}}
+  {{- /* codespaces dotfiles setup is non-interactive, so manually set */ -}}
+  {{- $name = "Jonathan Winn" -}}
+{{- else if not ($interactive) -}}
+  {{- /* TODO: should any profile values be set? */ -}}
+{{- else -}}
+  {{- $name = "Jon Winn" -}}
+  {{- $email = "me@jonwinn.com" -}}
+  {{- $gpgKey = "15ED1D77E7A4EA76" -}}
+  {{- $githubUser = "jwinn" -}}
+
+  {{- $profile = promptString "profile (private, winlum, work)"  "private" -}}
+
+  {{- if eq $profile "winlum" -}}
+    {{- $email = "jwinn@winlum.com" -}}
+    {{- $name = "Jonathan Winn" -}}
+    {{- $gpgKey = "" -}}
+    {{- $githubUser = "" -}}
+  {{- else if eq $profile "work" -}}
+    {{- $email = "" -}}
+    {{- $name = "Jonathan Winn" -}}
+    {{- $gpgKey = "" -}}
+    {{- $githubUser = "" -}}
+  {{- end -}}
+{{- end -}}
+
+encryption = "gpg"
+sourceDir = {{ .chezmoi.sourceDir | quote }}
+
+[data]
+codespaces = {{ $codespaces }}
+interactive = {{ $interactive }}
+
+[data.chassis]
+type = {{ $chassisType | quote }}
+
+[data.cpu]
+cores = {{ $cpuCores }}
+threads = {{ $cpuThreads }}
+
+{{ if eq .chezmoi.os "darwin" -}}
+[data.darwin]
+
+[data.darwin.deployment]
+target = {{ printf "%d.%d" $osSemversion.Major $osSemversion.Minor | quote }}
+
+[data.darwin.sdk]
+root = {{ $sdkRoot | quote }}
+{{- end }}
+
+[data.github]
+user = {{ $githubUser | quote }}
+
+[data.gpg]
+key = {{ $gpgKey | quote }}
+
+[data.os]
+hostname = {{ $hostName | quote }}
+id = {{ $osId | quote }}
+name = {{ $osName | quote }}
+semversion = {{ $osSemversion | quote }}
+version = {{ $osSemversion.Original | quote }}
+
+[data.profile]
+email = {{ $email | quote }}
+name = {{ $name | quote }}
+type = {{ $profile | quote }}
+user = {{ .chezmoi.username | quote }}
+
+[data.xdg]
+
+[data.xdg.cache]
+{{ if eq (env "XDG_CACHE_HOME") "" -}}
+home = {{ printf "%s/%s" .chezmoi.homeDir ".cache" | quote }}
+{{- else -}}
+home = {{ env "XDG_CACHE_HOME" | quote }}
+{{- end }}
+
+[data.xdg.config]
+{{ if eq (env "XDG_CONFIG_DIRS") "" -}}
+dirs = "/etc/xdg"
+{{- else -}}
+dirs = {{ env "XDG_CONFIG_DIRS" | quote }}
+{{- end }}
+{{ if eq (env "XDG_CONFIG_HOME") "" -}}
+home = {{ printf "%s/%s" .chezmoi.homeDir ".config" | quote }}
+{{- else -}}
+home = {{ env "XDG_CONFIG_HOME" | quote }}
+{{- end }}
+
+[data.xdg.data]
+{{ if eq (env "XDG_DATA_DIRS") "" -}}
+dirs = "/usr/local/share:/usr/share"
+{{- else -}}
+dirs = {{ env "XDG_DATA_DIRS" | quote }}
+{{- end }}
+{{ if eq (env "XDG_DATA_HOME") "" -}}
+home = {{ printf "%s/%s/%s" .chezmoi.homeDir ".local" "share" | quote }}
+{{- else -}}
+home = {{ env "XDG_DATA_HOME" | quote }}
+{{- end }}
+
+[data.xdg.runtime]
+{{ if ne (env "XDG_RUNTIME_DIR") "" -}}
+dir = {{ env "XDG_RUNTIME_DIR" | quote }}
+{{- end }}
+
+[gpg]
+recipient = {{ $gpgKey | quote }}

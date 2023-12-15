@@ -1,0 +1,67 @@
+#!/bin/sh
+
+set -eu
+
+# POSIX way to get script's dir: https://stackoverflow.com/a/29834779/12156188
+SCRIPT_DIR="$(cd -P -- "$(dirname -- "$(command -v -- "$0")")" && pwd -P)"
+ASDF_REPO="${ASDF_REPO:-"https://github.com/asdf-vm/asdf.git"}"
+
+has_command() {
+  command -v "${1}" 1>/dev/null 2>&1
+}
+
+safe_source() {
+  if [ -r "${1}" ]; then
+    . "${1}"
+  fi
+}
+
+install_asdf() {
+  if [ -z "${ASDF_DATA_DIR}" ]; then
+    printf "%s\n" "Error: ASDF_DATA_DIR env not set, unable to proceed"
+    return 1
+  fi
+
+  if ! has_command asdf && [ ! -x "${ASDF_DATA_DIR}/asdf.sh" ]; then
+    if ! has_command git; then
+      printf "%s\n" "Required git command not found in: $PATH"
+      return 1
+    fi
+
+    printf "%s\n" "Installing asdf to: ${ASDF_DATA_DIR}"
+
+    if [ ! -d "${ASDF_DATA_DIR}/.git" ]; then
+      printf "%s\n" "Cloning asdf from: ${ASDF_REPO}"
+      git clone "${ASDF_REPO}" "${ASDF_DATA_DIR}"
+
+      printf "%s\n" "Get and switch to the latest release"
+      cd "${ASDF_DATA_DIR}" \
+        && git fetch --all --prune --tags \
+        && git switch -c "$(git describe --abbrev=0 --tags)" \
+        && cd - >/dev/null \
+        || return $?
+
+      printf "%s\n" "Successfully installed asdf to: ${ASDF_DATA_DIR}"
+    else
+      printf "%s\n" "Updating the repo at: ${ASDF_DATA_DIR}"
+      cd "${ASDF_DATA_DIR}" \
+        && git fetch --all --prune --tags \
+        && git switch "$(git describe --abbrev=0 --tags)" \
+        && cd - >/dev/null \
+        || return $?
+
+      printf "%s\n" "Successfully updated asdf in: ${ASDF_DATA_DIR}"
+    fi
+
+    if [ -r "${ASDF_DATA_DIR}/asdf.sh" ]; then
+      . "${ASDF_DATA_DIR}/asdf.sh"
+    fi
+  else
+    printf "%s\n" "asdf already installed at: ${ASDF_DATA_DIR}"
+  fi
+
+  return 0
+}
+
+install_asdf || exit $?
+exec "${SHELL}"

@@ -1,0 +1,19 @@
+tap "homebrew/bundle"
+
+cask "brave-browser"
+cask "expressvpn"
+cask "google-chrome"
+cask "visual-studio-code"
+
+{{ if and (.interactive) (not .codespaces) -}}
+cask "grammarly"
+cask "moonlight"
+cask "nordvpn"
+cask "parallels"
+cask "parsec"
+cask "protonmail-bridge"
+cask "protonvpn"
+cask "utm"
+cask "vmware-fusion"
+{{- end }}
+

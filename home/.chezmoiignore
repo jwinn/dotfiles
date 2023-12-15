@@ -1,0 +1,17 @@
+# ignore any other asdf files/folders
+.config/asdf/**/*
+!.config/asdf/asdfrc
+!.config/asdf/tool-versions
+
+# ignore any .local files in the shell folders
+.config/{bash,sh,shell,zsh}/**/*.local
+
+# ignore run-time zsh files
+.config/zsh/.zsh_*
+.config/zsh/.zcompdump*
+
+# ignore vim's netrw history file
+.vim/.netrwhist
+
+# ignore non-json vscode files/folders
+.vscode/**/[^*.json]

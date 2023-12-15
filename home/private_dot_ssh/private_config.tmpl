@@ -1,0 +1,36 @@
+Host *
+	IgnoreUnknown AddKeysToAgent,UseKeychain
+	AddKeysToAgent yes
+	ServerAliveCountMax 3
+	ServerAliveInterval 15
+	TCPKeepAlive yes
+	UseKeychain yes
+	VisualHostKey yes
+	IdentityFile "%d/.ssh/keys/jonwinn.com/me/id_ed25519"
+	#IdentitiesOnly yes
+
+Host bitbucket.org
+	User git
+	PreferredAuthentications publickey
+
+Host codeberg.org
+	User git
+	PreferredAuthentications publickey
+	PubkeyAcceptedKeyTypes +ssh-rsa
+	HostkeyAlgorithms +ssh-rsa
+	PubkeyAcceptedAlgorithms +ssh-rsa
+
+Host github.com
+	User git
+	PreferredAuthentications publickey
+
+Host github.com-winlum
+	HostName github.com
+	User git
+	PreferredAuthentications publickey
+	IdentityFile "%d/.ssh/keys/winlum.com/jwinn/id_ed25519"
+
+Host git.sr.ht
+	User git
+	PreferredAuthentications publickey
+

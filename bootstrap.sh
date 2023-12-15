@@ -1,55 +1,77 @@
-#!/bin/sh -e
+#!/bin/sh -e -u
 
-cwd=$(CDPATH= cd -- "$(dirname -- "${0}")" && pwd -P)
-script="$(basename -- "${0}")"
+BIN_DIR="${HOME}/.local/bin"
+CHEZMOI_URL="get.chezmoi.io"
+DOTFILES_REPO="https://codeberg.org/jwinn/dotfiles.git"
+# POSIX way to get script's dir: https://stackoverflow.com/a/29834779/12156188
+SCRIPT_DIR="$(cd -P -- "$(dirname -- "$(command -v -- "$0")")" && pwd -P)"
 
-# ensure env and functions exist
-. "${cwd}/dotfiles/shell/common/env.sh"
-. "${cwd}/dotfiles/shell/common/env_functions.sh"
-ssource "${cwd}/dotfiles/shell/common/functions.sh"
+has_command() {
+  command -v "${1}" 1>/dev/null 2>&1
+}
 
-# parse command
-case "${1}" in
-  i|install) command=install ;;
-  r|rm|remove|uninstall) command=uninstall ;;
-  *)
-    printf "Usage: %s i|install|r|rm|remove|uninstall\n" "${script}"
-    exit 1
-    ;;
-esac
-
-# check potential--based on choice--requirements
-if [ -z "$(command -v git || true)" ]; then
-  q_prompt "Git is missing, do you want to continue" || exit 1
-fi
-if [ -z "$(command -v curl || true)" ]; then
-  q_prompt "Curl is missing, do you want to continue" || exit 1
-fi
-
-# run the command if exists and non-0 sized
-file="${cwd}/${OS_NAME}/${command}.sh"
-if [ -s "${file}" ]; then
-  ssource "${cwd}/shared/pkg-managers.sh"
-
-  if [ -z "${EUID}" ]; then
-    EUID="${EUID:-$(id -u)}"
-  fi
-  sudo="$(command -v sudo || true)"
-
-  if [ -n "${IS_LINUX}" ] && [ -z "$(command -v ${PKG_CMD} || true)" ]; then
-    printf "%s not found in %s" "${PKG_CMD}" "${PATH}"
-    exit 1
-  elif [ -z "${IS_MACOS}" ] \
-    && [ "${EUID}" -gt 0 ] \
-    && [ -z "${sudo}" ] \
-    && ! q_prompt "Not running as root, and sudo not found, continue?"; then
-    exit 1
+verify() {
+  if ! has_command git; then
+    printf "%s\n" "Error: unable to locate git in: ${PATH}"
+    return 1
   fi
 
-  ssource "${file}"
-  display_banner "Please run: exec \$SHELL" \
-    "- or - restart the terminal/shell"
-else
-  printf "Unsupported OS \"%s\"\n" "${OS_NAME}"
-  exit 1
-fi
+  if ! has_command curl && ! has_command wget; then
+    printf "%s\n" "Error: curl nor wget found in: ${PATH}"
+    return 1
+  fi
+
+  return 0
+}
+
+install_chezmoi() {
+  install_script=
+
+  if ! has_command chezmoi \
+    && [ ! -x "${HOME}/bin/chezmoi" ] \
+    && [ ! -x "${HOME}/.local/bin/chezmoi" ]; then
+
+    printf "%s\n" "Installing chezmoi to: ${BIN_DIR}"
+    if has_command curl; then
+      install_script="$(curl -fsSL ${CHEZMOI_URL})"
+    elif has_command wget; then
+      install_script="$(wget -qO- ${CHEZMOI_URL})"
+    else
+      printf "%s\n" "Error: curl nor wget found in: ${PATH}"
+      return 1
+    fi
+    sh -c "${install_script}" -- -b "${BIN_DIR}"
+
+    unset -v install_script
+    printf "%s\n" "Successfully installed chezmoi to: ${BIN_DIR}"
+  fi
+
+  if ! has_command chezmoi; then
+    if [ -x "${HOME}/bin/chezmoi" ]; then
+      PATH="${HOME}/bin:${PATH}"
+    elif [ -x "${BIN_DIR}/chezmoi" ]; then
+      PATH="${BIN_DIR}:${PATH}"
+    else
+      printf "%s\n" "Error: unable to find chezmoi in: ${PATH}"
+      return 1
+    fi
+  fi
+
+  # TODO: make this more robust and resilient
+  printf "%s\n" "Initializing dotfiles from chezmoi: ${DOTFILES_REPO}"
+  if [ -z "${CHEZMOI_ONESHOT}" ]; then
+    chezmoi init --apply --verbose "${DOTFILES_REPO}"
+  else
+    chezmoi init --one-shot "${DOTFILES_REPO}"
+  fi
+
+  return 0
+}
+
+main() {
+  verify || exit $?
+  install_chezmoi || exit $?
+}
+
+# call main
+main
