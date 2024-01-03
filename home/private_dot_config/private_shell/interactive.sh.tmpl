@@ -9,6 +9,10 @@ alias ll="ls -la"
 [ -n "${OS_IS_MACOS}" ] || [ -n "${OS_IS_LINUX}" ] \
   && alias grep="grep --color=auto"
 
+# allow scp/ssh without a known_hosts entry
+alias scpx="scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+alias sshx="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+
 # in order to support a system with vim XDG-config'd and neovim
 # env vars need reset for neovim
 if [ -d "${XDG_CONFIG_HOME}/nvim" ]; then
