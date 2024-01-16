@@ -2,7 +2,7 @@
 
 BIN_DIR="${HOME}/.local/bin"
 CHEZMOI_URL="get.chezmoi.io"
-DOTFILES_REPO="git@github.com:jwinn/dotfiles.git"
+DOTFILES_REPO="https://github.com/jwinn/dotfiles.git"
 # POSIX way to get script's dir: https://stackoverflow.com/a/29834779/12156188
 SCRIPT_DIR="$(cd -P -- "$(dirname -- "$(command -v -- "$0")")" && pwd -P)"
 
