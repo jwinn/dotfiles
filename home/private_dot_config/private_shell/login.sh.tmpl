@@ -1,5 +1,3 @@
-# shellcheck shell=sh
-
 # Put your environment variables here
 
 # place the shell history in XDG folder
@@ -22,10 +20,8 @@ export LESSKEY="${XDG_CONFIG_HOME}/less/keys"
 # subversion
 export SUBVERSION_HOME="${XDG_CONFIG_HOME}/subversion"
 # vim -- example
-#export MYVIMRC="${XDG_CONFIG_HOME}/vim/vimrc"
-#export VIMDOTDIR="${XDG_CONFIG_HOME}/vim"
-#export VIMINIT=":source ${MYVIMRC}"
-#export VIMINIT="let $MYVIMRC=\"${XDG_CONFIG_HOME}/vim/vimrc\" | :source ${MYVIMRC}"
+export MYVIMRC="${XDG_CONFIG_HOME}/vim/init.vim"
+export VIMINIT=":source ${MYVIMRC}"
 
 # Preferred programs
 export PAGER=less

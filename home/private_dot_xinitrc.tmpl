@@ -1,0 +1,12 @@
+# https://nixos.wiki/wiki/Using_X_without_a_Display_Manager
+if [ -z "${DBUS_SESSION_BUS_ADDRESS}" ]; then
+  eval $(dbus-launch --exit-with-session --sh-syntax)
+fi
+
+if command -v systemctl >/dev/null 2>&1; then
+  systemctl --user import-environment DISPLAY XAUTHORITY
+fi
+
+if command -v dbus-update-activation-environment >/dev/null 2>&1; then
+  dbus-update-activation-environment DISPLAY XAUTHORITY
+fi
