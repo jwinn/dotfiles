@@ -3,6 +3,11 @@ if [ -z "${DBUS_SESSION_BUS_ADDRESS}" ]; then
   eval $(dbus-launch --exit-with-session --sh-syntax)
 fi
 
+# souce ~/.Xresources if it exists and `xrdb` is available
+if command -v xrdb >/dev/null 2>&1 && [ -f "${HOME}/.Xresources" ]; then
+  xrdb -merge -I${HOME} ${HOME}/.Xresources
+fi
+
 if command -v systemctl >/dev/null 2>&1; then
   systemctl --user import-environment DISPLAY XAUTHORITY
 fi

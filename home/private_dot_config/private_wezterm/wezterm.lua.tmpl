@@ -12,7 +12,8 @@ end
 
 -- This is where you actually apply your config choices
 
-config.font = wezterm.font "JetBrains Mono"
+config.font = wezterm.font "monospace"
+config.font = wezterm.font "FiraCode Nerd Font"
 
 --
 -- window background
@@ -21,7 +22,7 @@ config.font = wezterm.font "JetBrains Mono"
 -- The art is a bit too bright and colorful to be useful as a backdrop
 -- for text, so we're going to dim it down to 10% of its normal brightness
 local dimmer = { brightness = 0.1 }
-local base_dir = os.getenv("WEZTERM_CONFIG_DIR")
+local base_dir = wezterm.config_dir
 local bg_base_dir = base_dir .. "/assets/Alien_Ship_bg_vert_images"
 
 config.enable_scroll_bar = true
