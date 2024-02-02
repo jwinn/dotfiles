@@ -116,7 +116,7 @@ target = {{ printf "%d.%d" $osSemversion.Major $osSemversion.Minor | quote }}
 
 [data.darwin.sdk]
 root = {{ $sdkRoot | quote }}
-{{- end }}
+{{- end -}}
 
 [data.github]
 user = {{ $githubUser | quote }}
@@ -173,7 +173,7 @@ home = {{ env "XDG_DATA_HOME" | quote }}
 [data.xdg.runtime]
 {{ if ne (env "XDG_RUNTIME_DIR") "" -}}
 dir = {{ env "XDG_RUNTIME_DIR" | quote }}
-{{- end }}
+{{- end -}}
 
 [gpg]
 recipient = {{ $gpgKey | quote }}
