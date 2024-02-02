@@ -1,6 +1,17 @@
 -- Pull in the wezterm API
 local wezterm = require "wezterm"
 
+-- variables
+
+-- The art is a bit too bright and colorful to be useful as a backdrop
+-- for text, so we're going to dim it down to 10% of its normal brightness
+local dimmer = { brightness = 0.1 }
+local base_dir = wezterm.config_dir
+local bg_base_dir = base_dir .. "/assets/Alien_Ship_bg_vert_images"
+
+local is_i3wm = os.getenv("I3SOCK")
+local show_bg = (not is_i3wm)
+
 -- This table will hold the configuration.
 local config = {}
 
@@ -12,38 +23,29 @@ end
 
 -- This is where you actually apply your config choices
 
-config.font = wezterm.font "monospace"
---config.font = wezterm.font "FiraCode Nerd Font"
---config.font = wezterm.font "ComicShannsMono Nerd Font"
-config.font = wezterm.font "IntoneMono Nerd Font"
-config.font_size = 11.0
-
---window_decorations = "RESIZE"
-config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
-config.enable_tab_bar = false
-config.hide_tab_bar_if_only_one_tab = true
+if is_i3wm then
+  --config.font = wezterm.font "monospace"
+  --config.font = wezterm.font "FiraCode Nerd Font"
+  --config.font = wezterm.font "ComicShannsMono Nerd Font"
+  config.font = wezterm.font "IntoneMono Nerd Font"
+  config.font_size = 11.0
+  --config.window_decorations = "RESIZE"
+  config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
+  config.enable_tab_bar = false
+  config.hide_tab_bar_if_only_one_tab = true
+  config.enable_scroll_bar = false
+  config.window_background_opacity = 0.0
+  config.text_background_opacity = 0.3
+else
+  config.min_scroll_bar_height = "2cell"
+  config.colors = {
+    scrollbar_thumb = "white",
+  }
+end
 
 --
 -- window background
 --
-
--- The art is a bit too bright and colorful to be useful as a backdrop
--- for text, so we're going to dim it down to 10% of its normal brightness
-local dimmer = { brightness = 0.1 }
-local base_dir = wezterm.config_dir
-local bg_base_dir = base_dir .. "/assets/Alien_Ship_bg_vert_images"
-
-local is_i3wm = os.getenv("I3SOCK")
-local show_bg = (not is_i3wm)
-
-config.window_background_opacity = 0.0
-config.text_background_opacity = 0.3
-
-config.enable_scroll_bar = false
-config.min_scroll_bar_height = "2cell"
-config.colors = {
-  scrollbar_thumb = "white",
-}
 
 if show_bg then
   config.background = {
