@@ -1,0 +1,241 @@
+* {
+  background-color: transparent;
+  border-color: var(border, white/90%);
+  text-color: var(foreground, white/95%);
+}
+
+dummy, textbox-separator {
+  expand: false;
+}
+dummy-ex {
+  expand: true;
+}
+
+textbox-separator {
+  str: var(textbox-separator, "");
+}
+
+overlay {
+  background-color: var(overlay-background, black/90%);
+}
+
+window {
+  anchor: var(window-anchor, north);
+  location: var(window-location, north);
+  transparency: var(window-transparency, "real");
+  width: var(window-width, 80%);
+  x-offset: var(x-offset, 0);
+  y-offset: var(y-offset, 1em);
+  children: [ mainbox ];
+}
+
+mainbox {
+  orientation: horizontal;
+  spacing: 1em;
+  children: [ col-1, col-2 ];
+}
+
+col-1, col-2 {
+  background-color: var(background, gray);
+  border: 4px;
+  border-radius: var(border-radius, 0.25em);
+}
+
+col-1 {
+  children: [ inputbar, col-1-middle, mode-wrapper ];
+}
+col-1-middle {
+  background-image: var(image-background, 
+    url("./assets/bg-wire-bust.png", both));
+  children: [ message ];
+}
+
+col-2 {
+  padding: 0.2em;
+  children: [ listview ];
+}
+
+inputbar {
+  border: 0 0 1px 0;
+  children: [ box ];
+}
+box {
+  orientation: horizontal;
+  padding: 0.25em 0.5em;
+  //children: [ case-indicator, prompt, entry, num-filtered-rows,
+  //            textbox-separator, num-rows, textbox-separator,
+  //            textbox-current-entry, icon-current-entry ];
+  children: [ case-indicator, prompt, entry, num-filtered-rows,
+              textbox-separator, num-rows ];
+}
+case-indicator {
+}
+prompt {
+  margin: 0 0.6em 0 0; 
+}
+entry {
+  background-color: var(entry-background, gray/10%);
+  cursor: text;
+  cursor-color: var(entry-cursor-color, white/90%);
+  cursor-width: var(entry-cursor-width, 2px);
+  margin: 0 0.3em 0 0;
+  padding: 0 0 0 0.3em;
+  placeholder: "Search";
+}
+num-rows {
+}
+num-filtered-rows {
+}
+textbox-current-entry {
+}
+icon-current-entry {
+}
+
+message {
+  background-color: var(message-background, gray/25%);
+  border: 0 0 1px dash 0;
+  padding: 0.1em 0.25em;
+}
+textbox {
+}
+
+mode-wrapper {
+  expand: false;
+  orientation: horizontal;
+  children: [ button-mode-previous, mode-switcher, button-mode-next ];
+}
+button-mode-previous, button-mode-next  {
+  expand: false;
+  vertical-align: 0.5;
+}
+button-mode-previous {
+  action: "kb-mode-previous";
+  border: 1px 1px 0 0;
+  content: "";
+  padding: 0.2em 0.3em 0.2em 0.2em;
+}
+button-mode-next {
+  action: "kb-mode-next";
+  border: 1px 0 0 0;
+  content: "";
+  padding: 0.2em 0.2em 0.2em 0.3em;
+}
+mode-switcher {
+  expand: true;
+}
+button-mode-previous, button-mode-next, button {
+  border-color: var(button-border, white/90%);
+  cursor: pointer;
+}
+button {
+  border: 1px 1px 0 0;
+  padding: 0.2em 0;
+}
+button selected {
+  background-color: var(button-selected-bg, white/20%);
+  border-color: var(button-selected-border, white/90%);
+  text-color: @button-selected-text;
+}
+
+listview {
+}
+scrollbar {
+}
+element {
+  padding: 0.2em;
+  //children: [ element-index, element-icon, element-text ];
+  children: [ element-icon, element-text ];
+}
+element selected {
+  background-color: var(element-selected-bg, white/10%);
+  border: 0 4px;
+  border-color: var(element-selected-border, green/90%);
+  border-radius: 8px;
+}
+element alternate {
+  background-color: var(element-alternate-bg, gray/10%);
+}
+element-icon {
+  padding: 0 0.2em;
+  size: 0.66em;
+  squared: true;
+}
+element-index {
+}
+element-text {
+}
+element-text selected {
+  text-color: var(element-selected-text, white/90%);
+}
+
+/*
+ * Change to single column, when on a smaller screen
+ */
+@media (max-width: 1024px) {
+  configuration {
+    combi {
+      //display-name: "";
+      display-name: "";
+    }
+
+    drun {
+      display-name: "";
+    }
+
+    filebrowser {
+      display-name: "󱧶";
+      //display-name: "";
+    }
+
+    keys {
+      display-name: "󰧺";
+    }
+
+    run {
+      display-name: "";
+    }
+
+    ssh {
+      display-name: "";
+    }
+
+    window {
+      display-name: "";
+    }
+
+    windowcd {
+      display-name: "";
+    }
+  }
+
+  mainbox {
+    orientation: vertical;
+    spacing: 0.5em;
+  }
+
+  col-1 {
+    background-image: none;
+    expand: false;
+    spacing: 0.5em;
+    children: [ inputbar, message, mode-wrapper ];
+  }
+
+  col-2 {
+  }
+
+  inputbar {
+    padding: 0.2em 0;
+    children: [ case-indicator, prompt, entry, num-filtered-rows,
+                textbox-separator, num-rows ];
+  }
+  num-rows {
+    padding: 0 0.3em 0 0;
+  }
+
+  message {
+    padding: 0 0 0.3em;
+  }
+  textbox {
+    padding: 0.3em 0.3em 0 0.3em;
+  }
+}

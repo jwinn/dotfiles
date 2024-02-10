@@ -1,0 +1,42 @@
+! vim: ft=xdefaults
+!===========================================================================!
+! OneHalf Light
+!---------------------------------------------------------------------------!
+! https://github.com/mbadolato/iTerm2-Color-Schemes
+!---------------------------------------------------------------------------!
+#define CLR_BASE16_00 #282c34
+#define CLR_BASE16_01 #e06c75
+#define CLR_BASE16_02 #98c379
+#define CLR_BASE16_03 #e5c07b
+#define CLR_BASE16_04 #61afef
+#define CLR_BASE16_05 #c678dd
+#define CLR_BASE16_06 #56b6c2
+#define CLR_BASE16_07 #dcdfe4
+#define CLR_BASE16_08 #282c34
+#define CLR_BASE16_09 #e06c75
+#define CLR_BASE16_0A #98c379
+#define CLR_BASE16_0B #e5c07b
+#define CLR_BASE16_0C #61afef
+#define CLR_BASE16_0D #c678dd
+#define CLR_BASE16_0E #56b6c2
+#define CLR_BASE16_0F #dcdfe4
+
+#define CLR_BACKGROUND #282c34
+#define CLR_BADGE #ff0000
+#define CLR_BOLD #abb2bf
+#define CLR_CURSOR #a3b3cc
+#define CLR_CURSOR_GUIDE #313640
+#define CLR_CURSOR_TEXT #dcdfe4
+#define CLR_FADE #e5c07b
+#define CLR_FOREGROUND #dcdfe4
+#define CLR_ITALIC #abb2bf
+#define CLR_LINK #61afef
+!#define CLR_POINTER_BG #
+!#define CLR_POINTER_FG #
+#define CLR_SELECTED_TEXT #dcdfe4
+#define CLR_SELECTION #474e5d
+#define CLR_TAB #98c379
+#define CLR_UNDERLINE #abb2bf
+
+#define FADING 35
+!#define OPACITY_BG 80

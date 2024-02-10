@@ -1,0 +1,47 @@
+* {
+  CLR-BASE16-00: #929292;
+  CLR-BASE16-01: #e27373;
+  CLR-BASE16-02: #94b979;
+  CLR-BASE16-03: #ffba7b;
+  CLR-BASE16-04: #97bedc;
+  CLR-BASE16-05: #e1c0fa;
+  CLR-BASE16-06: #00988e;
+  CLR-BASE16-07: #dedede;
+  CLR-BASE16-08: #bdbdbd;
+  CLR-BASE16-09: #ffa1a1;
+  CLR-BASE16-0A: #bddeab;
+  CLR-BASE16-0B: #ffdca0;
+  CLR-BASE16-0C: #b1d8f6;
+  CLR-BASE16-0D: #fbdaff;
+  CLR-BASE16-0E: #1ab2a8;
+  CLR-BASE16-0F: #ffffff;
+  
+  CLR-BACKGROUND: #121212;
+  CLR-BADGE: #e27373;
+  CLR-BOLD: #ffffff;
+  CLR-CURSOR: #ffa560;
+  //CLR-CURSOR-GUIDE: #;
+  CLR-CURSOR-TEXT: #ffffff;
+  CLR-FADE: #ffba7b;
+  CLR-FOREGROUND: #dedede;
+  CLR-ITALIC: #ffffff;
+  CLR-LINK: #e1c0fa;
+  //CLR-POINTER-BG: #;
+  //CLR-POINTER-FG: #;
+  CLR-SELECTED-TEXT: #f4f4f4;
+  CLR-SELECTION: #474e91;
+  CLR-TAB: #bddeab;
+  CLR-UNDERLINE: #ffffff;
+  
+  FADING: 35;
+  OPACITY-BG: 80;
+}
+
+button {
+  background-color: var(CLR-BTN-BACKGROUND, dimgray/20%);
+  text-color: var(CLR-BTN-FOREGROUND, lightgray/50%); 
+}
+button selected {
+  background-color: var(CLR-BTN-SELECTED-BACKGROUND, lightgray/20%);
+  text-color: var(CLR-BTN-FOREGROUND, lightgray/20%); 
+}

@@ -1,0 +1,47 @@
+* {
+  ansi-0: #15161e;
+  ansi-1: #f7768e;
+  ansi-2: #9ece6a;
+  ansi-3: #e0af68;
+  ansi-4: #7aa2f7;
+  ansi-5: #bb9af7;
+  ansi-6: #7dcfff;
+  ansi-7: #a9b1d6;
+  ansi-8: #414868;
+  ansi-9: #f7768e;
+  ansi-10: #9ece6a;
+  ansi-11: #e0af68;
+  ansi-12: #7aa2f7;
+  ansi-13: #bb9af7;
+  ansi-14: #7dcfff;
+  ansi-15: #c0caf5;
+
+  background: rgb(26, 27, 38, 1.0);
+  image-background: url("./assets/bg-wire-bust.png", both);
+  border: rgb(158, 206, 106, 1.0);
+  //border-radius: 8px;
+  button-border: rgb(187, 154, 247, 0.8);
+  //button-selected-bg: rgb(238, 238, 238, 0.2);
+  button-selected-bg: rgb(224, 175, 104, 1.0);
+  button-selected-border: rgb(187, 154, 247, 1.0);
+  button-selected-text: rgb(21, 22, 30, 1.0);
+  element-alternate-bg: rgb(128, 128, 128, 0.1);
+  element-selected-bg: rgb(125, 207, 255, 0.2);
+  element-selected-border: rgb(125, 207, 255, 1.0);
+  element-selected-text: rgb(192, 202, 245, 1.0);
+  entry-background: rgb(65, 72, 104, 1.0);
+  entry-cursor-color: rgb(192, 202, 245, 1.0);
+  entry-cursor-width: 0.5em;
+  foreground: rgb(192, 202, 245, 1.0);
+  message-background: rgb(65, 72, 104, 1.0);
+  overlay-background: rgb(26, 27, 38, 0.9);
+  textbox-separator: "";
+  underline: underline rgb(238, 238, 238, 1.0);
+  urgent: rgb(247, 118, 142, 0.95);
+  //window-anchor: north;
+  //window-location: north;
+  //window-transparency: "real";
+  //window-width: 60%;
+  //x-offset: 0;
+  //y-offset: 1em;
+}

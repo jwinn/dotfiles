@@ -1,0 +1,15 @@
+! vim: ft=xdefaults
+!===========================================================================!
+! Font Settings
+!===========================================================================!
+
+Xft.antialias: 1
+Xft.autohint: 0
+! Resolution for Xft in dots per inch (e.g. 96)
+Xft.dpi: 192
+Xft.hinting: 1
+! What degree of hinting to use (hintnone, hintslight, hintmedium, or hintfull)
+Xft.hintstyle: hintslight
+!Xft.lcdfilter: lcddefault
+! Type of subpixel antialiasing (none, rgb, bgr, vrgb or vbgr)
+Xft.rgba: rgba

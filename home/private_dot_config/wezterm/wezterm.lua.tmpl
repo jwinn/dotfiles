@@ -28,7 +28,7 @@ if is_i3wm then
   --config.font = wezterm.font "FiraCode Nerd Font"
   --config.font = wezterm.font "ComicShannsMono Nerd Font"
   config.font = wezterm.font "IntoneMono Nerd Font"
-  config.font_size = 11.0
+  --config.font_size = 11.0
   --config.window_decorations = "RESIZE"
   config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
   config.enable_tab_bar = false
@@ -144,18 +144,26 @@ end
 ---@param appearance string
 ---@return string
 local function scheme_for_appearance(appearance)
+  local scheme = ""
+
   if appearance:find "Dark" then
-    return "Tokyo Night"
+    scheme = "Tokyo Night"
+    --scheme = "Tokyo Night Moon"
+    --scheme = "Hybrid (terminal.sexy)"
+    --scheme = "Jellybeans"
+    --scheme = "Kanagawa (Gogh)"
+    --scheme = "Kanagawabones"
+    --scheme = "nord"
   else
-    return "Tokyo Night Day"
+    scheme = "Tokyo Night Day"
+    --scheme = "nord-light"
   end
+
+  return scheme
 end
 
 -- set the color scheme
--- as the bg is now always "dark", just use Tokyo Night
---config.color_scheme = scheme_for_appearance(get_appearance())
---config.color_scheme = "Tokyo Night"
-config.color_scheme = "Hybrid (terminal.sexy)"
+config.color_scheme = scheme_for_appearance(get_appearance())
 
 --
 -- neovim zen-mode

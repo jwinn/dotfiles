@@ -1,0 +1,42 @@
+! vim: ft=xdefaults
+!===========================================================================!
+! Nord
+!---------------------------------------------------------------------------!
+! https://github.com/nordtheme/nord
+!---------------------------------------------------------------------------!
+#define CLR_ANSI_0 #3b4252
+#define CLR_ANSI_1 #bf616a
+#define CLR_ANSI_2 #a3be8c
+#define CLR_ANSI_3 #ebcb8b
+#define CLR_ANSI_4 #81a1c1
+#define CLR_ANSI_5 #b48ead
+#define CLR_ANSI_6 #88c0d0
+#define CLR_ANSI_7 #e5e9f0
+#define CLR_ANSI_8 #4c566a
+#define CLR_ANSI_9 #bf616a
+#define CLR_ANSI_10 #a3be8c
+#define CLR_ANSI_11 #ebcb8b
+#define CLR_ANSI_12 #81a1c1
+#define CLR_ANSI_13 #b48ead
+#define CLR_ANSI_14 #8fbcbb
+#define CLR_ANSI_15 #eceff4
+
+#define CLR_BACKGROUND #2e3440
+#define CLR_BADGE #3b4252
+#define CLR_BOLD #ffffff
+#define CLR_CURSOR #eceff4
+#define CLR_CURSOR_GUIDE #3c3836
+#define CLR_CURSOR_TEXT #282828
+#define CLR_FADE #ebcb8b
+#define CLR_FOREGROUND #d8dee9
+#define CLR_ITALIC #ffffff
+#define CLR_LINK #feffff
+!#define CLR_POINTER_BG #
+!#define CLR_POINTER_FG #
+#define CLR_SELECTED_TEXT #4c566a
+#define CLR_SELECTION #eceff4
+#define CLR_TAB #a3be8c
+#define CLR_UNDERLINE #ffffff
+
+#define FADING 30
+!#define OPACITY_BG 80

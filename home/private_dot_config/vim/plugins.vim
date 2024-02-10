@@ -388,6 +388,11 @@ if ! g:jw.opts.minimal
   "let g:jsx_ext_required = 0
   " }}}
 
+  " nix {{{
+  " syntax for nix files
+  Plug 'LnL7/vim-nix'
+  " }}}
+
   " PHP {{{
   if g:jw.has.job && g:jw.has.timers
     Plug 'lvht/phpcd.vim', { 'for': 'php', 'do': 'composer install' }

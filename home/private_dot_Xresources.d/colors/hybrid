@@ -1,0 +1,43 @@
+! vim: ft=xdefaults
+!===========================================================================!
+! Hybrid
+!---------------------------------------------------------------------------!
+! https://github.com/w0ng/vim-hybrid
+!---------------------------------------------------------------------------!
+
+#define CLR_ANSI_0 #2a2e33
+#define CLR_ANSI_1 #b84d51
+#define CLR_ANSI_2 #b3bf5a
+#define CLR_ANSI_3 #e4b55e
+#define CLR_ANSI_4 #6e90b0
+#define CLR_ANSI_5 #a17eac
+#define CLR_ANSI_6 #7fbfb4
+#define CLR_ANSI_7 #b5b9b6
+#define CLR_ANSI_8 #1d1f22
+#define CLR_ANSI_9 #8d2e32
+#define CLR_ANSI_10 #798431
+#define CLR_ANSI_11 #e58a50
+#define CLR_ANSI_12 #4b6b88
+#define CLR_ANSI_13 #6e5079
+#define CLR_ANSI_14 #4d7b74
+#define CLR_ANSI_15 #5a626a
+
+#define CLR_BACKGROUND #161719
+#define CLR_BADGE #b84d51
+#define CLR_BOLD #b7bcba
+#define CLR_CURSOR #b7bcba
+!#define CLR_CURSOR_GUIDE #
+#define CLR_CURSOR_TEXT #1e1f22
+#define CLR_FADE #e4b55e
+#define CLR_FOREGROUND #b7bcba
+#define CLR_ITALIC #1e1f22
+#define CLR_LINK #a17eac
+!#define CLR_POINTER_BG #
+!#define CLR_POINTER_FG #
+#define CLR_SELECTED_TEXT #b7bcba
+#define CLR_SELECTION #1e1f22
+#define CLR_TAB #798431
+#define CLR_UNDERLINE #1e1f22
+
+#define FADING 30
+!#define OPACITY_BG 80

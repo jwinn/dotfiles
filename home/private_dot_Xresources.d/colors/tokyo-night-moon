@@ -1,0 +1,35 @@
+! vim: ft=xdefaults
+!===========================================================================!
+! Tokyo Night Moon
+!---------------------------------------------------------------------------!
+! https://github.com/folke/tokyonight.nvim
+!---------------------------------------------------------------------------!
+
+#define CLR-ANSI-0 #1b1d2b
+#define CLR-ANSI-1 #ff757f
+#define CLR-ANSI-2 #c3e88d
+#define CLR-ANSI-3 #ffc777
+#define CLR-ANSI-4 #82aaff
+#define CLR-ANSI-5 #c099ff
+#define CLR-ANSI-6 #86e1fc
+#define CLR-ANSI-7 #828bb8
+#define CLR-ANSI-8 #444a73
+#define CLR-ANSI-9 #ff757f
+#define CLR-ANSI-10 #c3e88d
+#define CLR-ANSI-11 #ffc777
+#define CLR-ANSI-12 #82aaff
+#define CLR-ANSI-13 #c099ff
+#define CLR-ANSI-14 #86e1fc
+#define CLR-ANSI-15 #c8d3f5
+
+#define CLR-BACKGROUND #222436
+#define CLR-FOREGROUND #c8d3f5
+#define CLR-CURSOR #c8d3f5
+!#define CLR-CURSOR-GUIDE #
+#define CLR-ITALIC #
+!#define CLR-POINTER-BG #
+!#define CLR-POINTER-FG #
+#define CLR-UNDERLINE #
+
+#define FADING 35
+!#define OPACITY-BG 80

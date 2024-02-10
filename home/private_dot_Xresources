@@ -1,0 +1,164 @@
+! vim: ft=xdefaults
+!===========================================================================!
+! Colors
+!===========================================================================!
+
+!
+! TODO: includes are not working in NixOS, so inline colors
+!       may be related to how NixOS sources ~/.Xresources
+!
+
+!#include "Xresources.d/colors/hybrid"
+!#include "Xresources.d/colors/jellybeans"
+!#include "Xresources.d/colors/kanagawa"
+!#include "Xresources.d/colors/kanagawabones"
+!#include "Xresources.d/colors/kanagawa-dragon"
+!#include "Xresources.d/colors/kanagawa-lotus"
+!#include "Xresources.d/colors/nord"
+!#include "Xresources.d/colors/nord-light"
+!#include "Xresources.d/colors/nvim-dark"
+!#include "Xresources.d/colors/nvim-light"
+!#include "Xresources.d/colors/onehalf-dark"
+!#include "Xresources.d/colors/onehalf-light"
+!#include "Xresources.d/colors/tokyo-night"
+!#include "Xresources.d/colors/tokyo-night-day"
+!#include "Xresources.d/colors/tokyo-night-moon"
+!#include "Xresources.d/colors/tokyo-night-storm"
+
+!===========================================================================!
+! Tokyo Night
+!___________________________________________________________________________!
+! https://github.com/folke/tokyonight.nvim
+!___________________________________________________________________________!
+
+#define CLR_ANSI_0 #15161e
+#define CLR_ANSI_1 #f7768e
+#define CLR_ANSI_2 #9ece6a
+#define CLR_ANSI_3 #e0af68
+#define CLR_ANSI_4 #7aa2f7
+#define CLR_ANSI_5 #bb9af7
+#define CLR_ANSI_6 #7dcfff
+#define CLR_ANSI_7 #a9b1d6
+#define CLR_ANSI_8 #414868
+#define CLR_ANSI_9 #f7768e
+#define CLR_ANSI_10 #9ece6a
+#define CLR_ANSI_11 #e0af68
+#define CLR_ANSI_12 #7aa2f7
+#define CLR_ANSI_13 #bb9af7
+#define CLR_ANSI_14 #7dcfff
+#define CLR_ANSI_15 #c0caf5
+
+#define CLR_BACKGROUND #1a1b26
+#define CLR_BADGE #ff2600
+#define CLR_BOLD #eeeeee
+#define CLR_CURSOR #c0caf5
+#define CLR_CURSOR_GUIDE #b3ecff
+#define CLR_CURSOR_TEXT #15161e
+#define CLR_FADE #e0af68
+#define CLR_FOREGROUND #c0caf5
+#define CLR_ITALIC #eeeeee
+#define CLR_LINK #73daca
+!#define CLR_POINTER_BG #
+!#define CLR_POINTER_FG #
+#define CLR_SELECTED_TEXT #c0caf5
+#define CLR_SELECTION #33467c
+#define CLR_TAB #9ece6a
+#define CLR_UNDERLINE #eeeeee
+
+#define FADING 35
+!#define OPACITY_BG 80
+
+! special
+#ifdef OPACITY_BG
+  *.background: [OPACITY_BG]CLR_BACKGROUND
+#else
+  *.background: CLR_BACKGROUND
+#endif
+*.foreground: CLR_FOREGROUND
+*.cursorColor: CLR_FOREGROUND
+
+! black
+*.color0: CLR_ANSI_0
+*.color8: CLR_ANSI_1
+
+! red
+*.color1: CLR_ANSI_1
+*.color9: CLR_ANSI_9
+
+! green
+*.color2: CLR_ANSI_2
+*.color10: CLR_ANSI_10
+
+! yellow
+*.color3: CLR_ANSI_3
+*.color11: CLR_ANSI_11
+
+! blue
+*.color4: CLR_ANSI_4
+*.color12: CLR_ANSI_12
+
+! magenta
+*.color5: CLR_ANSI_5
+*.color13: CLR_ANSI_13
+
+! cyan
+*.color6: CLR_ANSI_6
+*.color14: CLR_ANSI_14
+
+! white
+*.color7: CLR_ANSI_7
+*.color15: CLR_ANSI_15
+
+!===========================================================================!
+! Font
+!===========================================================================!
+
+!#include "Xresources.d/hidpi/font"
+
+Xft.antialias: 1
+Xft.autohint: 0
+! Resolution for Xft in dots per inch (e.g. 96)
+Xft.dpi: 192
+Xft.hinting: 1
+! What degree of hinting to use (hintnone, hintslight, hintmedium, or hintfull)
+Xft.hintstyle: hintslight
+!Xft.lcdfilter: lcddefault
+! Type of subpixel antialiasing (none, rgb, bgr, vrgb or vbgr)
+Xft.rgba: rgba
+
+!===========================================================================!
+! Cursor
+!===========================================================================!
+
+!#include "Xresources.d/hidpi/cursor"
+
+Xcursor.theme: Vanilla-DMZ
+XCursor.size: 32
+
+!===========================================================================!
+! rxvt-unicode
+!===========================================================================!
+
+!---------------------------------------------------------------------------!
+! rxvt-unicode perl extensions
+!---------------------------------------------------------------------------!
+
+URxvt.perl-ext-common: default,selection-to-clipboard,keyboard-select
+
+! keyboard-select: https://github.com/xyb3rt/urxvt-perls
+!
+! h/j/k/l:    Move cursor left/down/up/right (also with arrow keys)
+! g/G/0/^/$/H/M/L/f/F/;/,/w/W/b/B/e/E: More vi-like cursor movement keys
+! '/'/?:      Start forward/backward search
+! n/N:        Repeat last search, N: in reverse direction
+! Ctrl-f/b:   Scroll down/up one screen
+! Ctrl-d/u:   Scroll down/up half a screen
+! v/V/Ctrl-v: Toggle normal/linewise/blockwise selection
+! y/Return:   Copy selection to primary buffer, Return: quit afterwards
+! Y:          Copy selected lines to primary buffer or cursor line and quit
+! q/Escape:   Quit keyboard selection mode
+!---------------------------------------------------------------------------!
+URxvt.keysym.M-Escape: perl:keyboard-select:activate
+! overrides default Meta-s to allow selection in backward search mode
+URxvt.keysym.M-s: perl:keyboard-select:search
+URxvt.keyboard-select.clipboard: true

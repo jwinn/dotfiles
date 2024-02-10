@@ -1,0 +1,45 @@
+! vim: ft=xdefaults
+!===========================================================================!
+! Kanagawa Wave
+!---------------------------------------------------------------------------!
+! https://github.com/rebelot/kanagawa.nvim
+!---------------------------------------------------------------------------!
+#define CLR_ANSI_0 #16161d
+#define CLR_ANSI_1 #c34043
+#define CLR_ANSI_2 #76946a
+#define CLR_ANSI_3 #c0a36e
+#define CLR_ANSI_4 #7e9cd8
+#define CLR_ANSI_5 #957fb8
+#define CLR_ANSI_6 #6a9589
+#define CLR_ANSI_7 #c8c093
+#define CLR_ANSI_8 #727169
+#define CLR_ANSI_9 #e82424
+#define CLR_ANSI_10 #98bb6c
+#define CLR_ANSI_11 #e6c384
+#define CLR_ANSI_12 #7fb4ca
+#define CLR_ANSI_13 #938aa9
+#define CLR_ANSI_14 #7aa89f
+#define CLR_ANSI_15 #dcd7ba
+
+#define CLR_ANSI_16 #ffa066
+#define CLR_ANSI_17 #ff5d62
+
+#define CLR_BACKGROUND #1f1f28
+#define CLR_BADGE #1f1f28
+#define CLR_BOLD #727169
+#define CLR_CURSOR #c8c093
+!#define CLR_CURSOR_GUIDE #
+#define CLR_CURSOR_TEXT #1f1f28
+#define CLR_FADE #c0a36e
+#define CLR_FOREGROUND #dcd7ba
+#define CLR_ITALIC #727169
+#define CLR_LINK #72a7bc
+!#define CLR_POINTER_BG #
+!#define CLR_POINTER_FG #
+#define CLR_SELECTED_TEXT #c8c093
+#define CLR_SELECTION #2d4f67
+#define CLR_TAB #1f1f28
+#define CLR_UNDERLINE #727169
+
+#define FADING 35
+!#define OPACITY_BG 80

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+[ -r "${HOME}/.fehbg" ] && "${HOME}/.fehbg" &disown
+[ -r "${HOME}/.Xresources" ] && xrdb -merge "${HOME}/.Xresources" &disown
+#if [ -r "${HOME}/.Xresources" ]; then
+#  if [ -d "${HOME}/.Xresources.d" ]; then
+#    xrdb -merge "${HOME}/.Xresources.d/colors/tokyo-night"
+#    xrdb -merge "${HOME}/.Xresources.d/hidpi/cursor"
+#    xrdb -merge "${HOME}/.Xresources.d/hidpi/font"
+#  fi
+#
+#  xrdb -merge "${HOME}/.Xresources" &disown
+#fi

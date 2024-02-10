@@ -1,0 +1,43 @@
+! vim: ft=xdefaults
+!===========================================================================!
+! Tokyo Night Day
+!---------------------------------------------------------------------------!
+! https://github.com/folke/tokyonight.nvim
+!---------------------------------------------------------------------------!
+
+#define CLR-ANSI-0 #e9e9ed
+#define CLR-ANSI-1 #f52a65
+#define CLR-ANSI-2 #587539
+#define CLR-ANSI-3 #8c6c3e
+#define CLR-ANSI-4 #2e7de9
+#define CLR-ANSI-5 #9854f1
+#define CLR-ANSI-6 #007197
+#define CLR-ANSI-7 #6172b0
+#define CLR-ANSI-8 #a1a6c5
+#define CLR-ANSI-9 #f52a65
+#define CLR-ANSI-10 #587539
+#define CLR-ANSI-11 #8c6c3e
+#define CLR-ANSI-12 #2e7de9
+#define CLR-ANSI-13 #9854f1
+#define CLR-ANSI-14 #007197
+#define CLR-ANSI-15 #3760bf
+
+#define CLR-BACKGROUND #e1e2e7
+#define CLR-BADGE #ff2600
+#define CLR-BOLD #eeeeee
+#define CLR-CURSOR #3760bf
+#define CLR-CURSOR-GUIDE #b3ecff
+#define CLR-CURSOR-TEXT #e1e2e7
+#define CLR-FADE #8c6c3e
+#define CLR-FOREGROUND #3760bf
+#define CLR-ITALIC #eeeeee
+#define CLR-LINK #73daca
+!#define CLR-POINTER-BG #
+!#define CLR-POINTER-FG #
+#define CLR-SELECTED-TEXT #3760bf
+#define CLR-SELECTION #99a7df
+#define CLR-TAB #587539
+#define CLR-UNDERLINE #eeeeee
+
+#define FADING 35
+!#define OPACITY-BG 80

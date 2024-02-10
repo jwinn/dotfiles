@@ -1,0 +1,57 @@
+/**
+ * Default configuration settings
+ * Can be overridden in themes
+ */
+configuration {
+  combi-modes: [ window, drun, keys, filebrowser, run, ssh ];
+  dpi: 192;
+  font: "ComicShannsMono Nerd Font 12";
+  modes: [ combi, window, drun, run, filebrowser, ssh ];
+  show-icons: true;
+  terminal: "${TERMINAL:-"wezterm"}";
+  window-format: "{w}  {c}  {t}";
+
+  combi {
+    //display-name: "";
+    display-name: "";
+  }
+
+  drun {
+    display-name: "";
+  }
+
+  filebrowser {
+    display-name: "󱧶";
+    //display-name: "";
+  }
+
+  keys {
+    display-name: "󰧺";
+  }
+
+  run {
+    display-name: "";
+  }
+
+  ssh {
+    display-name: "";
+  }
+
+  timeout {
+    action: "kb-cancel";
+    delay: 0;
+  }
+
+  window {
+    display-name: "";
+    prefer-icon-theme: true;
+  }
+
+  windowcd {
+    display-name: "";
+  }
+}
+
+//@theme "colors/jellybeans"
+@theme "colors/tokyonight/default"
+@import "layouts/two-col/default"

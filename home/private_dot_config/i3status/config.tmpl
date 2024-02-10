@@ -2,17 +2,14 @@ general {
     #output_format = "dzen2"
     interval = 1
     colors = true
-    color_good = "#B5BD68"
-    color_degraded = "#F0C674"
-    color_bad = "#CC6666"
 }
 
-order += "ethernet ens160"
+order += "ethernet _first_"
 #order += "run_watch DHCP"
 #order += "run_watch VPNC"
 #order += "path_exists VPN"
-#order += "wireless wlan0"
-order += "battery 0"
+#order += "wireless _first_"
+order += "battery all"
 order += "disk /"
 order += "cpu_usage"
 #order += "cpu_temperature 0"
@@ -22,19 +19,19 @@ order += "tztime utc"
 order += "tztime local"
 #order += "read_file uptime"
 
-wireless wlan0 {
+wireless _first_ {
     format_up = "W: (%quality at %essid, %bitrate) %ip"
     format_down = "W: down"
 }
 
-ethernet ens160 {
+ethernet _first_ {
     # if using %speed, cap_net_admin capability is required
     #format_up = "E: %ip (%speed)"
     format_up = "E: %ip"
     format_down = "E: down"
 }
 
-battery 0 {
+battery all {
     format = "%status %percentage %remaining %emptytime"
     format_down = "No battery"
     status_chr = "⚡ CHR"
