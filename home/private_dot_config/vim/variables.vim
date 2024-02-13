@@ -106,7 +106,7 @@ let g:jw.opts = {
       \ 'colors': {
       \   'dark': {
       \     'background': 'dark',
-      \     'scheme': 'hybrid',
+      \     'scheme': 'jellybeans',
       \     'statusline': 'hybrid',
       \   },
       \   'light': {

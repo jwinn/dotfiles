@@ -17,10 +17,11 @@
   ansi-15: #c0caf5;
 
   background: rgb(26, 27, 38, 1.0);
-  image-background: url("./assets/bg-wire-bust.png", both);
+  image-bg: url("./assets/bg-wire-bust.png", both);
   border: rgb(158, 206, 106, 1.0);
   //border-radius: 8px;
   button-border: rgb(187, 154, 247, 0.8);
+  button-mode-bg: rgb(187, 154, 247, 0.4);
   //button-selected-bg: rgb(238, 238, 238, 0.2);
   button-selected-bg: rgb(224, 175, 104, 1.0);
   button-selected-border: rgb(187, 154, 247, 1.0);
@@ -29,12 +30,17 @@
   element-selected-bg: rgb(125, 207, 255, 0.2);
   element-selected-border: rgb(125, 207, 255, 1.0);
   element-selected-text: rgb(192, 202, 245, 1.0);
-  entry-background: rgb(65, 72, 104, 1.0);
+  entry-bg: rgb(65, 72, 104, 1.0);
   entry-cursor-color: rgb(192, 202, 245, 1.0);
   entry-cursor-width: 0.5em;
+  entry-placeholder: "Search";
+  entry-placeholder-color: rgb(192, 202, 245, 1.0);
   foreground: rgb(192, 202, 245, 1.0);
-  message-background: rgb(65, 72, 104, 1.0);
-  overlay-background: rgb(26, 27, 38, 0.9);
+  message-bg: rgb(65, 72, 104, 1.0);
+  overlay-bg: rgb(26, 27, 38, 0.9);
+  prompt-bg: rgb(224, 175, 104, 1.0);
+  //prompt-bg: rgb(187, 154, 247, 0.8);
+  prompt-text: rgb(21, 22, 30, 1.0);
   textbox-separator: "";
   underline: underline rgb(238, 238, 238, 1.0);
   urgent: rgb(247, 118, 142, 0.95);

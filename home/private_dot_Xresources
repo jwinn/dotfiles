@@ -25,61 +25,57 @@
 !#include "Xresources.d/colors/tokyo-night-moon"
 !#include "Xresources.d/colors/tokyo-night-storm"
 
-!===========================================================================!
-! Tokyo Night
-!___________________________________________________________________________!
-! https://github.com/folke/tokyonight.nvim
-!___________________________________________________________________________!
+#define CLR_ANSI_0 #3b3b3b
+#define CLR_ANSI_1 #cf6a4c
+#define CLR_ANSI_2 #99ad6a
+#define CLR_ANSI_3 #d8ad4c
+#define CLR_ANSI_4 #597bc5
+#define CLR_ANSI_5 #a037b0
+#define CLR_ANSI_6 #71b9f8
+#define CLR_ANSI_7 #adadad
+#define CLR_ANSI_8 #444444
+#define CLR_ANSI_9 #ff9d80
+#define CLR_ANSI_10 #c3e6ad
+#define CLR_ANSI_11 #ffdca0
+#define CLR_ANSI_12 #b1d8f6
+#define CLR_ANSI_13 #fbdaff
+#define CLR_ANSI_14 #1ab2a8
+#define CLR_ANSI_15 #ffffff
 
-#define CLR_ANSI_0 #15161e
-#define CLR_ANSI_1 #f7768e
-#define CLR_ANSI_2 #9ece6a
-#define CLR_ANSI_3 #e0af68
-#define CLR_ANSI_4 #7aa2f7
-#define CLR_ANSI_5 #bb9af7
-#define CLR_ANSI_6 #7dcfff
-#define CLR_ANSI_7 #a9b1d6
-#define CLR_ANSI_8 #414868
-#define CLR_ANSI_9 #f7768e
-#define CLR_ANSI_10 #9ece6a
-#define CLR_ANSI_11 #e0af68
-#define CLR_ANSI_12 #7aa2f7
-#define CLR_ANSI_13 #bb9af7
-#define CLR_ANSI_14 #7dcfff
-#define CLR_ANSI_15 #c0caf5
-
-#define CLR_BACKGROUND #1a1b26
-#define CLR_BADGE #ff2600
-#define CLR_BOLD #eeeeee
-#define CLR_CURSOR #c0caf5
-#define CLR_CURSOR_GUIDE #b3ecff
-#define CLR_CURSOR_TEXT #15161e
-#define CLR_FADE #e0af68
-#define CLR_FOREGROUND #c0caf5
-#define CLR_ITALIC #eeeeee
-#define CLR_LINK #73daca
+#define CLR_BACKGROUND #151515
+!#define CLR_BADGE #e27373
+#define CLR_BOLD #ffffff
+!#define CLR_CURSOR #ffa560
+#define CLR_CURSOR_GUIDE #1c1c1c
+!#define CLR_CURSOR_TEXT #ffffff
+!#define CLR_FADE #ffba7b
+#define CLR_FOREGROUND #e8e8d3
+!#define CLR_ITALIC #
+!#define CLR_LINK #e1c0fa
 !#define CLR_POINTER_BG #
 !#define CLR_POINTER_FG #
-#define CLR_SELECTED_TEXT #c0caf5
-#define CLR_SELECTION #33467c
-#define CLR_TAB #9ece6a
-#define CLR_UNDERLINE #eeeeee
+#define CLR_SELECTED_TEXT #ffffff
+#define CLR_SELECTION #403c41
+#define CLR_TAB_BG #9098a0
+#define CLR_TAB #b0b8c0
+!#define CLR_UNDERLINE #
 
-#define FADING 35
-!#define OPACITY_BG 80
+!#define FADING 35
+!#define OPACITY_BG 85
 
 ! special
-#ifdef OPACITY_BG
-  *.background: [OPACITY_BG]CLR_BACKGROUND
-#else
-  *.background: CLR_BACKGROUND
-#endif
+!#ifdef OPACITY_BG
+!  *.background: [OPACITY_BG]CLR_BACKGROUND
+!#else
+!  *.background: CLR_BACKGROUND
+!#endif
+*.background: CLR_BACKGROUND
 *.foreground: CLR_FOREGROUND
 *.cursorColor: CLR_FOREGROUND
 
 ! black
 *.color0: CLR_ANSI_0
-*.color8: CLR_ANSI_1
+*.color8: CLR_ANSI_8
 
 ! red
 *.color1: CLR_ANSI_1

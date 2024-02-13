@@ -21,6 +21,7 @@ local lazyconfig = {}
 local lazyspec = {
   spec = {
     { import = "jwinn.plugins" },
+    { import = "jwinn.plugins.colors" },
     { import = "jwinn.plugins.lsp" },
     { import = "jwinn.plugins.treesitter" },
   }

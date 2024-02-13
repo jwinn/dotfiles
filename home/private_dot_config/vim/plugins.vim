@@ -93,13 +93,11 @@ if ! g:jw.opts.minimal
   if g:jw.has.256color
     let base16colorspace = 256
   endif
-  Plug 'lifepillar/vim-colortemplate'
-  Plug 'dracula/vim', { 'as': 'dracula' }
+  Plug 'nanotech/jellybeans.vim'
   Plug 'morhetz/gruvbox'
   Plug 'lifepillar/vim-gruvbox8'
   Plug 'w0ng/vim-hybrid'
-  Plug 'haishanh/night-owl.vim'
-  Plug 'arcticicestudio/nord-vim'
+  Plug 'nordtheme/vim'
   Plug 'rakr/vim-one'
   if g:jw.has.italics
     let g:one_allow_italics = 1

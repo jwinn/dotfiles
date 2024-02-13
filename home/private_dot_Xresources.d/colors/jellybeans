@@ -14,12 +14,12 @@
 #define CLR_ANSI_6 #71b9f8
 #define CLR_ANSI_7 #adadad
 #define CLR_ANSI_8 #444444
-!#define CLR_ANSI_9 #ffa1a1
-!#define CLR_ANSI_10 #bddeab
-!#define CLR_ANSI_11 #ffdca0
-!#define CLR_ANSI_12 #b1d8f6
-!#define CLR_ANSI_13 #fbdaff
-!#define CLR_ANSI_14 #1ab2a8
+#define CLR_ANSI_9 #ff9d80
+#define CLR_ANSI_10 #c3e6ad
+#define CLR_ANSI_11 #ffdca0
+#define CLR_ANSI_12 #b1d8f6
+#define CLR_ANSI_13 #fbdaff
+#define CLR_ANSI_14 #1ab2a8
 #define CLR_ANSI_15 #ffffff
 
 #define CLR_BACKGROUND #151515

@@ -13,10 +13,7 @@ vim.opt.wrap = false -- disable line wrap
 -- "optimize" for undotree usage
 vim.opt.swapfile = false -- no ~ affixed files
 vim.opt.backup = false -- no backup files
--- TODO: should use XDG folder structure, where applicable
--- where undo files are stored
-vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
-vim.opt.undofile = true -- undo file name
+vim.opt.undofile = false -- undo file name
 
 vim.opt.hlsearch = false -- do not hightlight search
 
@@ -34,6 +31,5 @@ vim.opt.updatetime = 50
 
 -- columns are highlighted with ColorColumn
 vim.opt.colorcolumn = { "80", "120" }
-
 
 vim.g.mapleader = " " -- map the <Leader> to <Space>

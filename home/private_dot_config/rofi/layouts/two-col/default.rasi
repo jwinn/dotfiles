@@ -1,22 +1,19 @@
 * {
+  display-name-run: "Run";
   background-color: transparent;
   border-color: var(border, white/90%);
   text-color: var(foreground, white/95%);
 }
 
-dummy, textbox-separator {
+dummy {
   expand: false;
 }
 dummy-ex {
   expand: true;
 }
 
-textbox-separator {
-  str: var(textbox-separator, "");
-}
-
 overlay {
-  background-color: var(overlay-background, black/90%);
+  background-color: var(overlay-bg, black/90%);
 }
 
 window {
@@ -45,7 +42,7 @@ col-1 {
   children: [ inputbar, col-1-middle, mode-wrapper ];
 }
 col-1-middle {
-  background-image: var(image-background, 
+  background-image: var(image-bg, 
     url("./assets/bg-wire-bust.png", both));
   children: [ message ];
 }
@@ -57,42 +54,69 @@ col-2 {
 
 inputbar {
   border: 0 0 1px 0;
+  padding: 0.25em 0.5em;
   children: [ box ];
 }
 box {
   orientation: horizontal;
-  padding: 0.25em 0.5em;
-  //children: [ case-indicator, prompt, entry, num-filtered-rows,
-  //            textbox-separator, num-rows, textbox-separator,
-  //            textbox-current-entry, icon-current-entry ];
-  children: [ case-indicator, prompt, entry, num-filtered-rows,
-              textbox-separator, num-rows ];
-}
-case-indicator {
+  //children: [ prompt, entrybox, textbox-input-separator,
+  //            textbox-current-entry, textbox-input-separator,
+  //            icon-current-entry ];
+  children: [ prompt, entrybox ];
 }
 prompt {
-  margin: 0 0.6em 0 0; 
+  background-color: var(prompt-bg, white/20%);
+  horizontal-align: 0.5;
+  margin: 0 0.2em 0 0; 
+  padding: 0 0.6em 0 0.2em;
+  text-color: @prompt-text;
+  vertical-align: 0.5;
+}
+entrybox {
+  background-color: var(entry-bg, gray/10%);
+  padding: 0 0.3em 0 0;
+  orientation: horizontal;
+  vertical-align: 0.5;
+  children: [  entry, case-indicator, textbox-input-separator,
+              num-filtered-rows, textbox-rows-separator, num-rows ];
 }
 entry {
-  background-color: var(entry-background, gray/10%);
   cursor: text;
   cursor-color: var(entry-cursor-color, white/90%);
   cursor-width: var(entry-cursor-width, 2px);
-  margin: 0 0.3em 0 0;
   padding: 0 0 0 0.3em;
-  placeholder: "Search";
+  placeholder: var(entry-placeholder, "Search");
+  placeholder-color: var(entry-placeholder-color, white/50%);
+  vertical-align: 0.5;
+}
+textbox-input-separator {
+  expand: false;
+  str: var(textbox-separator, "");
+  vertical-align: 0.5;
+}
+textbox-rows-separator {
+  expand: false;
+  str: "/";
+  vertical-align: 0.5;
+}
+case-indicator {
+  vertical-align: 0.5;
 }
 num-rows {
+  vertical-align: 0.5;
 }
 num-filtered-rows {
+  vertical-align: 0.5;
 }
 textbox-current-entry {
+  vertical-align: 0.5;
 }
 icon-current-entry {
+  vertical-align: 0.5;
 }
 
 message {
-  background-color: var(message-background, gray/25%);
+  background-color: var(message-bg, gray/25%);
   border: 0 0 1px dash 0;
   padding: 0.1em 0.25em;
 }
@@ -105,6 +129,7 @@ mode-wrapper {
   children: [ button-mode-previous, mode-switcher, button-mode-next ];
 }
 button-mode-previous, button-mode-next  {
+  background-color: var(button-mode-bg, white/20%);
   expand: false;
   vertical-align: 0.5;
 }
@@ -112,13 +137,17 @@ button-mode-previous {
   action: "kb-mode-previous";
   border: 1px 1px 0 0;
   content: "";
-  padding: 0.2em 0.3em 0.2em 0.2em;
+  horizontal-align: 0.5;
+  vertical-align: 0.5;
+  width: 1em;
 }
 button-mode-next {
   action: "kb-mode-next";
   border: 1px 0 0 0;
   content: "";
-  padding: 0.2em 0.2em 0.2em 0.3em;
+  horizontal-align: 0.5;
+  vertical-align: 0.5;
+  width: 1em;
 }
 mode-switcher {
   expand: true;
@@ -172,42 +201,6 @@ element-text selected {
  * Change to single column, when on a smaller screen
  */
 @media (max-width: 1024px) {
-  configuration {
-    combi {
-      //display-name: "";
-      display-name: "";
-    }
-
-    drun {
-      display-name: "";
-    }
-
-    filebrowser {
-      display-name: "󱧶";
-      //display-name: "";
-    }
-
-    keys {
-      display-name: "󰧺";
-    }
-
-    run {
-      display-name: "";
-    }
-
-    ssh {
-      display-name: "";
-    }
-
-    window {
-      display-name: "";
-    }
-
-    windowcd {
-      display-name: "";
-    }
-  }
-
   mainbox {
     orientation: vertical;
     spacing: 0.5em;

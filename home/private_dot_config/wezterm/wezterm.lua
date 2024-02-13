@@ -2,18 +2,10 @@
 local wezterm = require "wezterm"
 
 -- variables
-
--- The art is a bit too bright and colorful to be useful as a backdrop
--- for text, so we're going to dim it down to 10% of its normal brightness
-local dimmer = { brightness = 0.1 }
+local config = {} -- The table holding the configuration
 local base_dir = wezterm.config_dir
-local bg_base_dir = base_dir .. "/assets/Alien_Ship_bg_vert_images"
-
 local is_i3wm = os.getenv("I3SOCK")
 local show_bg = (not is_i3wm)
-
--- This table will hold the configuration.
-local config = {}
 
 -- In newer versions of wezterm, use the config_builder which will
 -- help provide clearer error messages
@@ -28,14 +20,14 @@ if is_i3wm then
   --config.font = wezterm.font "FiraCode Nerd Font"
   --config.font = wezterm.font "ComicShannsMono Nerd Font"
   config.font = wezterm.font "IntoneMono Nerd Font"
-  --config.font_size = 11.0
-  --config.window_decorations = "RESIZE"
-  config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
-  config.enable_tab_bar = false
+  config.font_size = 10.0
+  --config.enable_tab_bar = false
   config.hide_tab_bar_if_only_one_tab = true
   config.enable_scroll_bar = false
-  config.window_background_opacity = 0.0
-  config.text_background_opacity = 0.3
+  config.use_fancy_tab_bar = false
+  config.window_background_opacity = 0.8
+  --config.text_background_opacity = 0.3
+  --config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
 else
   config.min_scroll_bar_height = "2cell"
   config.colors = {
@@ -48,6 +40,11 @@ end
 --
 
 if show_bg then
+  -- for text, so we're going to dim it down to 10% of its normal brightness
+  -- The art is a bit too bright and colorful to be useful as a backdrop
+  local dimmer = { brightness = 0.1 }
+  local bg_base_dir = base_dir .. "/assets/Alien_Ship_bg_vert_images"
+
   config.background = {
     -- This is the deepest/back-most layer. It will be rendered first
     {
@@ -147,10 +144,10 @@ local function scheme_for_appearance(appearance)
   local scheme = ""
 
   if appearance:find "Dark" then
-    scheme = "Tokyo Night"
+    --scheme = "Tokyo Night"
     --scheme = "Tokyo Night Moon"
     --scheme = "Hybrid (terminal.sexy)"
-    --scheme = "Jellybeans"
+    scheme = "Jellybeans"
     --scheme = "Kanagawa (Gogh)"
     --scheme = "Kanagawabones"
     --scheme = "nord"
@@ -165,12 +162,24 @@ end
 -- set the color scheme
 config.color_scheme = scheme_for_appearance(get_appearance())
 
+-- Update the color scheme on appearance change
+wezterm.on("window-config-reloaded", function(window, pane)
+  local overrides = window:get_config_overrides() or {}
+  local color_scheme = scheme_for_appearance(get_appearance())
+
+  if overrides.color_scheme ~= color_scheme then
+    overrides.color_scheme = color_scheme
+    window:set_config_overrides(overrides)
+  end
+end)
+
 --
 -- neovim zen-mode
 -- https://github.com/folke/zen-mode.nvim#wezterm
 --
 wezterm.on("user-var-changed", function(window, pane, name, value)
   local overrides = window:get_config_overrides() or {}
+
   if name == "ZEN_MODE" then
     local incremental = value:find("+")
     local number_value = tonumber(value)
@@ -189,6 +198,7 @@ wezterm.on("user-var-changed", function(window, pane, name, value)
       overrides.enable_tab_bar = false
     end
   end
+
   window:set_config_overrides(overrides)
 end)
 

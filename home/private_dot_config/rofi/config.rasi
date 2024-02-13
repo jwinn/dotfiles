@@ -3,12 +3,14 @@
  * Can be overridden in themes
  */
 configuration {
-  combi-modes: [ window, drun, keys, filebrowser, run, ssh ];
-  dpi: 192;
+  combi-modes: [ window, drun, run ];
+  disable-history: true;
+  dpi: 0;
   font: "ComicShannsMono Nerd Font 12";
-  modes: [ combi, window, drun, run, filebrowser, ssh ];
+  max-history-size: 10;
+  modes: [ combi, window, drun, run, filebrowser, ssh, keys ];
   show-icons: true;
-  terminal: "${TERMINAL:-"wezterm"}";
+  terminal: "rofi-sensible-terminal";
   window-format: "{w}  {c}  {t}";
 
   combi {
@@ -29,8 +31,11 @@ configuration {
     display-name: "󰧺";
   }
 
+  //run-command: "{cmd}";
   run {
     display-name: "";
+    //shell-command: "{terminal} -e {cmd}"; 
+    shell-command: "{terminal} -e $SHELL -ic \"{cmd} && read\"";
   }
 
   ssh {

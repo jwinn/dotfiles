@@ -24,8 +24,19 @@ export MYVIMRC="${XDG_CONFIG_HOME}/vim/init.vim"
 export VIMINIT=":source ${MYVIMRC}"
 
 # Preferred programs
-export PAGER=less
-export EDITOR=vim
+export PAGER="less -FirSwX"
+if has_command nvim; then
+  export EDITOR="env -u MYVIMRC -u VIMINIT -u VIM nvim"
+elif has_command vim; then
+  export EDITOR=vim
+fi
+if has_command wezterm; then
+  export TERMINAL=wezterm
+elif has_command kitty; then
+  export TERMINAL=kitty
+elif has_command alacritty; then
+  export TERMINAL=alacritty
+fi
 export VISUAL=$EDITOR
 
 # Language
