@@ -1,0 +1,27 @@
+! vim: ft=xdefaults
+!===========================================================================!
+! Catppuccin Macchiato
+!---------------------------------------------------------------------------!
+! https://github.com/catppuccin/xresources
+!---------------------------------------------------------------------------!
+
+#define CLR_BACKGROUND #24273a
+#define CLR_FOREGROUND #cad3f5
+#define CLR_CURSOR #cad3f5
+
+#define CLR_ANSI_0 #494d64
+#define CLR_ANSI_1 #ed8796
+#define CLR_ANSI_2 #a6da95
+#define CLR_ANSI_3 #eed49f
+#define CLR_ANSI_4 #8aadf4
+#define CLR_ANSI_5 #f5bde6
+#define CLR_ANSI_6 #8bd5ca
+#define CLR_ANSI_7 #b8c0e0
+#define CLR_ANSI_8 #5b6078
+#define CLR_ANSI_9 #ed8796
+#define CLR_ANSI_10 #a6da95
+#define CLR_ANSI_11 #eed49f
+#define CLR_ANSI_12 #8aadf4
+#define CLR_ANSI_13 #f5bde6
+#define CLR_ANSI_14 #8bd5ca
+#define CLR_ANSI_15 #a5adcb

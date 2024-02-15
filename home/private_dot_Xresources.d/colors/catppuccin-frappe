@@ -1,0 +1,27 @@
+! vim: ft=xdefaults
+!===========================================================================!
+! Catppuccin Frappe
+!---------------------------------------------------------------------------!
+! https://github.com/catppuccin/xresources
+!---------------------------------------------------------------------------!
+
+#define CLR_ANSI_0 #51576d
+#define CLR_ANSI_1 #e78284
+#define CLR_ANSI_2 #a6d189
+#define CLR_ANSI_3 #e5c890
+#define CLR_ANSI_4 #8caaee
+#define CLR_ANSI_5 #f4b8e4
+#define CLR_ANSI_6 #81c8be
+#define CLR_ANSI_7 #b5bfe2
+#define CLR_ANSI_8 #626880
+#define CLR_ANSI_9 #e78284
+#define CLR_ANSI_10 #a6d189
+#define CLR_ANSI_11 #e5c890
+#define CLR_ANSI_12 #8caaee
+#define CLR_ANSI_13 #f4b8e4
+#define CLR_ANSI_14 #81c8be
+#define CLR_ANSI_15 #a5adce
+
+#define CLR_BACKGROUND #303446
+#define CLR_FOREGROUND #c6d0f5
+#define CLR_CURSOR #c6d0f5

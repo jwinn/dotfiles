@@ -1,6 +1,6 @@
 return {
   "nordtheme/vim",
-  name = "Nord",
+  name = "nord.vim",
   lazy = true,
   opts = {
   },

@@ -5,6 +5,15 @@
 ! https://github.com/nanotech/jellybeans.vim
 !---------------------------------------------------------------------------!
 
+!0 Black    rgb(59,59,59)     #3b3b3b
+!1 Red      rgb(207,106,76)   #cf6a4c
+!2 Green    rgb(153,173,106)  #99ad6a
+!3 Yellow   rgb(216,173,76)   #d8ad4c
+!4 Blue     rgb(89,123,197)   #597bc5
+!5 Magenta  rgb(160,55,176)   #a037b0
+!6 Cyan     rgb(113,185,248)  #71b9f8
+!7 White    rgb(173,173,173)  #adadad
+
 #define CLR_ANSI_0 #3b3b3b
 #define CLR_ANSI_1 #cf6a4c
 #define CLR_ANSI_2 #99ad6a
@@ -14,28 +23,28 @@
 #define CLR_ANSI_6 #71b9f8
 #define CLR_ANSI_7 #adadad
 #define CLR_ANSI_8 #444444
-#define CLR_ANSI_9 #ff9d80
-#define CLR_ANSI_10 #c3e6ad
-#define CLR_ANSI_11 #ffdca0
-#define CLR_ANSI_12 #b1d8f6
-#define CLR_ANSI_13 #fbdaff
-#define CLR_ANSI_14 #1ab2a8
-#define CLR_ANSI_15 #ffffff
+#define CLR_ANSI_9 #e27373
+#define CLR_ANSI_10 #94b979
+#define CLR_ANSI_11 #ffba7b
+#define CLR_ANSI_12 #97bedc
+#define CLR_ANSI_13 #e1c0fa
+#define CLR_ANSI_14 #00988e
+#define CLR_ANSI_15 #dedede
 
 #define CLR_BACKGROUND #151515
-!#define CLR_BADGE #e27373
+#define CLR_BADGE #e27373
 #define CLR_BOLD #ffffff
-!#define CLR_CURSOR #ffa560
+#define CLR_CURSOR #ffa560
 #define CLR_CURSOR_GUIDE #1c1c1c
-!#define CLR_CURSOR_TEXT #ffffff
-!#define CLR_FADE #ffba7b
+#define CLR_CURSOR_TEXT #ffffff
+#define CLR_FADE #ffba7b
 #define CLR_FOREGROUND #e8e8d3
 !#define CLR_ITALIC #
-!#define CLR_LINK #e1c0fa
+#define CLR_LINK #e1c0fa
 !#define CLR_POINTER_BG #
 !#define CLR_POINTER_FG #
-#define CLR_SELECTED_TEXT #ffffff
-#define CLR_SELECTION #403c41
+#define CLR_SELECTED_TEXT #f4f4f4
+#define CLR_SELECTION #474e91
 #define CLR_TAB #b0b8c0
 !#define CLR_UNDERLINE #
 

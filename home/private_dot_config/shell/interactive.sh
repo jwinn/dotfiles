@@ -60,8 +60,6 @@ if has_command git; then
     safe_source "/usr/doc/git-${git_version}/contrib/completion/git-prompt.sh"
   elif [ -s "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh" ]; then
     safe_source "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh"
-  elif [ -s "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh" ]; then
-    safe_source "/usr/local/doc/git-${git_version}/contrib/completion/git-prompt.sh"
   elif [ -n "${OS_IS_MACOS}" ] && [ -s "/Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh" ]; then
     safe_source "/Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh"
   fi

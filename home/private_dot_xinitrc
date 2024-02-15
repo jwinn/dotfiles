@@ -1,5 +1,9 @@
 #!/bin/sh
 
+has_command() {
+  command -v "${1}" 1>/dev/null 2>&1
+}
+
 [ -r "${HOME}/.fehbg" ] && "${HOME}/.fehbg" &disown
 [ -r "${HOME}/.Xresources" ] && xrdb -merge "${HOME}/.Xresources" &disown
 #if [ -r "${HOME}/.Xresources" ]; then
@@ -11,3 +15,19 @@
 #
 #  xrdb -merge "${HOME}/.Xresources" &disown
 #fi
+
+# Per https://nixos.wiki/wiki/Using_X_without_a_Display_Manager
+# TODO: ideally, should only be run if started wtih startx on NixOS
+if [ -n "${NIX_PATH}" ]; then
+  if [ -z "${DBUS_SESSION_BUS_ADDRESS}" ] && has_command dbus-launch; then
+    eval $(dbus-launch --exit-with-session --sh-syntax)
+  fi
+
+  if has_command systemctl; then
+    systemctl --user import-environment DISPLAY XAUTHORITY
+  fi
+
+  if has_command dbus-update-activation-environment; then
+    dbus-update-activation-environment DISPLAY XAUTHORITY
+  fi
+fi
