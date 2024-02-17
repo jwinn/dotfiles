@@ -144,16 +144,19 @@ local function scheme_for_appearance(appearance)
   local scheme = ""
 
   if appearance:find "Dark" then
-    --scheme = "Tokyo Night"
-    --scheme = "Tokyo Night Moon"
+    --scheme = "Catppuccin"
     --scheme = "Hybrid (terminal.sexy)"
     scheme = "Jellybeans"
     --scheme = "Kanagawa (Gogh)"
     --scheme = "Kanagawabones"
     --scheme = "nord"
+    --scheme = "Tokyo Night"
+    --scheme = "Tokyo Night Moon"
   else
-    scheme = "Tokyo Night Day"
+    --scheme = "Catppuccin Latte"
+    scheme = "Jellybeans"
     --scheme = "nord-light"
+    --scheme = "Tokyo Night Day"
   end
 
   return scheme

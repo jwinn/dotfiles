@@ -5,10 +5,6 @@
 ! https://github.com/catppuccin/xresources
 !---------------------------------------------------------------------------!
 
-#define CLR_BACKGROUND #eff1f5
-#define CLR_FOREGROUND #4c4f69
-#define CLR_CURSOR #4c4f69
-
 #define CLR_ANSI_0 #5c5f77
 #define CLR_ANSI_1 #d20f39
 #define CLR_ANSI_2 #40a02b
@@ -25,3 +21,7 @@
 #define CLR_ANSI_13 #ea76cb
 #define CLR_ANSI_14 #179299
 #define CLR_ANSI_15 #bcc0cc
+
+#define CLR_BACKGROUND #eff1f5
+#define CLR_FOREGROUND #4c4f69
+#define CLR_CURSOR #4c4f69
